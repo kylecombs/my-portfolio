@@ -1,0 +1,72 @@
+.gradient-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: linear-gradient(125deg, #e0e0e0 0%, #ffffff 50%, #f0f0f0 100%);
+  opacity: 1;
+}
+
+.gradient-canvas {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  filter: blur(80px) contrast(1.2);
+  opacity: 0.7;
+}
+
+.floating-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: float 20s infinite ease-in-out;
+  opacity: 0.4;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  33% { transform: translateY(-20px) rotate(-5deg); }
+  66% { transform: translateY(20px) rotate(5deg); }
+}
+
+.orb-1 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, #dab5c8 0%, transparent 70%);
+  top: -10%;
+  left: -10%;
+  animation-delay: 0s;
+}
+
+.orb-2 {
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, #b5c2da 0%, transparent 70%);
+  bottom: -20%;
+  right: -10%;
+  animation-delay: 5s;
+}
+
+.orb-3 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, #c8dad2 0%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation-delay: 10s;
+}
+
+.grain-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  opacity: 0.15;
+  mix-blend-mode: multiply;
+  z-index: 10;
+}

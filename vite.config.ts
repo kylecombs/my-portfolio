@@ -21,4 +21,10 @@ export default defineConfig({
     }),
     tsconfigPaths(),
   ],
+  ssr: {
+    noExternal: ["styled-components"],
+  },
+  optimizeDeps: {
+    include: ["styled-components"],
+  },
 });
