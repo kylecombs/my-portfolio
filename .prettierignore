@@ -1,0 +1,33 @@
+# Dependencies
+node_modules
+
+# Build outputs
+build
+dist
+.output
+.vercel
+.netlify
+.cache
+
+# Generated files
+*.lock
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Logs
+*.log
+logs
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Coverage reports
+coverage
+
+# Other
+.DS_Store
+.vscode
+.idea 

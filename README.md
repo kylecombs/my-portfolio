@@ -33,11 +33,13 @@ app/
 ### Getting Started
 
 1. Install dependencies:
+
 ```bash
 npm install
 ```
 
 2. Start the development server:
+
 ```bash
 npm run dev
 ```
@@ -55,6 +57,7 @@ npm run dev
 ## 📄 Pages
 
 ### Homepage (`/`)
+
 - Hero section with introduction
 - About section with skills and quick facts
 - Featured projects preview
@@ -62,6 +65,7 @@ npm run dev
 - Contact information
 
 ### Projects (`/projects`)
+
 - Detailed project showcase
 - Technology stack for each project
 - Links to GitHub repositories and live demos
@@ -82,8 +86,8 @@ const projects = [
     technologies: ["React", "TypeScript", "Node.js"],
     githubUrl: "https://github.com/username/repo",
     liveUrl: "https://your-demo.com",
-    imageGradient: "from-blue-400 to-purple-500"
-  }
+    imageGradient: "from-blue-400 to-purple-500",
+  },
 ];
 ```
 
