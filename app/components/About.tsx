@@ -10,17 +10,6 @@ const facts = [
   { label: "Currently", value: "CAMP · ALEX AND ANI" },
 ];
 
-const path = [
-  { year: "2007", title: "BFA, Studio Art", place: "University of Oklahoma" },
-  { year: "2013", title: "Preparator", place: "David Zwirner" },
-  {
-    year: "2021",
-    title: "Engineer & Teaching Fellow",
-    place: "Fullstack Academy",
-  },
-  { year: "2022", title: "Fullstack Engineer", place: "Rexby → Arx → CAMP" },
-];
-
 const fadeUp = {
   initial: { opacity: 0, y: 24 },
   whileInView: { opacity: 1, y: 0 },
@@ -87,57 +76,6 @@ export function About() {
                 </div>
               ))}
             </motion.dl>
-          </div>
-
-          <div className="relative mt-20">
-            <motion.div
-              aria-hidden="true"
-              className="absolute left-0 right-0 top-0 hidden h-px origin-left bg-dark-green/25 md:block"
-              initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              viewport={{ once: true, amount: 0.5 }}
-              transition={{ duration: 1.2, ease }}
-            />
-            <motion.ol
-              className="grid gap-8 border-l border-dark-green/20 pl-6 md:grid-cols-4 md:border-l-0 md:pl-0"
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, amount: 0.5 }}
-              variants={{
-                show: {
-                  transition: { staggerChildren: 0.12, delayChildren: 0.3 },
-                },
-              }}
-            >
-              {path.map((step) => (
-                <motion.li
-                  key={step.year}
-                  className="group relative md:pt-8"
-                  variants={{
-                    hidden: { opacity: 0, y: 16 },
-                    show: {
-                      opacity: 1,
-                      y: 0,
-                      transition: { duration: 0.6, ease },
-                    },
-                  }}
-                >
-                  <span
-                    aria-hidden="true"
-                    className="absolute -left-[1.6rem] top-2 h-2 w-2 rounded-full bg-dark-green md:-top-1 md:left-0"
-                  />
-                  <p className="font-neue-haas text-sm tracking-widest text-dark-green/70">
-                    {step.year}
-                  </p>
-                  <p className="mt-2 font-neue-haas text-xl font-medium text-dark-green">
-                    {step.title}
-                  </p>
-                  <p className="mt-1 font-neue-haas italic text-gray-800">
-                    {step.place}
-                  </p>
-                </motion.li>
-              ))}
-            </motion.ol>
           </div>
         </div>
       </section>

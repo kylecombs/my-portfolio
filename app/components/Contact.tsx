@@ -5,6 +5,11 @@ const ease = [0.22, 1, 0.36, 1] as const;
 
 const links = [
   {
+    label: "Email",
+    handle: "kylecombsdev@gmail.com",
+    href: "mailto:kylecombsdev@gmail.com",
+  },
+  {
     label: "LinkedIn",
     handle: "in/kyledavidcombs",
     href: "https://www.linkedin.com/in/kyledavidcombs/",
@@ -23,7 +28,7 @@ export function Contact() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <SectionHeading eyebrow="05" title="Get in touch" />
 
-          <div className="mt-16 grid gap-12 md:grid-cols-12 md:items-end">
+          <div className="mt-16 grid gap-12 md:grid-cols-12 md:items-center">
             <motion.div
               className="md:col-span-7"
               initial={{ opacity: 0, y: 24 }}
@@ -31,7 +36,7 @@ export function Contact() {
               viewport={{ once: true, amount: 0.4 }}
               transition={{ duration: 0.8, ease }}
             >
-              <p className="drop-shadow-glow font-script text-7xl font-light leading-none text-dark-green sm:text-8xl">
+              <p className="drop-shadow-glow font-script text-8xl font-light leading-none text-dark-green sm:text-9xl">
                 Say hello<span className="ml-2 text-2xl">☺</span>
               </p>
               <p className="mt-8 max-w-md text-pretty font-neue-haas text-lg leading-relaxed text-gray-800">
@@ -74,8 +79,10 @@ export function Contact() {
                 >
                   <a
                     href={l.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    {...(l.href.startsWith("http") && {
+                      target: "_blank",
+                      rel: "noopener noreferrer",
+                    })}
                     className="group flex min-h-11 items-center justify-between gap-4 py-6 font-neue-haas text-gray-800 transition-colors hover:text-dark-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-dark-green"
                   >
                     <span>
@@ -92,7 +99,9 @@ export function Contact() {
                     >
                       ↗
                     </span>
-                    <span className="sr-only">(opens in a new tab)</span>
+                    {l.href.startsWith("http") && (
+                      <span className="sr-only">(opens in a new tab)</span>
+                    )}
                   </a>
                 </motion.li>
               ))}

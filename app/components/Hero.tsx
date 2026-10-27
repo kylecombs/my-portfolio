@@ -6,90 +6,105 @@ interface HeroProps {
   className?: string;
 }
 
+const nav = [
+  { label: "About", href: "#about" },
+  { label: "Experience", href: "#experience" },
+  { label: "Projects", href: "#projects" },
+  { label: "Contact", href: "#contact" },
+];
+
+// CSS, not Motion: the hero must animate before hydration, since it is the first paint
+const enterClass =
+  "animate-[heroEnter_0.8s_cubic-bezier(0.22,1,0.36,1)_both] motion-reduce:animate-none";
+const delay = (s: number) => ({ animationDelay: `${s}s` });
+
 export function Hero({ className = "" }: HeroProps) {
   const rotation = useMouseMomentum({
     friction: 0.99,
     sensitivity: 0.3,
-    maxVelocity: 5
+    maxVelocity: 5,
   });
 
   return (
-    <section className={`relative min-h-screen overflow-hidden ${className}`}>
+    <section className={`relative min-h-svh overflow-hidden ${className}`}>
       {/* Page Border */}
-      <div className="pointer-events-none absolute inset-4 z-20 border border-dark-green/20"/>
+      <div className="pointer-events-none absolute inset-4 z-20 border border-dark-green/20" />
 
       {/* Asterisk Background Element */}
-      <Asterisk 
-        className="absolute bottom-16 left-20 h-80 w-80 fill-white/10 z-0" 
-        style={{ 
+      <Asterisk
+        className="absolute bottom-16 left-20 z-0 h-80 w-80 fill-white/10"
+        style={{
           transform: `rotate(${rotation}deg)`,
-          transformOrigin: 'center center'
+          transformOrigin: "center center",
         }}
-              />
-        
-        {/* Sparkle Effect */}
-        <Sparkles />
+      />
 
-      {/* Hero Content */}
-      <div className="relative z-10 h-screen p-12">
-        <div className="absolute top-10 left-12">
-          <h1 className="mb-2 font-neue-haas text-4xl font-normal italic outlined-text tracking-wide text-dark-green sm:text-5xl lg:text-7xl whitespace-nowrap opacity-0 translate-x-4 animate-[fadeInSlideLeft_0.8s_ease-out_0.1s_forwards]">
+      {/* Sparkle Effect */}
+      <Sparkles />
+
+      <div className="relative z-10 flex min-h-svh flex-col px-8 py-10 sm:px-12">
+        <header className="lg:absolute lg:left-12 lg:top-10">
+          <h1
+            style={delay(0.1)}
+            className={`${enterClass} outlined-text mb-2 whitespace-nowrap font-neue-haas text-4xl font-normal italic tracking-wide sm:text-5xl lg:text-7xl`}
+          >
             Kyle Combs
           </h1>
-          <p className="mb-8 font-neue-haas text-xl font-normal tracking-wider text-dark-green opacity-0 translate-x-4 animate-[fadeInSlideLeft_0.8s_ease-out_0.3s_forwards]">
+          <p
+            style={delay(0.25)}
+            className={`${enterClass} mb-6 font-neue-haas text-xl font-normal tracking-wider text-dark-green`}
+          >
             Software Engineer
           </p>
 
-          {/* Navigation */}
-          <nav className="space-y-2">
-            <div className="flex items-center opacity-0 translate-x-4 animate-[fadeInSlideLeft_0.8s_ease-out_0.5s_forwards] group">
-              <div className="mr-4 relative w-6 h-6 flex items-center justify-center">
-                <div className="h-2 w-2 rounded-full bg-gray-800 group-hover:opacity-0 transition-opacity duration-200"></div>
-                <span className="absolute text-[1.5rem] drop-shadow-glow opacity-0 group-hover:opacity-100 transition-opacity duration-200">☺</span>
-              </div>
-              <a
-                href="/projects"
-                className="font-neue-haas text-lg font-normal text-gray-800 transition-all duration-200 hover:text-gray-600 group-hover:translate-x-1"
-              >
-                Projects
-              </a>
-            </div>
-            <div className="flex items-center opacity-0 translate-x-4 animate-[fadeInSlideLeft_0.8s_ease-out_0.7s_forwards] group">
-              <div className="mr-4 relative w-6 h-6 flex items-center justify-center">
-                <div className="h-2 w-2 rounded-full bg-gray-800 group-hover:opacity-0 transition-opacity duration-200"></div>
-                <span className="absolute text-[1.5rem] drop-shadow-glow opacity-0 group-hover:opacity-100 transition-opacity duration-200">☺</span>
-              </div>
-              <a
-                href="#about"
-                className="font-neue-haas text-lg font-normal text-gray-800 transition-all duration-200 hover:text-gray-600 group-hover:translate-x-1"
-              >
-                Info
-              </a>
-            </div>
-            <div className="flex items-center opacity-0 translate-x-4 animate-[fadeInSlideLeft_0.8s_ease-out_0.9s_forwards] group">
-              <div className="mr-4 relative w-6 h-6 flex items-center justify-center">
-                <div className="h-2 w-2 rounded-full bg-gray-800 group-hover:opacity-0 transition-opacity duration-200"></div>
-                <span className="absolute text-[1.5rem] drop-shadow-glow opacity-0 group-hover:opacity-100 transition-opacity duration-200">☺</span>
-              </div>
-              <a
-                href="#contact"
-                className="font-neue-haas text-lg font-normal text-gray-800 transition-all duration-200 hover:text-gray-600 group-hover:translate-x-1"
-              >
-                Contact
-              </a>
-            </div>
+          <nav aria-label="Sections">
+            <ul>
+              {nav.map((item, i) => (
+                <li
+                  key={item.href}
+                  className={enterClass}
+                  style={delay(0.4 + i * 0.1)}
+                >
+                  <a
+                    href={item.href}
+                    className="group flex min-h-11 items-center font-neue-haas text-lg text-gray-800 transition-colors duration-200 hover:text-dark-green focus-visible:text-dark-green"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="relative mr-4 flex h-6 w-6 items-center justify-center"
+                    >
+                      <span className="h-2 w-2 rounded-full bg-dark-green transition-opacity duration-200 group-hover:opacity-0 group-focus-visible:opacity-0" />
+                      <span className="drop-shadow-glow absolute text-[1.5rem] opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100">
+                        ☺
+                      </span>
+                    </span>
+                    <span className="transition-transform duration-200 group-hover:translate-x-1">
+                      {item.label}
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
           </nav>
-        </div>
+        </header>
 
-        <div className="flex mb-20 justify-center items-center h-full">
-          <div className="flex flex-col translate-x-8 animate-[fadeInLeft_0.8s_ease-out_0.5s_forwards] font-normal text-gray-700 opacity-0 space-y-2">
-            <div className="flex items-baseline space-x-1 justify-end mb-2">
-              <p className="outlined-text text-[3.75rem] font-bold italic">Good</p><strong className="text-[3.75rem] font-bold italic">software</strong> <p className="outlined-text text-[3.75rem] font-bold italic">should</p>
-            </div>
-            <p className="font-script font-light leading-[13rem] text-[15rem] drop-shadow-glow">
-              Feel good<span className="text-[1.5rem] ml-2 drop-shadow-glow">☺</span>
+        <div className="flex flex-1 items-center justify-center py-16">
+          <div
+            style={delay(0.5)}
+            className={`${enterClass} flex flex-col items-end text-dark-green`}
+          >
+            <p className="flex flex-wrap items-baseline justify-end gap-x-3 text-[clamp(1.75rem,5vw,3.75rem)] font-bold italic leading-tight">
+              <span className="outlined-text">Good</span>
+              <strong>software</strong>
+              <span className="outlined-text">should</span>
             </p>
-            <p className="text-pretty font-neue-haas text-xl font-normal leading-relaxed text-right max-w-[32rem] float-right self-end">
+            <p className="drop-shadow-glow font-script text-[clamp(5rem,17vw,15rem)] font-light leading-[0.9]">
+              Feel good
+              <span aria-hidden="true" className="ml-2 text-[1.5rem]">
+                ☺
+              </span>
+            </p>
+            <p className="mt-6 max-w-[32rem] text-pretty text-right font-neue-haas text-lg leading-relaxed text-gray-800 sm:text-xl">
               As a software engineer, I work to make the web a little more
               welcoming. My approach is simple: write solid code, respect the
               user, and remember that behind every screen is a real person. I
@@ -98,6 +113,33 @@ export function Hero({ className = "" }: HeroProps) {
             </p>
           </div>
         </div>
+
+        <a
+          href="#about"
+          aria-label="Scroll to About"
+          style={delay(1.2)}
+          className={`${enterClass} absolute inset-x-0 bottom-10 mx-auto hidden w-fit flex-col items-center gap-3 font-neue-haas text-xs uppercase tracking-widest text-dark-green/70 transition-colors hover:text-dark-green sm:flex`}
+        >
+          Scroll
+          <span
+            aria-hidden="true"
+            className="relative flex h-11 w-3 justify-center"
+          >
+            <span className="block h-10 w-px origin-top animate-[scrollLine_2.4s_ease-in-out_infinite] bg-dark-green/50 motion-reduce:animate-none" />
+            {/* Tip sits at the line's end (40px); scrollArrow follows the line's scaleY */}
+            <svg
+              viewBox="0 0 12 7"
+              className="absolute left-0 top-[34px] h-[7px] w-3 animate-[scrollArrow_2.4s_ease-in-out_infinite] fill-none stroke-dark-green/50 motion-reduce:animate-none"
+            >
+              <polyline
+                points="1,1 6,6 11,1"
+                strokeWidth="1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+        </a>
       </div>
     </section>
   );
