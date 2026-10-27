@@ -24,7 +24,7 @@ const links = [
 export function Contact() {
   return (
     <MotionConfig reducedMotion="user">
-      <section id="contact" className="relative pb-12 pt-24">
+      <section id="contact" className="relative pb-12 pt-16">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <SectionHeading eyebrow="05" title="Get in touch" />
 

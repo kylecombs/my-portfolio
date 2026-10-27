@@ -53,7 +53,7 @@ const groups = [
 export function Skills() {
   return (
     <MotionConfig reducedMotion="user">
-      <section id="skills" className="relative py-24">
+      <section id="skills" className="relative py-16">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <SectionHeading eyebrow="04" title="Skills" />
 

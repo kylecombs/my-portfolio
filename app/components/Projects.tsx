@@ -1,5 +1,5 @@
 import { MotionConfig, motion } from "motion/react";
-import { projects } from "~/data/portfolio";
+import { companyLogos, projects } from "~/data/portfolio";
 import { SectionHeading } from "./Experience";
 
 interface ProjectsProps {
@@ -12,7 +12,7 @@ export function Projects({ limit, headingAs }: ProjectsProps) {
 
   return (
     <MotionConfig reducedMotion="user">
-      <section id="projects" className="relative py-24">
+      <section id="projects" className="relative py-16">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <SectionHeading eyebrow="03" title="Projects" as={headingAs} />
 
@@ -40,9 +40,16 @@ export function Projects({ limit, headingAs }: ProjectsProps) {
                   whileHover={{ y: -6 }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 >
-                  <div className="flex items-baseline justify-between gap-4 font-neue-haas text-sm tracking-widest text-dark-green/70">
+                  <div className="flex items-center justify-between gap-4 font-neue-haas text-sm tracking-widest text-dark-green/70">
                     <span>{String(i + 1).padStart(2, "0")}</span>
-                    <span className="uppercase">
+                    <span className="inline-flex items-center gap-2 uppercase">
+                      {companyLogos[p.context] && (
+                        <img
+                          src={companyLogos[p.context]}
+                          alt=""
+                          className="h-5 w-auto"
+                        />
+                      )}
                       {p.context} · {p.year}
                     </span>
                   </div>

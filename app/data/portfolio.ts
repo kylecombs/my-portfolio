@@ -18,6 +18,14 @@ export interface Project {
   tags: string[];
 }
 
+// Keyed by Job.company / Project.context; entries without a logo render name only.
+export const companyLogos: Record<string, string> = {
+  CAMP: "/assets/logos/camp.svg",
+  "ALEX AND ANI": "/assets/logos/alex-and-ani.png",
+  "Arx Research": "/assets/logos/arx.svg",
+  Rexby: "/assets/logos/rexby.svg",
+};
+
 export const experience: Job[] = [
   {
     role: "Lead Front End Engineer",

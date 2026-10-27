@@ -1,12 +1,12 @@
 import { MotionConfig, motion } from "motion/react";
-import { experience } from "~/data/portfolio";
+import { companyLogos, experience } from "~/data/portfolio";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
 export function Experience() {
   return (
     <MotionConfig reducedMotion="user">
-      <section id="experience" className="relative py-24">
+      <section id="experience" className="relative py-16">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <SectionHeading eyebrow="02" title="Experience" />
 
@@ -38,11 +38,20 @@ export function Experience() {
                 <h3 className="font-neue-haas text-2xl font-medium text-dark-green sm:text-3xl">
                   {job.role}
                 </h3>
-                <p className="mt-1 font-neue-haas text-lg italic text-gray-800">
-                  {job.company}
-                  <span className="not-italic text-gray-600">
-                    {" "}
-                    · {job.type} · {job.location}
+                <p className="mt-1 flex flex-wrap items-center gap-x-2 font-neue-haas text-lg italic text-gray-800">
+                  {companyLogos[job.company] && (
+                    <img
+                      src={companyLogos[job.company]}
+                      alt=""
+                      className="h-6 w-auto"
+                    />
+                  )}
+                  <span>
+                    {job.company}
+                    <span className="not-italic text-gray-600">
+                      {" "}
+                      · {job.type} · {job.location}
+                    </span>
                   </span>
                 </p>
 
