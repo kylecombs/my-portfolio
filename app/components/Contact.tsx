@@ -1,5 +1,6 @@
 import { MotionConfig, motion } from "motion/react";
 import { SectionHeading } from "./Experience";
+import { reveal, staggerShow } from "~/utils/reveal";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -31,10 +32,8 @@ export function Contact() {
           <div className="mt-16 grid gap-12 md:grid-cols-12 md:items-center">
             <motion.div
               className="md:col-span-7"
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              {...reveal({ opacity: 0, y: 24 })}
               viewport={{ once: true, amount: 0.4 }}
-              transition={{ duration: 0.8, ease }}
             >
               <p className="drop-shadow-glow font-script text-8xl font-light leading-none text-dark-green sm:text-9xl">
                 Say hello<span className="ml-2 text-2xl">☺</span>
@@ -58,11 +57,7 @@ export function Contact() {
               initial="hidden"
               whileInView="show"
               viewport={{ once: true, amount: 0.4 }}
-              variants={{
-                show: {
-                  transition: { staggerChildren: 0.1, delayChildren: 0.2 },
-                },
-              }}
+              variants={{ show: staggerShow(0.1, 0.2) }}
             >
               {links.map((l) => (
                 <motion.li

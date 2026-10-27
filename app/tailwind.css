@@ -68,6 +68,12 @@ body {
   }
 }
 
+@keyframes pinwheelSpin {
+  to {
+    rotate: 360deg;
+  }
+}
+
 @keyframes sparkle {
   0%, 100% {
     opacity: 0;

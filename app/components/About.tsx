@@ -1,7 +1,6 @@
 import { MotionConfig, motion } from "motion/react";
 import { SectionHeading } from "./Experience";
-
-const ease = [0.22, 1, 0.36, 1] as const;
+import { reveal } from "~/utils/reveal";
 
 const facts = [
   { label: "Based", value: "New York · Remote" },
@@ -10,11 +9,7 @@ const facts = [
   { label: "Currently", value: "CAMP · ALEX AND ANI" },
 ];
 
-const fadeUp = {
-  initial: { opacity: 0, y: 24 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, amount: 0.4 },
-};
+const viewport = { once: true, amount: 0.4 };
 
 export function About() {
   return (
@@ -26,8 +21,8 @@ export function About() {
           <div className="mt-16 grid gap-12 md:grid-cols-12">
             <div className="space-y-6 md:col-span-7">
               <motion.p
-                {...fadeUp}
-                transition={{ duration: 0.8, ease }}
+                {...reveal({ opacity: 0, y: 24 })}
+                viewport={viewport}
                 className="text-pretty font-neue-haas text-2xl leading-snug text-dark-green sm:text-3xl"
               >
                 I&apos;m a fullstack engineer who works with small teams on a
@@ -35,8 +30,8 @@ export function About() {
                 build the analytics pipeline for <em>ALEX AND ANI</em>.
               </motion.p>
               <motion.p
-                {...fadeUp}
-                transition={{ duration: 0.8, ease, delay: 0.1 }}
+                {...reveal({ opacity: 0, y: 24 }, { delay: 0.1 })}
+                viewport={viewport}
                 className="text-pretty font-neue-haas text-lg leading-relaxed text-gray-800"
               >
                 I came to software from the art world. After a BFA in Studio
@@ -46,8 +41,8 @@ export function About() {
                 they&apos;re wrong.
               </motion.p>
               <motion.p
-                {...fadeUp}
-                transition={{ duration: 0.8, ease, delay: 0.2 }}
+                {...reveal({ opacity: 0, y: 24 }, { delay: 0.2 })}
+                viewport={viewport}
                 className="text-pretty font-neue-haas text-lg leading-relaxed text-gray-800"
               >
                 I learned to code at Fullstack Academy, stayed on to teach the
@@ -58,8 +53,8 @@ export function About() {
             </div>
 
             <motion.dl
-              {...fadeUp}
-              transition={{ duration: 0.8, ease, delay: 0.15 }}
+              {...reveal({ opacity: 0, y: 24 }, { delay: 0.15 })}
+              viewport={viewport}
               className="self-start border border-dark-green/20 bg-white/25 p-6 backdrop-blur-md sm:p-8 md:col-span-5"
             >
               {facts.map((f) => (

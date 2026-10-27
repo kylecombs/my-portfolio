@@ -1,6 +1,7 @@
 import { MotionConfig, motion } from "motion/react";
 import { companyLogos, projects } from "~/data/portfolio";
 import { SectionHeading } from "./Experience";
+import { staggerShow } from "~/utils/reveal";
 
 interface ProjectsProps {
   limit?: number;
@@ -21,7 +22,7 @@ export function Projects({ limit, headingAs }: ProjectsProps) {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, amount: 0.1 }}
-            variants={{ show: { transition: { staggerChildren: 0.08 } } }}
+            variants={{ show: staggerShow(0.08) }}
           >
             {shown.map((p, i) => (
               <motion.li

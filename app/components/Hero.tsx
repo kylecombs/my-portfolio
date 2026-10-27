@@ -4,6 +4,7 @@ import { Link } from "@remix-run/react";
 import { useState } from "react";
 import { Asterisk } from "./Asterisk";
 import { useMouseMomentum } from "../hooks/useMouseMomentum";
+import { scrollToSection } from "../utils/scrollToSection";
 import { Sparkles } from "./Sparkles";
 import { experience } from "../data/portfolio";
 
@@ -30,6 +31,8 @@ export function Hero({ className = "" }: HeroProps) {
     friction: 0.99,
     sensitivity: 0.3,
     maxVelocity: 5,
+    scrollSensitivity: 0.05,
+    scrollMaxVelocity: 2,
   });
 
   return (
@@ -37,9 +40,10 @@ export function Hero({ className = "" }: HeroProps) {
       {/* Page Border */}
       <div className="pointer-events-none absolute inset-2.5 z-20 border border-dark-green/20 lg:inset-4" />
 
-      {/* Asterisk Background Element */}
+      {/* Asterisk Background Element: mouse momentum spins it; touch screens get a slow
+          CSS spin on `rotate`, which stacks with the inline transform */}
       <Asterisk
-        className="absolute -right-10 top-28 z-0 h-52 w-52 fill-dark-green/5 lg:bottom-14 lg:left-16 lg:right-auto lg:top-auto lg:h-80 lg:w-80"
+        className="absolute -right-10 top-28 z-0 h-52 w-52 fill-dark-green/5 lg:bottom-14 lg:left-16 lg:right-auto lg:top-auto lg:h-80 lg:w-80 [@media(hover:none)]:motion-safe:animate-[pinwheelSpin_45s_linear_infinite]"
         style={{
           transform: `rotate(${rotation}deg)`,
           transformOrigin: "center center",
@@ -55,7 +59,7 @@ export function Hero({ className = "" }: HeroProps) {
             style={delay(0.1)}
             className={`${enterClass} flex flex-col gap-0.5 font-neue-haas`}
           >
-            <span className="outlined-text text-[1.75rem] italic leading-none tracking-wide lg:text-[2.375rem]">
+            <span className="outlined-text text-[2.5rem] italic leading-none tracking-wide lg:text-[3.5rem]">
               Kyle Combs
             </span>
             <span className="text-[0.6875rem] uppercase tracking-[0.14em] text-dark-green lg:text-[0.8125rem]">
@@ -90,7 +94,10 @@ export function Hero({ className = "" }: HeroProps) {
               <Link
                 key={item.href}
                 to={item.href}
-                onClick={() => setMenuOpen(false)}
+                onClick={(e) => {
+                  setMenuOpen(false);
+                  scrollToSection(e);
+                }}
                 style={delay(0.2 + i * 0.1)}
                 className={`${enterClass} group flex min-h-11 items-center gap-2.5 px-3.5 font-neue-haas text-base text-gray-800 transition-colors duration-200 hover:text-dark-green focus-visible:text-dark-green`}
               >
@@ -108,10 +115,23 @@ export function Hero({ className = "" }: HeroProps) {
             ))}
             <Link
               to="#contact"
-              onClick={() => setMenuOpen(false)}
+              onClick={(e) => {
+                setMenuOpen(false);
+                scrollToSection(e);
+              }}
               style={delay(0.5)}
-              className={`${enterClass} flex min-h-11 items-center px-3.5 font-neue-haas text-base font-medium text-dark-green lg:ml-3 lg:rounded-full lg:border lg:border-dark-green lg:px-5 lg:text-[0.9375rem] lg:transition-colors lg:hover:bg-dark-green lg:hover:text-[#f5f5f5]`}
+              className={`${enterClass} group flex min-h-11 items-center gap-2.5 px-3.5 font-neue-haas text-base font-medium text-dark-green lg:ml-3 lg:rounded-full lg:border lg:border-dark-green lg:px-5 lg:text-[0.9375rem] lg:transition-colors lg:hover:bg-dark-green lg:hover:text-[#f5f5f5]`}
             >
+              {/* Bullet only in the mobile menu; desktop renders this as a pill button */}
+              <span
+                aria-hidden="true"
+                className="relative flex h-4 w-4 items-center justify-center lg:hidden"
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-dark-green transition-opacity duration-200 group-hover:opacity-0 group-focus-visible:opacity-0" />
+                <span className="drop-shadow-glow absolute text-[1.25rem] opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100">
+                  ☺
+                </span>
+              </span>
               Get in touch
             </Link>
           </nav>
@@ -133,7 +153,7 @@ export function Hero({ className = "" }: HeroProps) {
                 good
                 <span
                   aria-hidden="true"
-                  className="ml-1.5 align-top font-neue-haas text-[1.375rem] lg:ml-3 lg:text-[2rem]"
+                  className="ml-4 align-baseline font-neue-haas text-[1.375rem] lg:text-[2rem]"
                 >
                   ☺
                 </span>
@@ -143,28 +163,33 @@ export function Hero({ className = "" }: HeroProps) {
 
           <div
             style={delay(0.6)}
-            className={`${enterClass} flex flex-col gap-7 lg:col-span-4 lg:col-start-9 lg:pb-9 xl:col-span-3 xl:col-start-10`}
+            className={`${enterClass} flex flex-col gap-7 lg:col-span-4 lg:col-start-9 lg:pb-9`}
           >
             <p className="text-pretty font-neue-haas text-[1.0625rem] leading-relaxed text-gray-800 lg:text-lg">
-              I work to make the web a little more welcoming — solid code,
-              respect for the user, and design thinking, so the experience just
-              works.
+              I work to make the web a little more welcoming. My approach is
+              simple: write solid code, respect the user, and remember
+              there&apos;s a real person behind every screen. I bring
+              engineering, design, and product thinking together to build
+              experiences that <em>just work</em>.
             </p>
             <div className="flex flex-col gap-2.5 font-neue-haas lg:flex-row lg:items-center lg:gap-3">
               <Link
                 to="#projects"
+                onClick={scrollToSection}
                 className="flex min-h-[3.25rem] items-center justify-center whitespace-nowrap rounded-full bg-dark-green px-6 font-medium text-[#f5f5f5] transition-opacity hover:opacity-90 lg:min-h-12 lg:text-[0.9375rem]"
               >
                 See projects
               </Link>
               <Link
                 to="#contact"
+                onClick={scrollToSection}
                 className="flex min-h-[3.25rem] items-center justify-center rounded-full border border-dark-green font-medium text-dark-green lg:hidden"
               >
                 Get in touch
               </Link>
               <Link
                 to="#about"
+                onClick={scrollToSection}
                 className="group hidden min-h-12 items-center gap-2 whitespace-nowrap px-3 text-[0.9375rem] font-medium text-dark-green lg:flex"
               >
                 About me
@@ -211,6 +236,7 @@ export function Hero({ className = "" }: HeroProps) {
 
           <Link
             to="#about"
+            onClick={scrollToSection}
             aria-label="Scroll to About"
             className="hidden min-h-11 items-center gap-3 text-[0.6875rem] uppercase tracking-[0.2em] text-[#3d5a4d] transition-colors hover:text-dark-green lg:flex"
           >
