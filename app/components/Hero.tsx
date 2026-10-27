@@ -1,3 +1,6 @@
+// Link, not <a>: native hash entries share Remix's "default" history key, so
+// ScrollRestoration restores a stale position and snaps back to the top.
+import { Link } from "@remix-run/react";
 import { Asterisk } from "./Asterisk";
 import { useMouseMomentum } from "../hooks/useMouseMomentum";
 import { Sparkles } from "./Sparkles";
@@ -58,20 +61,20 @@ export function Hero({ className = "" }: HeroProps) {
           </p>
 
           <nav aria-label="Sections">
-            <ul>
+            <ul className="grid w-fit grid-cols-2 gap-x-6 sm:block">
               {nav.map((item, i) => (
                 <li
                   key={item.href}
                   className={enterClass}
                   style={delay(0.4 + i * 0.1)}
                 >
-                  <a
-                    href={item.href}
+                  <Link
+                    to={item.href}
                     className="group flex min-h-11 items-center font-neue-haas text-lg text-gray-800 transition-colors duration-200 hover:text-dark-green focus-visible:text-dark-green"
                   >
                     <span
                       aria-hidden="true"
-                      className="relative mr-4 flex h-6 w-6 items-center justify-center"
+                      className="relative mr-1 flex h-6 w-6 items-center justify-center sm:mr-4"
                     >
                       <span className="h-2 w-2 rounded-full bg-dark-green transition-opacity duration-200 group-hover:opacity-0 group-focus-visible:opacity-0" />
                       <span className="drop-shadow-glow absolute text-[1.5rem] opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100">
@@ -81,7 +84,7 @@ export function Hero({ className = "" }: HeroProps) {
                     <span className="transition-transform duration-200 group-hover:translate-x-1">
                       {item.label}
                     </span>
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -91,20 +94,20 @@ export function Hero({ className = "" }: HeroProps) {
         <div className="flex flex-1 items-center justify-center py-16">
           <div
             style={delay(0.5)}
-            className={`${enterClass} flex flex-col items-end text-dark-green`}
+            className={`${enterClass} flex flex-col items-start text-dark-green sm:items-end`}
           >
-            <p className="flex flex-wrap items-baseline justify-end gap-x-3 text-[clamp(1.75rem,5vw,3.75rem)] font-bold italic leading-tight">
+            <p className="flex flex-wrap items-baseline gap-x-3 text-[clamp(1.75rem,5vw,3.75rem)] font-bold italic leading-tight sm:justify-end">
               <span className="outlined-text">Good</span>
               <strong>software</strong>
               <span className="outlined-text">should</span>
             </p>
-            <p className="drop-shadow-glow font-script text-[clamp(5rem,17vw,15rem)] font-light leading-[0.9]">
+            <p className="drop-shadow-glow font-script text-[clamp(5.5rem,25vw,15rem)] font-light leading-[0.9]">
               Feel good
               <span aria-hidden="true" className="ml-2 text-[1.5rem]">
                 ☺
               </span>
             </p>
-            <p className="mt-6 max-w-[32rem] text-pretty text-right font-neue-haas text-lg leading-relaxed text-gray-800 sm:text-xl">
+            <p className="mt-6 max-w-[32rem] text-pretty font-neue-haas text-base leading-relaxed text-gray-800 sm:text-right sm:text-xl">
               As a software engineer, I work to make the web a little more
               welcoming. My approach is simple: write solid code, respect the
               user, and remember that behind every screen is a real person. I
@@ -114,11 +117,11 @@ export function Hero({ className = "" }: HeroProps) {
           </div>
         </div>
 
-        <a
-          href="#about"
+        <Link
+          to="#about"
           aria-label="Scroll to About"
           style={delay(1.2)}
-          className={`${enterClass} absolute inset-x-0 bottom-10 mx-auto hidden w-fit flex-col items-center gap-3 font-neue-haas text-xs uppercase tracking-widest text-dark-green/70 transition-colors hover:text-dark-green sm:flex`}
+          className={`${enterClass} absolute inset-x-0 bottom-10 mx-auto hidden w-fit flex-col items-center gap-3 font-neue-haas text-xs uppercase tracking-widest text-dark-green/70 transition-colors hover:text-dark-green lg:flex`}
         >
           Scroll
           <span
@@ -139,7 +142,7 @@ export function Hero({ className = "" }: HeroProps) {
               />
             </svg>
           </span>
-        </a>
+        </Link>
       </div>
     </section>
   );
