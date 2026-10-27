@@ -1,5 +1,6 @@
 import { MotionConfig, motion } from "motion/react";
 import { SectionHeading } from "./Experience";
+import { staggerShow } from "~/utils/reveal";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -62,7 +63,7 @@ export function Skills() {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, amount: 0.2 }}
-            variants={{ show: { transition: { staggerChildren: 0.1 } } }}
+            variants={{ show: staggerShow(0.1) }}
           >
             {groups.map((g, i) => (
               <motion.div

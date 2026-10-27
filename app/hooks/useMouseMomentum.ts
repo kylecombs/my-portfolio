@@ -4,6 +4,8 @@ interface UseMouseMomentumOptions {
   friction?: number;
   sensitivity?: number;
   maxVelocity?: number;
+  scrollSensitivity?: number;
+  scrollMaxVelocity?: number;
 }
 
 /**
@@ -30,7 +32,9 @@ export function useMouseMomentum(options: UseMouseMomentumOptions = {}) {
   const {
     friction = 0.98,      // How quickly the rotation slows down (0-1)
     sensitivity = 0.5,    // How sensitive to mouse movement
-    maxVelocity = 50      // Maximum rotation velocity
+    maxVelocity = 50,     // Maximum rotation velocity
+    scrollSensitivity = 0, // Spin added per px scrolled on touch screens (0 = off)
+    scrollMaxVelocity = maxVelocity // Lower cap keeps scroll-driven spin calm
   } = options;
 
   const [rotation, setRotation] = useState(0);
@@ -104,6 +108,25 @@ export function useMouseMomentum(options: UseMouseMomentumOptions = {}) {
       animationRef.current = requestAnimationFrame(animate);
     };
 
+    // Touch screens have no mouse movement, so scrolling feeds the momentum instead
+    // Media queries are read on every event, not once at mount, so switching device
+    // emulation or motion settings takes effect without a reload
+    const touchOnly = window.matchMedia('(hover: none)');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let lastScrollY = window.scrollY;
+    const handleScroll = () => {
+      const delta = Math.abs(window.scrollY - lastScrollY);
+      lastScrollY = window.scrollY;
+      if (!touchOnly.matches || reducedMotion.matches) return;
+      velocityRef.current = Math.min(velocityRef.current + delta * scrollSensitivity, scrollMaxVelocity);
+      if (!isAnimatingRef.current) {
+        startAnimation();
+      }
+    };
+    if (scrollSensitivity > 0) {
+      window.addEventListener('scroll', handleScroll, { passive: true });
+    }
+
     // Add mouse move listener
     document.addEventListener('mousemove', handleMouseMove);
 
@@ -111,11 +134,15 @@ export function useMouseMomentum(options: UseMouseMomentumOptions = {}) {
       if (typeof window === 'undefined') return;
       
       document.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('scroll', handleScroll);
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
+      // Otherwise a re-run (new options, hot reload) mid-spin leaves the flag stuck
+      // true and no input ever restarts the loop
+      isAnimatingRef.current = false;
     };
-  }, [friction, sensitivity, maxVelocity]);
+  }, [friction, sensitivity, maxVelocity, scrollSensitivity, scrollMaxVelocity]);
 
   return rotation;
 } 

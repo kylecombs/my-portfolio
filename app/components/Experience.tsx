@@ -1,7 +1,6 @@
 import { MotionConfig, motion } from "motion/react";
+import { reveal } from "~/utils/reveal";
 import { companyLogos, experience } from "~/data/portfolio";
-
-const ease = [0.22, 1, 0.36, 1] as const;
 
 export function Experience() {
   return (
@@ -15,10 +14,11 @@ export function Experience() {
               <motion.li
                 key={`${job.company}-${job.role}`}
                 className="group relative pb-14 pl-8 last:pb-0 md:pl-12"
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                {...reveal(
+                  { opacity: 0, y: 24 },
+                  { delay: i * 0.05, duration: 0.7 }
+                )}
                 viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.7, ease, delay: i * 0.05 }}
               >
                 {/* Timeline marker: dot that becomes ☺ on hover, echoing the hero nav */}
                 <span
@@ -98,10 +98,8 @@ export function SectionHeading({
   return (
     <motion.div
       className="flex items-baseline gap-4 border-b border-dark-green/20 pb-6"
-      initial={{ opacity: 0, x: 16 }}
-      whileInView={{ opacity: 1, x: 0 }}
+      {...reveal({ opacity: 0, x: 16 })}
       viewport={{ once: true, amount: 0.6 }}
-      transition={{ duration: 0.8, ease }}
     >
       <span className="font-neue-haas text-sm tracking-widest text-dark-green/70">
         {eyebrow}
