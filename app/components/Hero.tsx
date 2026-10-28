@@ -6,16 +6,16 @@ import { Asterisk } from "./Asterisk";
 import { useMouseMomentum } from "../hooks/useMouseMomentum";
 import { scrollToSection } from "../utils/scrollToSection";
 import { Sparkles } from "./Sparkles";
-import { experience } from "../data/portfolio";
+import { availability, experience, hero } from "../data/portfolio";
 
 interface HeroProps {
   className?: string;
 }
 
 const nav = [
+  { label: "Services", href: "#services" },
+  { label: "Work", href: "#work" },
   { label: "About", href: "#about" },
-  { label: "Experience", href: "#experience" },
-  { label: "Projects", href: "#projects" },
 ];
 
 // CSS, not Motion: the hero must animate before hydration, since it is the first paint
@@ -63,7 +63,7 @@ export function Hero({ className = "" }: HeroProps) {
               Kyle Combs
             </span>
             <span className="text-[0.6875rem] uppercase tracking-[0.14em] text-dark-green lg:text-[0.8125rem]">
-              Software Engineer
+              {hero.label}
             </span>
           </div>
 
@@ -166,33 +166,22 @@ export function Hero({ className = "" }: HeroProps) {
             className={`${enterClass} flex flex-col gap-7 lg:col-span-4 lg:col-start-9 lg:pb-9`}
           >
             <p className="text-pretty font-neue-haas text-[1.0625rem] leading-relaxed text-gray-800 lg:text-lg">
-              I work to make the web a little more welcoming. My approach is
-              simple: write solid code, respect the user, and remember
-              there&apos;s a real person behind every screen. I bring
-              engineering, design, and product thinking together to build
-              experiences that <em>just work</em>.
+              {hero.intro}
             </p>
             <div className="flex flex-col gap-2.5 font-neue-haas lg:flex-row lg:items-center lg:gap-3">
               <Link
-                to="#projects"
+                to="#contact"
                 onClick={scrollToSection}
                 className="flex min-h-[3.25rem] items-center justify-center whitespace-nowrap rounded-full bg-dark-green px-6 font-medium text-[#f5f5f5] transition-opacity hover:opacity-90 lg:min-h-12 lg:text-[0.9375rem]"
               >
-                See projects
+                Start a project
               </Link>
               <Link
-                to="#contact"
+                to="#work"
                 onClick={scrollToSection}
-                className="flex min-h-[3.25rem] items-center justify-center rounded-full border border-dark-green font-medium text-dark-green lg:hidden"
+                className="group flex min-h-[3.25rem] items-center justify-center gap-2 whitespace-nowrap px-3 font-medium text-dark-green lg:min-h-12 lg:text-[0.9375rem]"
               >
-                Get in touch
-              </Link>
-              <Link
-                to="#about"
-                onClick={scrollToSection}
-                className="group hidden min-h-12 items-center gap-2 whitespace-nowrap px-3 text-[0.9375rem] font-medium text-dark-green lg:flex"
-              >
-                About me
+                See my work
                 <svg
                   aria-hidden="true"
                   viewBox="0 0 16 16"
@@ -217,7 +206,7 @@ export function Hero({ className = "" }: HeroProps) {
                 key={job.company}
                 className="flex items-baseline gap-3 lg:flex-col lg:gap-1"
               >
-                <dt className="w-11 text-[0.6875rem] uppercase tracking-[0.14em] text-[#3d5a4d] lg:w-auto">
+                <dt className="w-[4.75rem] text-[0.6875rem] uppercase tracking-[0.14em] text-[#3d5a4d] lg:w-auto">
                   {i === 0 ? "Now" : "Also"}
                 </dt>
                 <dd className="text-gray-800">
@@ -226,18 +215,18 @@ export function Hero({ className = "" }: HeroProps) {
                 </dd>
               </div>
             ))}
-            <div className="hidden flex-col gap-1 lg:flex">
-              <dt className="text-[0.6875rem] uppercase tracking-[0.14em] text-[#3d5a4d]">
-                Based
+            <div className="flex items-baseline gap-3 lg:flex-col lg:gap-1">
+              <dt className="w-[4.75rem] text-[0.6875rem] uppercase tracking-[0.14em] text-[#3d5a4d] lg:w-auto">
+                Status
               </dt>
-              <dd className="text-gray-800">{current[0].location}</dd>
+              <dd className="text-gray-800">{availability}</dd>
             </div>
           </dl>
 
           <Link
-            to="#about"
+            to="#services"
             onClick={scrollToSection}
-            aria-label="Scroll to About"
+            aria-label="Scroll to Services"
             className="hidden min-h-11 items-center gap-3 text-[0.6875rem] uppercase tracking-[0.2em] text-[#3d5a4d] transition-colors hover:text-dark-green lg:flex"
           >
             Scroll

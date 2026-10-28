@@ -7,7 +7,7 @@ export const meta: MetaFunction = () => {
     {
       name: "description",
       content:
-        "Projects by Kyle Combs: reservations and ticketing, Shopify extensions, analytics pipelines, NFC tap-to-open tooling, and more.",
+        "Work by Kyle Combs: Shopify storefronts and extensions, reservations and ticketing, analytics pipelines, AI coding workflows, and more.",
     },
   ];
 };
@@ -23,7 +23,7 @@ export default function ProjectsPage() {
           <span aria-hidden="true">←</span> Kyle Combs
         </a>
       </nav>
-      <Projects headingAs="h1" />
+      <Projects title="All projects" headingAs="h1" />
     </div>
   );
 }
