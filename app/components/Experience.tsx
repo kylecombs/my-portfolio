@@ -1,60 +1,151 @@
-import { MotionConfig, motion } from "motion/react";
+import { AnimatePresence, MotionConfig, motion } from "motion/react";
+import { useId, useState } from "react";
 import { reveal } from "~/utils/reveal";
-import { companyLogos, experience } from "~/data/portfolio";
+import {
+  companyLogos,
+  experience,
+  experienceLinks,
+  isPlaceholder,
+  type Job,
+} from "~/data/portfolio";
 
 export function Experience() {
   return (
     <MotionConfig reducedMotion="user">
       <section id="experience" className="relative py-16">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <SectionHeading eyebrow="02" title="Experience" />
+          <SectionHeading eyebrow="05" title="Experience" />
 
-          <ol className="relative mt-16 border-l border-dark-green/20 md:ml-[11rem]">
+          <ol className="relative mt-16 border-l border-dark-green/20">
             {experience.map((job, i) => (
               <motion.li
                 key={`${job.company}-${job.role}`}
-                className="group relative pb-14 pl-8 last:pb-0 md:pl-12"
+                className="group relative pl-8 md:pl-12"
                 {...reveal(
                   { opacity: 0, y: 24 },
                   { delay: i * 0.05, duration: 0.7 }
                 )}
                 viewport={{ once: true, amount: 0.3 }}
               >
-                {/* Timeline marker: dot that becomes ☺ on hover, echoing the hero nav */}
+                <JobRow job={job} />
+              </motion.li>
+            ))}
+          </ol>
+
+          <div className="mt-12 flex flex-col gap-2 font-neue-haas text-lg text-gray-800 sm:flex-row sm:justify-end sm:gap-10">
+            <a
+              href={experienceLinks.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex min-h-11 items-center gap-3 transition-colors hover:text-dark-green"
+            >
+              Full history on LinkedIn
+              <span
+                aria-hidden="true"
+                className="transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+              >
+                ↗
+              </span>
+              <span className="sr-only">(opens in a new tab)</span>
+            </a>
+            {isPlaceholder(experienceLinks.resume) ? (
+              <p className="inline-flex min-h-11 items-center gap-3">
+                Download résumé (PDF) {experienceLinks.resume}
+              </p>
+            ) : (
+              <a
+                href={experienceLinks.resume}
+                download
+                className="group inline-flex min-h-11 items-center gap-3 transition-colors hover:text-dark-green"
+              >
+                Download résumé (PDF)
                 <span
                   aria-hidden="true"
-                  className="absolute -left-3 top-1 flex h-6 w-6 items-center justify-center"
+                  className="transition-transform duration-200 group-hover:translate-y-0.5"
                 >
-                  <span className="h-2 w-2 rounded-full bg-dark-green transition-opacity duration-200 group-hover:opacity-0" />
-                  <span className="drop-shadow-glow absolute text-xl text-dark-green opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                    ☺
-                  </span>
+                  ↓
                 </span>
+              </a>
+            )}
+          </div>
+        </div>
+      </section>
+    </MotionConfig>
+  );
+}
 
-                <p className="mb-2 font-neue-haas text-sm uppercase tracking-widest text-dark-green/70 md:absolute md:-left-[11rem] md:top-1 md:mb-0 md:w-36 md:text-right">
-                  {job.dates.replace(/ (?=\d)/g, "\u00a0")}
+function JobRow({ job }: { job: Job }) {
+  const [open, setOpen] = useState(false);
+  const panelId = useId();
+
+  return (
+    <>
+      {/* Timeline marker: dot that becomes ☺ on hover, echoing the hero nav */}
+      <span
+        aria-hidden="true"
+        className="absolute -left-3 top-[1.125rem] flex h-6 w-6 items-center justify-center sm:top-5"
+      >
+        <span className="h-2 w-2 rounded-full bg-dark-green transition-opacity duration-200 group-focus-within:opacity-0 group-hover:opacity-0" />
+        <span className="drop-shadow-glow absolute text-xl text-dark-green opacity-0 transition-opacity duration-200 group-focus-within:opacity-100 group-hover:opacity-100">
+          ☺
+        </span>
+      </span>
+
+      <h3>
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls={panelId}
+          onClick={() => setOpen((o) => !o)}
+          className="flex w-full items-start justify-between gap-4 py-4 text-left font-neue-haas focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-dark-green"
+        >
+          <span className="flex flex-col gap-x-3 gap-y-1 md:flex-row md:flex-wrap md:items-baseline">
+            <span className="text-xl font-medium text-dark-green sm:text-2xl">
+              {job.role}
+            </span>
+            <span className="inline-flex flex-wrap items-center gap-x-2 text-lg italic text-gray-800">
+              {companyLogos[job.company] && (
+                <img
+                  src={companyLogos[job.company]}
+                  alt=""
+                  className="h-5 w-auto"
+                />
+              )}
+              {job.company}
+              <span className="not-italic text-gray-600">· {job.type}</span>
+            </span>
+            <span className="text-sm uppercase tracking-widest text-dark-green/70">
+              {job.dates.replace(/ (?=\d)/g, "\u00a0")}
+            </span>
+          </span>
+
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 16 16"
+            className={`mt-2 h-4 w-4 shrink-0 fill-none stroke-dark-green stroke-[1.5] transition-transform duration-300 ${open ? "rotate-45" : ""}`}
+            strokeLinecap="round"
+          >
+            <path d="M8 2v12M2 8h12" />
+          </svg>
+        </button>
+      </h3>
+
+      {/* Stays mounted so aria-controls always resolves */}
+      <div id={panelId}>
+        <AnimatePresence initial={false}>
+          {open && (
+            <motion.div
+              key="panel"
+              className="overflow-hidden"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <div className="pb-8 pt-1">
+                <p className="font-neue-haas text-sm text-gray-600">
+                  {job.location}
                 </p>
-
-                <h3 className="font-neue-haas text-2xl font-medium text-dark-green sm:text-3xl">
-                  {job.role}
-                </h3>
-                <p className="mt-1 flex flex-wrap items-center gap-x-2 font-neue-haas text-lg italic text-gray-800">
-                  {companyLogos[job.company] && (
-                    <img
-                      src={companyLogos[job.company]}
-                      alt=""
-                      className="h-6 w-auto"
-                    />
-                  )}
-                  <span>
-                    {job.company}
-                    <span className="not-italic text-gray-600">
-                      {" "}
-                      · {job.type} · {job.location}
-                    </span>
-                  </span>
-                </p>
-
                 <ul className="mt-4 max-w-3xl space-y-2 font-neue-haas text-base leading-relaxed text-gray-800">
                   {job.highlights.map((h) => (
                     <li key={h} className="flex gap-3">
@@ -77,12 +168,12 @@ export function Experience() {
                     </li>
                   ))}
                 </ul>
-              </motion.li>
-            ))}
-          </ol>
-        </div>
-      </section>
-    </MotionConfig>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </>
   );
 }
 

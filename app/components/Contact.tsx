@@ -1,33 +1,16 @@
 import { MotionConfig, motion } from "motion/react";
 import { SectionHeading } from "./Experience";
 import { reveal, staggerShow } from "~/utils/reveal";
+import { contact, isPlaceholder } from "~/data/portfolio";
 
 const ease = [0.22, 1, 0.36, 1] as const;
-
-const links = [
-  {
-    label: "Email",
-    handle: "kylecombsdev@gmail.com",
-    href: "mailto:kylecombsdev@gmail.com",
-  },
-  {
-    label: "LinkedIn",
-    handle: "in/kyledavidcombs",
-    href: "https://www.linkedin.com/in/kyledavidcombs/",
-  },
-  {
-    label: "GitHub",
-    handle: "@kylecombs",
-    href: "https://github.com/kylecombs",
-  },
-];
 
 export function Contact() {
   return (
     <MotionConfig reducedMotion="user">
       <section id="contact" className="relative pb-12 pt-16">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <SectionHeading eyebrow="05" title="Get in touch" />
+          <SectionHeading eyebrow="06" title="Get in touch" />
 
           <div className="mt-16 grid gap-12 md:grid-cols-12 md:items-center">
             <motion.div
@@ -36,12 +19,13 @@ export function Contact() {
               viewport={{ once: true, amount: 0.4 }}
             >
               <p className="drop-shadow-glow font-script text-8xl font-light leading-none text-dark-green sm:text-9xl">
-                Say hello<span className="ml-2 text-2xl">☺</span>
+                Let&apos;s build something
+                <span aria-hidden="true" className="ml-2 text-2xl">
+                  ☺
+                </span>
               </p>
               <p className="mt-8 max-w-md text-pretty font-neue-haas text-lg leading-relaxed text-gray-800">
-                I&apos;m open to contract work with small teams: frontends,
-                Rails APIs, Shopify integrations, and data pipelines. Tell me
-                what you&apos;re building.
+                {contact.intro}
               </p>
               <p className="mt-6 inline-flex items-center gap-3 font-neue-haas text-sm uppercase tracking-widest text-dark-green/70">
                 <span className="relative flex h-2 w-2">
@@ -50,6 +34,26 @@ export function Contact() {
                 </span>
                 Available for new projects
               </p>
+              <div className="mt-8">
+                {isPlaceholder(contact.booking.href) ? (
+                  <p className="font-neue-haas text-base text-gray-800">
+                    <span className="inline-flex min-h-12 items-center rounded-full border border-dashed border-dark-green px-6 font-medium text-dark-green">
+                      {contact.booking.label}
+                    </span>{" "}
+                    {contact.booking.href}
+                  </p>
+                ) : (
+                  <a
+                    href={contact.booking.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-12 items-center gap-2 rounded-full bg-dark-green px-6 font-neue-haas font-medium text-[#f5f5f5] transition-opacity hover:opacity-90"
+                  >
+                    {contact.booking.label}
+                    <span className="sr-only">(opens in a new tab)</span>
+                  </a>
+                )}
+              </div>
             </motion.div>
 
             <motion.ul
@@ -59,7 +63,7 @@ export function Contact() {
               viewport={{ once: true, amount: 0.4 }}
               variants={{ show: staggerShow(0.1, 0.2) }}
             >
-              {links.map((l) => (
+              {contact.links.map((l) => (
                 <motion.li
                   key={l.label}
                   className="border-b border-dark-green/20"
