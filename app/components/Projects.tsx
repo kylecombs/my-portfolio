@@ -2,9 +2,11 @@ import {
   AnimatePresence,
   MotionConfig,
   motion,
+  stagger,
+  useAnimate,
   useReducedMotion,
 } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   companyLogos,
   isPlaceholder,
@@ -15,6 +17,7 @@ import {
 import { SectionHeading } from "./Experience";
 import { Tags, smallLabelClass } from "./Tags";
 import { staggerShow } from "~/utils/reveal";
+import { scrollWindowTo } from "~/utils/scrollToSection";
 
 interface ProjectsProps {
   limit?: number;
@@ -87,8 +90,9 @@ interface ProjectCardProps {
   onToggle: () => void;
 }
 
-// Expanding spans the card across both grid columns, which pushes its
-// neighbour onto the next row; `layout` animates both moves.
+// Expanding spans the card across both grid columns. A right-column card also
+// jumps ahead of its left partner (via `order`), so it opens in place and the
+// partner and every card after it shift on by one; `layout` animates it all.
 function ProjectCard({
   project: p,
   index,
@@ -96,6 +100,35 @@ function ProjectCard({
   onToggle,
 }: ProjectCardProps) {
   const mediaId = `project-media-${index}`;
+  const order = expanded && index % 2 === 1 ? 2 * index - 3 : 2 * index;
+  const [scope, animate] = useAnimate<HTMLElement>();
+  const reduceMotion = useReducedMotion();
+  const prevExpanded = useRef(expanded);
+
+  // On toggle the content would visibly stretch and reflow with the card, so
+  // hide it before paint and bring it back in sequence once the resize settles.
+  useLayoutEffect(() => {
+    if (prevExpanded.current === expanded) return;
+    prevExpanded.current = expanded;
+    const items = scope.current.querySelectorAll<HTMLElement>("[data-fade]");
+    items.forEach((el) => (el.style.opacity = "0"));
+    animate(
+      items,
+      reduceMotion ? { opacity: 1 } : { opacity: [0, 1], y: [8, 0] },
+      { duration: 0.4, ease, delay: stagger(0.05, { startDelay: 0.35 }) }
+    );
+
+    if (expanded) {
+      // offsetTop ignores the layout animation's transforms, so this is where
+      // the card will settle; the scroll runs alongside the resize.
+      let top = 0;
+      for (let el: HTMLElement | null = scope.current; el; ) {
+        top += el.offsetTop;
+        el = el.offsetParent as HTMLElement | null;
+      }
+      scrollWindowTo(top);
+    }
+  }, [expanded, animate, scope, reduceMotion]);
   const parts = [
     { label: "Problem", text: p.problem },
     { label: "Built", text: p.built },
@@ -105,7 +138,8 @@ function ProjectCard({
   return (
     <motion.li
       layout
-      className={expanded ? "md:col-span-2" : undefined}
+      className={`md:[order:var(--order)] ${expanded ? "md:col-span-2" : ""}`}
+      style={{ "--order": order } as React.CSSProperties}
       variants={{
         hidden: { opacity: 0, y: 32 },
         show: {
@@ -114,84 +148,128 @@ function ProjectCard({
           transition: { duration: 0.7, ease },
         },
       }}
-      transition={{ layout: { duration: 0.5, ease } }}
+      transition={{
+        layout: { type: "spring", visualDuration: 0.55, bounce: 0.12 },
+      }}
     >
       <motion.article
-        className="group flex h-full flex-col border border-dark-green/20 bg-white/25 p-6 backdrop-blur-md transition-colors duration-300 hover:border-dark-green/50 hover:bg-white/40 sm:p-8"
+        ref={scope}
+        className="group relative flex h-full flex-col border border-dark-green/20 bg-white/25 p-6 backdrop-blur-md transition-colors duration-300 hover:border-dark-green/50 hover:bg-white/40 sm:p-8"
         whileHover={expanded ? undefined : { y: -6 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
       >
-        <motion.div
-          layout="position"
-          className="flex items-center justify-between gap-4 font-neue-haas text-sm tracking-widest text-dark-green/70"
+        {/* Header and media toggle on click as a mouse/touch shortcut;
+            keyboard users get the expand button. */}
+        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- the expand button covers keyboard */}
+        <div
+          className={p.media ? "cursor-pointer" : undefined}
+          onClick={
+            p.media
+              ? (e) => {
+                  // Buttons and the open carousel handle their own clicks.
+                  const target = e.target as Element;
+                  if (target.closest("a, button, [role=region]")) return;
+                  if (window.getSelection()?.toString()) return;
+                  onToggle();
+                }
+              : undefined
+          }
         >
-          <span>{String(index + 1).padStart(2, "0")}</span>
-          <span className="inline-flex items-center gap-2 text-right uppercase">
-            {companyLogos[p.context] && (
-              <img
-                src={companyLogos[p.context]}
-                alt=""
-                className="h-5 w-auto"
-              />
-            )}
-            {/* ORA's wordmark, styled like the header in the ORA app */}
-            {p.title === "ORA" && (
-              <span
-                aria-hidden="true"
-                className="font-space-grotesk font-bold tracking-[0.22em] text-[#0C0C0C]"
-              >
-                ORA
+          <motion.div
+            layout="position"
+            className="flex items-center justify-between gap-4 font-neue-haas text-sm tracking-widest text-dark-green/70"
+          >
+            <span data-fade>{String(index + 1).padStart(2, "0")}</span>
+            <span className="inline-flex items-center gap-2 text-right uppercase">
+              <span data-fade className="inline-flex items-center gap-2">
+                {companyLogos[p.context] && (
+                  <img
+                    src={companyLogos[p.context]}
+                    alt=""
+                    className="h-5 w-auto"
+                  />
+                )}
+                {/* ORA's wordmark, styled like the header in the ORA app */}
+                {p.title === "ORA" && (
+                  <span
+                    aria-hidden="true"
+                    className="font-space-grotesk font-bold tracking-[0.22em] text-[#0C0C0C]"
+                  >
+                    ORA
+                  </span>
+                )}
+                {p.year ? `${p.context} · ${p.year}` : p.context}
               </span>
-            )}
-            {p.year ? `${p.context} · ${p.year}` : p.context}
-            {p.media && (
-              <button
-                type="button"
-                onClick={onToggle}
-                aria-expanded={expanded}
-                aria-controls={mediaId}
-                aria-label={`${expanded ? "Collapse" : "Expand"} ${p.title}`}
-                className="-my-2 -mr-2 ml-2 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-dark-green transition-colors hover:bg-dark-green/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-dark-green"
-              >
-                <motion.svg
-                  viewBox="0 0 24 24"
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={1.75}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                  animate={{ rotate: expanded ? 180 : 0 }}
-                  transition={{ duration: 0.4, ease }}
+              {p.media && (
+                <motion.button
+                  type="button"
+                  whileTap={{ scale: 0.88 }}
+                  onClick={onToggle}
+                  aria-expanded={expanded}
+                  aria-controls={mediaId}
+                  aria-label={`${expanded ? "Collapse" : "Expand"} ${p.title}`}
+                  className="-my-2 -mr-2 ml-2 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-dark-green transition-colors hover:bg-dark-green/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-dark-green"
                 >
-                  <path d="M7 17 17 7M9 7h8v8" />
-                </motion.svg>
-              </button>
-            )}
-          </span>
-        </motion.div>
+                  <span data-fade className="inline-flex">
+                    <motion.svg
+                      viewBox="0 0 24 24"
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={1.75}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                      animate={{ rotate: expanded ? 180 : 0 }}
+                      transition={{ duration: 0.4, ease }}
+                    >
+                      <path d="M7 17 17 7M9 7h8v8" />
+                    </motion.svg>
+                  </span>
+                </motion.button>
+              )}
+            </span>
+          </motion.div>
 
-        <AnimatePresence initial={false}>
-          {expanded && p.media && (
-            <motion.div
-              key="media"
-              id={mediaId}
-              className="mt-6"
-              initial={{ opacity: 0 }}
-              animate={{
-                opacity: 1,
-                transition: { duration: 0.4, delay: 0.2 },
-              }}
-              exit={{ opacity: 0, transition: { duration: 0.15 } }}
-            >
-              <MediaCarousel media={p.media} title={p.title} />
-            </motion.div>
-          )}
-        </AnimatePresence>
+          {/* popLayout swaps strip and carousel in one render, so the card's layout
+            spring covers the whole size change instead of snapping mid-way. */}
+          <AnimatePresence initial={false} mode="popLayout">
+            {p.media && (
+              <motion.div
+                key={expanded ? "carousel" : "thumb"}
+                id={mediaId}
+                className="mt-6"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  transition: { duration: 0.4, delay: 0.4, ease },
+                }}
+                exit={{ opacity: 0, transition: { duration: 0.15 } }}
+              >
+                {expanded ? (
+                  <MediaCarousel media={p.media} title={p.title} />
+                ) : (
+                  <div className="overflow-hidden border border-dark-green/20">
+                    <img
+                      src={p.media[0].poster}
+                      alt={p.media[0].alt}
+                      loading="lazy"
+                      draggable={false}
+                      className="h-40 w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03] motion-reduce:transition-none sm:h-48"
+                    />
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         <motion.div layout="position" className="flex flex-1 flex-col">
-          <h3 className="mt-6 font-neue-haas text-2xl font-medium text-dark-green sm:text-3xl">
+          <h3
+            data-fade
+            className="mt-6 font-neue-haas text-2xl font-medium text-dark-green sm:text-3xl"
+          >
             {p.title}
             <span
               aria-hidden="true"
@@ -201,7 +279,7 @@ function ProjectCard({
             </span>
           </h3>
 
-          <dl className="mt-4 flex-1 space-y-4">
+          <dl data-fade className="mt-4 flex-1 space-y-4">
             {parts.map((part) => (
               <div key={part.label}>
                 <dt className={smallLabelClass}>{part.label}</dt>
@@ -212,15 +290,21 @@ function ProjectCard({
             ))}
           </dl>
 
-          <Tags items={p.tags} />
+          <div data-fade>
+            <Tags items={p.tags} />
+          </div>
 
           {p.link &&
             (isPlaceholder(p.link.href) ? (
-              <p className="mt-6 font-neue-haas text-base text-gray-800">
+              <p
+                data-fade
+                className="mt-6 font-neue-haas text-base text-gray-800"
+              >
                 {p.link.label} {p.link.href}
               </p>
             ) : (
               <a
+                data-fade
                 href={p.link.href}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -333,10 +417,10 @@ function MediaCarousel({ media, title }: MediaCarouselProps) {
               className="group/dot inline-flex h-6 w-6 items-center justify-center"
             >
               <span
-                className={`h-2 w-2 rounded-full transition-colors ${
+                className={`h-2 rounded-full transition-[width,background-color] duration-300 ${
                   i === current
-                    ? "bg-dark-green"
-                    : "bg-dark-green/25 group-hover/dot:bg-dark-green/50"
+                    ? "w-5 bg-dark-green"
+                    : "w-2 bg-dark-green/25 group-hover/dot:bg-dark-green/50"
                 }`}
               />
             </button>

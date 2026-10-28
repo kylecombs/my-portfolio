@@ -39,16 +39,24 @@ export function scrollToSection(event: MouseEvent<HTMLAnchorElement>) {
   target.focus({ preventScroll: true });
 
   const to = target.getBoundingClientRect().top + window.scrollY;
+  const duration = scrollWindowTo(to);
+  if (duration) revealAt = performance.now() + duration * REVEAL_AT * 1000;
+}
+
+/**
+ * Animates the window scroll to `to` (instant under reduced motion); the
+ * user's own scrolling cancels it. Returns the duration in seconds.
+ */
+export function scrollWindowTo(to: number) {
   current?.stop();
   revealAt = 0;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     window.scrollTo(0, to);
-    return;
+    return 0;
   }
 
   const distance = Math.abs(to - window.scrollY);
   const duration = Math.min(1.2, 0.6 + distance / 8000);
-  revealAt = performance.now() + duration * REVEAL_AT * 1000;
   current = animate(window.scrollY, to, {
     duration,
     ease,
@@ -68,4 +76,5 @@ export function scrollToSection(event: MouseEvent<HTMLAnchorElement>) {
       window.removeEventListener(type, cancel);
     }
   });
+  return duration;
 }
