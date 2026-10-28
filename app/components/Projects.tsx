@@ -126,7 +126,10 @@ function ProjectCard({
         top += el.offsetTop;
         el = el.offsetParent as HTMLElement | null;
       }
-      scrollWindowTo(top);
+      // Leave 1.5rem of breathing room above the card.
+      const gap =
+        parseFloat(getComputedStyle(document.documentElement).fontSize) * 1.5;
+      scrollWindowTo(top - gap);
     }
   }, [expanded, animate, scope, reduceMotion]);
   const parts = [
@@ -245,7 +248,7 @@ function ProjectCard({
                   y: 0,
                   transition: { duration: 0.4, delay: 0.4, ease },
                 }}
-                exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                exit={{ opacity: 0, transition: { duration: 0.05 } }}
               >
                 {expanded ? (
                   <MediaCarousel media={p.media} title={p.title} />
