@@ -69,13 +69,12 @@ export const companyLogos: Record<string, string> = {
   Rexby: "/assets/logos/rexby.svg",
 };
 
-// TODO: weekly hours and start month
-export const availability = "[X] hrs/week · from [Month]";
+export const availability = "Accepting new clients in 2027";
 
 export const hero = {
   label: "Fullstack & Product Engineer",
   intro:
-    "I’m a fullstack engineer who helps small teams ship polished products: React frontends, Rails APIs, Shopify apps, and data pipelines. I bring engineering, design, and product thinking to every project, and I work part-time on contract, so you get senior help without a full-time hire.",
+    "I’m a fullstack engineer who helps teams ship polished products: React frontends, Node and Rails APIs, Shopify apps, and data pipelines. I bring engineering, design, and product thinking to every project, and I work part-time on contract, so you get senior help without a full-time hire.",
 };
 
 export const services: Service[] = [
@@ -138,14 +137,14 @@ export const howIWork: Principle[] = [
 // *text* renders as <em>
 export const about: { paragraphs: string[]; facts: Fact[] } = {
   paragraphs: [
-    "I’m a fullstack engineer who works with small teams on a part-time contract basis. Right now I lead frontend at *CAMP* and build the analytics pipeline for *ALEX AND ANI*.",
+    "I’m a fullstack engineer working part-time on contract. Right now I lead frontend at *CAMP* and build the analytics pipeline for *ALEX AND ANI*.",
     "I came to software from the art world. After a BFA in Studio Art, I spent eight years as a preparator at David Zwirner, installing complex exhibitions and caring for the artworks in them. It taught me to sweat the details people only notice when they’re wrong.",
-    "Since then I’ve shipped React frontends, Rails APIs, AWS media pipelines and dbt/Snowflake warehouses, usually as one of two or three engineers who own the whole product. I’m based in Brooklyn and work remotely.",
+    "Since then I’ve shipped React frontends, Node and Rails APIs, AWS media pipelines and dbt/Snowflake warehouses, usually as one of two or three engineers who own the whole product. I’m based in Brooklyn and work remotely.",
   ],
   facts: [
     { label: "Based", value: "Brooklyn · Remote" },
-    { label: "Working", value: "Part-time contract, small teams" },
-    { label: "Focus", value: "Frontend, Shopify, Rails APIs, data pipelines" },
+    { label: "Working", value: "Part-time contract, remote" },
+    { label: "Focus", value: "Frontend, Shopify, Node and Rails APIs, data pipelines" },
     { label: "Currently", value: "CAMP · ALEX AND ANI" },
   ],
 };
@@ -157,13 +156,12 @@ export const experienceLinks = {
 };
 
 export const contact = {
-  // TODO: booking month
   intro:
-    "I’m currently booking part-time contract work for [Month]. Tell me a little about your team, what you’re building, and where you’re stuck. I’ll reply within one business day.",
-  // TODO: Cal.com / Calendly URL
+    "I’m currently booking part-time contract work for 2027. Tell me a little about your team, what you’re building, and where you’re stuck. I’ll reply within one business day.",
   booking: {
-    label: "Book a 20-min intro call",
-    href: "[TODO: Cal.com / Calendly URL]",
+    label: "Book a 15-min intro call",
+    // The "30min" slug is Calendly's default; the event itself is 15 minutes.
+    href: "https://calendly.com/kylecombsdev/30min",
   },
   links: [
     // TODO: switch to a domain email, e.g. hello@kylecombs.com
@@ -274,64 +272,69 @@ export const selectedWorkCount = 6;
 // TODO: add `media` (short screen-capture video + poster) to each project as it's recorded
 export const projects: Project[] = [
   {
-    title: "Surface World Store",
+    title: "ORA",
     // TODO: confirm label and year
     context: "[Personal project · 2026]",
-    problem: "[TODO: one sentence]",
+    problem:
+      "Modular synthesis usually means expensive hardware or desktop software, and it’s hard to make music with someone else in real time.",
     built:
-      "A Shopify Hydrogen storefront I designed and built end to end. [TODO: key features]",
-    result: "[TODO]",
-    tags: ["Shopify Hydrogen", "React", "Remix", "Design"],
-    link: { label: "Visit the store", href: "[TODO: live URL]" },
+      "A browser-based modular synth: patch modules together on a canvas and hear them instantly, with SuperCollider compiled to WebAssembly running all audio in the browser. Several people can edit one patch live while only the patch state syncs between them, and a built-in Claude assistant helps build patches.",
+    result:
+      "Live and free to try: 80+ synth modules, real-time multiplayer patching and an AI patch assistant, all in a browser tab with nothing to install.",
+    tags: ["React", "WebAssembly", "SuperCollider", "WebSockets", "Claude API"],
+    link: { label: "Try it", href: "https://ora-fm.fly.dev/" },
   },
   {
-    title: "Reservations & Ticketing",
+    title: "Experience Booking Flow",
     context: "CAMP",
-    year: "2023–",
+    year: "2023–Present",
     problem:
-      "CAMP needed families to book play sessions, buy tickets and shop online in one smooth flow.",
+      "The online booking flow is CAMP’s primary source of revenue and needed a UX rework and optimization. It handles thousands of reservations a month across 10 stores nationwide.",
     built:
-      "The customer-facing booking, ticketing and e-commerce experience in React and TypeScript, along with the Rails APIs behind it.",
-    // TODO: e.g. "Now handles X bookings a month across Y locations."
-    result: "[TODO: result]",
-    tags: ["React", "TypeScript", "Ruby on Rails"],
+      "I’ve owned the booking flow for years. I added upsells so families can buy products, souvenirs and extra activities while they book, with Shopify inventory synced per location, and made sure peak-day rushes can’t overbook a session. This year I helped spec the flow and rebuilt it as a streamlined multi-step checkout in React and TypeScript, on Rails APIs.",
+    // TODO: swap "add-on sales grew" for the real upsell lift once it's pulled
+    result:
+      "After the relaunch, conversion climbed as much as 90% year over year, add-on sales grew, and the checkout’s Lighthouse score rose 20 points.",
+    tags: ["React", "TypeScript", "Ruby on Rails", "Shopify"],
   },
   {
     title: "Retail Analytics Pipeline",
     context: "ALEX AND ANI",
-    year: "2025–",
+    year: "2025–Present",
     problem:
-      "Revenue reports didn’t match Shopify, so teams didn’t trust the numbers.",
+      "A national jewelry brand selling online, wholesale and on Amazon needed sales and ad data from Shopify, Meta, Google, Amazon and Bing it could trust in one place.",
     built:
-      "The pipeline from Fivetran ingestion through dbt models in Snowflake to LookML explores, reconciled against Shopify.",
-    // TODO: e.g. "X dashboards, Y teams self-serve."
+      "I took over the Fivetran, dbt, Snowflake and Looker stack and now own it. I’ve fixed refund discrepancies, ad metrics over-reporting and duplicated products and SKUs, and added wholesale partner reporting, merchandising fields, and repeat purchase and lifetime value analysis.",
     result:
-      "Finance and merchandising now work from numbers they trust. [TODO: scale]",
+      "Merchandising, marketing and leadership pull their own trusted numbers from 8 Looker explores built on 37 dbt models.",
     tags: ["dbt", "Snowflake", "Fivetran", "Looker"],
   },
   {
     title: "Shopify Admin & POS Extensions",
     context: "CAMP",
-    year: "2023–",
-    problem: "[TODO: what staff were doing before]",
+    year: "2023–Present",
+    problem:
+      "Store teams managed reservations in a separate, self-hosted scheduling app that didn’t talk to the Shopify inventory and point of sale they used every day.",
     built:
-      "Admin extensions and point-of-sale integrations that let staff manage scheduling, reservations, and discounts inside Shopify.",
-    result: "[TODO]",
-    tags: ["Shopify", "React", "Ruby on Rails"],
+      "We moved scheduling into Shopify itself: an embedded admin app and POS extensions where staff build activities and time slots, check customers in, reschedule and refund bookings, and manage add-ons, ticket bundles and activity content. I wrote custom discounts and promos with Shopify Functions and built a birthday party pipeline that turns online inquiries into leads staff can book and invoice, all kept in sync with the Rails backend.",
+    result:
+      "Every team, from store staff to marketing and growth, now manages reservations, activities, add-ons and birthday parties in one place.",
+    tags: ["Shopify", "Shopify Functions", "React", "Ruby on Rails"],
   },
   {
     title: "Agent Coding Workflow",
     // TODO: confirm label and year
     context: "[Personal project · 2026]",
     problem:
-      "Small teams want AI coding agents but can’t let them push unreviewed code.",
+      "Teams want AI coding agents but can’t let them push unreviewed code.",
     built:
-      "A TypeScript orchestrator that picks up Linear tickets, runs Claude agents in sandboxed Docker containers, and routes every diff through human review before a PR opens.",
-    result: "[TODO]",
-    tags: ["TypeScript", "Claude Agent SDK", "Linear", "Docker"],
+      "A Python orchestrator that turns a one-line request or Linear ticket into a reviewed pull request. Claude agents write the spec, code and tests in a sandboxed Docker container, automated checks gate every round, and design, code and security reviewers must all pass before a PR opens. A human approves every spec and merges every PR.",
+    result:
+      "Dozens of merged PRs and thousands of lines of production code so far, saving hundreds of hours of developer time.",
+    tags: ["Python", "Claude Code", "Linear", "Docker", "Playwright"],
   },
   {
-    title: "Tap-to-Open Deploy Tool",
+    title: "IPFS Deploy for NFC Chips",
     context: "Arx Research",
     year: "2023",
     problem:
@@ -347,16 +350,24 @@ export const projects: Project[] = [
     title: "Creator Tools & Map Editor",
     context: "Rexby",
     year: "2022",
+    problem:
+      "Travel influencers needed a way to turn their recommendations into guides travelers would pay for.",
     built:
-      "Guide authoring, profile editing, and an interactive Google Maps editor for placing and organizing travel recommendations.",
-    tags: ["React", "Redux", "Google Maps"],
+      "Most of the creator app: profile editing, day-by-day itinerary authoring with photos, video and affiliate booking links, and an interactive Google Maps editor for pinning and organizing recommendations. I also wrote the GraphQL resolvers behind it and set up Cypress tests in CI.",
+    result:
+      "Creators could build, price and publish their own guides without help from Rexby’s team.",
+    tags: ["Next.js", "TypeScript", "GraphQL", "Google Maps", "Cypress"],
   },
   {
     title: "Video Transcoding Pipeline",
     context: "Rexby",
     year: "2022",
+    problem:
+      "Creators wanted video in their guides, but raw phone uploads were too heavy to stream well on mobile.",
     built:
-      "Upload and transcoding pipeline on AWS so creators could add video to their profiles and guides.",
+      "An upload pipeline on AWS: videos go straight to S3, a Lambda hands them to MediaConvert for streaming formats, and the results play in creator profiles, guides and a mobile video grid.",
+    result:
+      "Video became a core part of creator profiles and guides, playing smoothly on any device.",
     tags: ["AWS S3", "Lambda", "MediaConvert"],
   },
   {

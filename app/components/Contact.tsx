@@ -1,7 +1,7 @@
 import { MotionConfig, motion } from "motion/react";
 import { SectionHeading } from "./Experience";
 import { reveal, staggerShow } from "~/utils/reveal";
-import { contact, isPlaceholder } from "~/data/portfolio";
+import { availability, contact, isPlaceholder } from "~/data/portfolio";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -32,7 +32,7 @@ export function Contact() {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-dark-green/40 motion-reduce:animate-none" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-dark-green" />
                 </span>
-                Available for new projects
+                {availability}
               </p>
               <div className="mt-8">
                 {isPlaceholder(contact.booking.href) ? (

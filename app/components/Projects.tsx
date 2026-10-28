@@ -101,6 +101,15 @@ function ProjectCard({
           {companyLogos[p.context] && (
             <img src={companyLogos[p.context]} alt="" className="h-5 w-auto" />
           )}
+          {/* ORA's wordmark, styled like the header in the ORA app */}
+          {p.title === "ORA" && (
+            <span
+              aria-hidden="true"
+              className="font-space-grotesk font-bold tracking-[0.22em] text-[#0C0C0C]"
+            >
+              ORA
+            </span>
+          )}
           {p.year ? `${p.context} · ${p.year}` : p.context}
         </span>
       </div>

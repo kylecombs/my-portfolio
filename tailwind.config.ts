@@ -35,6 +35,7 @@ export default {
           "system-ui",
           "sans-serif",
         ],
+        "space-grotesk": ["Space Grotesk", "ui-sans-serif", "system-ui", "sans-serif"],
         "script": [
           "EdwardianScriptITCPro",
           "Inter",

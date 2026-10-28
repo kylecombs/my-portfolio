@@ -217,7 +217,7 @@ export function Hero({ className = "" }: HeroProps) {
             ))}
             <div className="flex items-baseline gap-3 lg:flex-col lg:gap-1">
               <dt className="w-[4.75rem] text-[0.6875rem] uppercase tracking-[0.14em] text-[#3d5a4d] lg:w-auto">
-                Available
+                Status
               </dt>
               <dd className="text-gray-800">{availability}</dd>
             </div>
