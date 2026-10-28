@@ -32,7 +32,7 @@ export interface Project {
   result?: string;
   tags: string[];
   link?: { label: string; href: string };
-  media?: ProjectMedia;
+  media?: ProjectMedia[];
 }
 
 export interface Service {
@@ -60,6 +60,14 @@ export interface ContactLink {
 export function isPlaceholder(value: string) {
   return value.startsWith("[");
 }
+
+// Stand-in images until real project media is recorded.
+const placeholderMedia: ProjectMedia[] = [1, 2, 3].map((n) => ({
+  type: "image",
+  src: `/assets/projects/placeholder-${n}.svg`,
+  poster: `/assets/projects/placeholder-${n}.svg`,
+  alt: `Placeholder image ${n}`,
+}));
 
 // Keyed by Job.company / Project.context; entries without a logo render name only.
 export const companyLogos: Record<string, string> = {
@@ -282,6 +290,7 @@ export const projects: Project[] = [
     result:
       "Live and free to try: 80+ synth modules, real-time multiplayer patching and an AI patch assistant, all in a browser tab with nothing to install.",
     tags: ["React", "WebAssembly", "SuperCollider", "WebSockets", "Claude API"],
+    media: placeholderMedia,
     link: { label: "Try it", href: "https://ora-fm.fly.dev/" },
   },
   {
@@ -296,6 +305,7 @@ export const projects: Project[] = [
     result:
       "After the relaunch, conversion climbed as much as 90% year over year, add-on sales grew, and the checkout’s Lighthouse score rose 20 points.",
     tags: ["React", "TypeScript", "Ruby on Rails", "Shopify"],
+    media: placeholderMedia,
   },
   {
     title: "Retail Analytics Pipeline",
@@ -308,6 +318,7 @@ export const projects: Project[] = [
     result:
       "Merchandising, marketing and leadership pull their own trusted numbers from 8 Looker explores built on 37 dbt models.",
     tags: ["dbt", "Snowflake", "Fivetran", "Looker"],
+    media: placeholderMedia,
   },
   {
     title: "Shopify Admin & POS Extensions",
@@ -320,6 +331,7 @@ export const projects: Project[] = [
     result:
       "Every team, from store staff to marketing and growth, now manages reservations, activities, add-ons and birthday parties in one place.",
     tags: ["Shopify", "Shopify Functions", "React", "Ruby on Rails"],
+    media: placeholderMedia,
   },
   {
     title: "Agent Coding Workflow",
@@ -332,6 +344,7 @@ export const projects: Project[] = [
     result:
       "Dozens of merged PRs and thousands of lines of production code so far, saving hundreds of hours of developer time.",
     tags: ["Python", "Claude Code", "Linear", "Docker", "Playwright"],
+    media: placeholderMedia,
   },
   {
     title: "IPFS Deploy for NFC Chips",
@@ -344,6 +357,7 @@ export const projects: Project[] = [
     result:
       "Brand partners could update a physical item’s experience without reissuing hardware.",
     tags: ["IPFS", "NFC", "ERS"],
+    media: placeholderMedia,
   },
   // Archive: shown on /projects only
   {
@@ -357,6 +371,7 @@ export const projects: Project[] = [
     result:
       "Creators could build, price and publish their own guides without help from Rexby’s team.",
     tags: ["Next.js", "TypeScript", "GraphQL", "Google Maps", "Cypress"],
+    media: placeholderMedia,
   },
   {
     title: "Video Transcoding Pipeline",
@@ -369,6 +384,7 @@ export const projects: Project[] = [
     result:
       "Video became a core part of creator profiles and guides, playing smoothly on any device.",
     tags: ["AWS S3", "Lambda", "MediaConvert"],
+    media: placeholderMedia,
   },
   {
     title: "Browser FM Synthesizer",
@@ -377,6 +393,7 @@ export const projects: Project[] = [
     built:
       "An FM synth that runs in the browser, built on the Web Audio API with a playable keyboard made in React and CSS.",
     tags: ["Web Audio API", "React", "CSS"],
+    media: placeholderMedia,
   },
   {
     title: "Webfluence",
@@ -385,5 +402,6 @@ export const projects: Project[] = [
     built:
       "Interactive network visualization of politicians and their campaign donors, built with a team as a capstone project.",
     tags: ["React", "Redux", "Node.js", "Postgres", "Vis.js"],
+    media: placeholderMedia,
   },
 ];
