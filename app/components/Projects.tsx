@@ -253,14 +253,30 @@ function ProjectCard({
                 {expanded ? (
                   <MediaCarousel media={p.media} title={p.title} />
                 ) : (
-                  <div className="overflow-hidden border border-dark-green/20">
+                  <div className="relative overflow-hidden border border-dark-green/20">
                     <img
-                      src={p.media[0].poster}
+                      src={p.media[0].thumb ?? p.media[0].poster}
                       alt={p.media[0].alt}
                       loading="lazy"
                       draggable={false}
                       className="h-40 w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03] motion-reduce:transition-none sm:h-48"
                     />
+                    {p.media[0].type === "video" && (
+                      <span
+                        aria-hidden="true"
+                        className="absolute inset-0 flex items-center justify-end pr-[9%]"
+                      >
+                        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-dark-green/80 text-white shadow-lg backdrop-blur-sm transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none">
+                          <svg
+                            viewBox="0 0 24 24"
+                            className="ml-0.5 h-6 w-6"
+                            fill="currentColor"
+                          >
+                            <path d="M8 5.5v13l11-6.5z" />
+                          </svg>
+                        </span>
+                      </span>
+                    )}
                   </div>
                 )}
               </motion.div>

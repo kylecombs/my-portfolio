@@ -1,0 +1,62 @@
+import type { CaptureLog } from "./capture/recorder";
+
+/** Seconds into the beat's clip, or the label of an event logged by the capture script (+ optional offset). */
+export type At = number | string | { event: string; offset: number };
+
+/** A rectangle in the app's CSS pixels (the capture viewport, e.g. 1920x1080). */
+export interface Region {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+export interface Beat {
+  clip: string;
+  /** Where in the clip the beat starts/ends; defaults to the whole clip. */
+  start?: At;
+  end?: At;
+  /** Address bar text for this beat; defaults to the config's `url`. */
+  url?: string;
+  /** Playback rate; >1 tightens slow stretches like page loads. */
+  speed?: number;
+  /** Camera moves. `region: null` returns to the full frame. Before the first one the camera holds where it was. */
+  zoom?: { at: At; region: Region | null }[];
+  callout?: { at: At; out?: At; label: string; text: string };
+  /** Moment(s) the storyboard shows, one panel (and screenshot) each; defaults to `callout.at`, else the beat's middle. */
+  board?: At | At[];
+}
+
+export interface VideoConfig {
+  id: string;
+  title: string;
+  description: string;
+  role: string;
+  /** Logo at the top of the title card, a path under public/ (e.g. "camp-booking/logo.png"). */
+  logo?: string;
+  tags: string[];
+  /** Shown in the browser frame's address bar. */
+  url: string;
+  colors: {
+    background: string;
+    surface: string;
+    text: string;
+    muted: string;
+    accent: string;
+  };
+  fps: number;
+  titleSeconds: number;
+  outroSeconds: number;
+  beats: Beat[];
+  /** Seamless hover loop, cut from one beat. */
+  loop: {
+    beat: number;
+    from: At;
+    seconds: number;
+    speed?: number;
+    region: Region | null;
+  };
+  /** Seconds into the main video for the poster frame. */
+  posterAt: number;
+  capture: CaptureLog;
+}
