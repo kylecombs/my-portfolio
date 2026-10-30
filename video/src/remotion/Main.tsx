@@ -15,7 +15,93 @@ import {
   TitleCard,
   useEnter,
 } from "./template";
-import { cameraAt, timeline } from "./timeline";
+import { cameraAt, resolveAt, timeline } from "./timeline";
+
+type TimedBeat = ReturnType<typeof timeline>["beats"][number];
+
+/** The beat's inset video over its clip, in sync, plus the redrawn player controls. */
+function Inset({ c, b }: { c: VideoConfig; b: TimedBeat }) {
+  const frame = useCurrentFrame(); // within the beat
+  const inset = b.inset!;
+  const from = inset.from === undefined ? 0 : b.frameOf(inset.from);
+  const to = inset.to === undefined ? b.frames : b.frameOf(inset.to);
+  const clipFrom =
+    inset.from === undefined ? b.trimStart : resolveAt(c, b.clip, inset.from);
+  const sourceFrom = clipFrom + inset.sourceAt; // source seconds at `from`
+  const { x, y, w, h } = inset.box;
+  const t = sourceFrom + ((frame - from) / c.fps) * b.speed;
+  const p = inset.controls ? Math.min(1, t / inset.controls.duration) : 0;
+  return (
+    <Sequence from={from} durationInFrames={to - from} layout="none">
+      <div
+        style={{
+          position: "absolute",
+          left: x,
+          top: y,
+          width: w,
+          height: h,
+          overflow: "hidden",
+          borderRadius: inset.radius ?? 0,
+        }}
+      >
+        <OffthreadVideo
+          src={staticFile(inset.src)}
+          trimBefore={Math.round(sourceFrom * c.fps)}
+          playbackRate={b.speed}
+          muted
+          style={{
+            width: w,
+            height: h,
+            objectFit: "cover",
+            filter: inset.filter,
+          }}
+        />
+        {inset.controls && (
+          // Matches the CAMP gallery player: pause bars, then a 4px track with a 12px knob.
+          <div
+            style={{ position: "absolute", left: 0, right: 0, bottom: 28.5 }}
+          >
+            {[26.5, 33.5].map((l) => (
+              <div
+                key={l}
+                style={{
+                  position: "absolute",
+                  left: l,
+                  bottom: -5,
+                  width: 3,
+                  height: 10.5,
+                  background: "#fff",
+                }}
+              />
+            ))}
+            <div
+              style={{
+                position: "absolute",
+                left: 60,
+                right: 16,
+                bottom: -2,
+                height: 4,
+                borderRadius: 2,
+                background: `linear-gradient(to right, #fff ${p * 100}%, rgba(255,255,255,0.5) ${p * 100}%)`,
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                left: 60 + p * (w - 76 - 12),
+                bottom: -6,
+                width: 12,
+                height: 12,
+                borderRadius: 6,
+                background: "#fff",
+              }}
+            />
+          </div>
+        )}
+      </div>
+    </Sequence>
+  );
+}
 
 function Stage({ c, t }: { c: VideoConfig; t: ReturnType<typeof timeline> }) {
   const frame = useCurrentFrame();
@@ -41,6 +127,7 @@ function Stage({ c, t }: { c: VideoConfig; t: ReturnType<typeof timeline> }) {
               muted
               style={{ position: "absolute", width: W, height: H }}
             />
+            {b.inset && <Inset c={c} b={b} />}
           </Sequence>
         ))}
       </BrowserFrame>

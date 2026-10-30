@@ -76,3 +76,8 @@ strip with clip, duration, speed and screenshot time.
 
 Reaching checkout creates a real cart that holds 2 GA seats for about 10 minutes. Nothing is
 purchased. The script picks a date about a week out and steps forward if a day has no slots.
+
+The screencast drops frames while the page plays video, so the gallery video would stutter. The
+config's `inset` draws the source video over it in sync (plus the player's controls). The source is
+gitignored with the clips; the fetch command is above `GALLERY_VIDEO` in `apps/camp-booking/video.config.ts`.
+After a re-capture, re-measure `sourceAt` (the sync offset) and the `from`/`to` times.

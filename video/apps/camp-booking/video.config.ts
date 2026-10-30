@@ -6,6 +6,16 @@ import capture from "../../public/camp-booking/events.json";
 // Schedule page's summary + calendar columns (CSS y ~323-1024), centered with a small margin.
 const COLUMNS = { x: 285, y: 240, w: 1351, h: 760 };
 
+// The gallery's Mux video, laid over the capture where it plays (box measured from the 02-video clip).
+// Fetch: ffmpeg -i https://stream.mux.com/y4C01eeYAbMm1TEJDQdOV1azUvEQ9coN3xblVQP5O006w.m3u8 -map 0:v:0 -c copy public/camp-booking/clips/gallery-source.mp4
+const GALLERY_VIDEO = {
+  src: "camp-booking/clips/gallery-source.mp4",
+  box: { x: 300, y: 138, w: 708, h: 531 },
+  radius: 10,
+  filter: "brightness(1.09)", // the capture renders it ~9% brighter (fit against the old render's frames)
+  controls: { duration: 16.93 },
+};
+
 // Both columns with the add-ons card (CSS y ~147-906) centered.
 const EXTRAS = { x: 160, y: 77, w: 1600, h: 900 };
 
@@ -58,11 +68,14 @@ const config: VideoConfig = {
         label: "Video in the gallery",
         text: "A short video shows families the experience before they buy.",
       },
+      // The screencast drops frames while the page plays video; draw the source over it once it has slid in.
+      inset: { ...GALLERY_VIDEO, from: 1.8, sourceAt: -0.92 },
     },
     {
       clip: "03-schedule",
       url: "camp.com/new-york-city/activities/bluey-x-camp/booking/schedule",
       speed: 1.15,
+      inset: { ...GALLERY_VIDEO, to: 2.0, sourceAt: 4.97 }, // until the page navigates
       zoom: [
         { at: "get-tickets", region: null },
         // Zoomed out on the columns as the schedule page appears, then into the calendar.

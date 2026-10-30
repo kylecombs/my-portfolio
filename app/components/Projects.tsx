@@ -214,7 +214,7 @@ function ProjectCard({
                   className="-my-2 -mr-2 ml-2 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-dark-green transition-colors hover:bg-dark-green/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-dark-green"
                 >
                   <span data-fade className="inline-flex">
-                    <motion.svg
+                    <svg
                       viewBox="0 0 24 24"
                       className="h-5 w-5"
                       fill="none"
@@ -223,11 +223,16 @@ function ProjectCard({
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       aria-hidden="true"
-                      animate={{ rotate: expanded ? 180 : 0 }}
-                      transition={{ duration: 0.4, ease }}
                     >
-                      <path d="M7 17 17 7M9 7h8v8" />
-                    </motion.svg>
+                      {/* Expand: arrows out to opposite corners; collapse: arrows in. */}
+                      <path
+                        d={
+                          expanded
+                            ? "M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"
+                            : "M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"
+                        }
+                      />
+                    </svg>
                   </span>
                 </motion.button>
               )}
