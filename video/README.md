@@ -63,7 +63,8 @@ strip with clip, duration, speed and screenshot time.
 - `master.mp4`: 1080p H.264 at CRF 16
 - `web-{1080,720}.{mp4,webm}`: no audio, faststart, made for muted autoplay loops
 - `loop-{1080,720}.{mp4,webm}`: hover loop
-- `poster.jpg`: frame at `posterAt`
+- `poster.jpg`: frame at `posterAt` (the open card shows it until the video plays)
+- `thumb.jpg`: the title card at 1.3s, shown on the collapsed card under a play button
 
 ## Adding an app
 
@@ -71,6 +72,36 @@ strip with clip, duration, speed and screenshot time.
 2. `apps/<id>/video.config.ts`: copy and edit. Put a logo in `public/<id>/` if it has one.
 3. Add the config to `apps` in `src/remotion/Root.tsx`.
 4. `npm run capture <id>`, then `npm run storyboard -- <id>` and `npm run studio` to tune, then `npm run export -- <id>`.
+
+## Workflow for a new video
+
+The process the CAMP video went through, and the rules it followed:
+
+- **Spec:** 20–40s total, about 6 beats of a few seconds each. Hide dev overlays, cookie banners and
+  popups, and any real customer data. Don't show my name anywhere. Never complete a purchase or a
+  real submission; stop at the step before.
+- **Callout copy:** a short label plus one plain sentence on what the user sees or can do. Match labels
+  to the app's own button text where it has one.
+- **Loop:**
+  1. Write `capture.ts` and `video.config.ts`, then run one capture.
+  2. Run the storyboard and review the contact sheet (`out/<id>/storyboard.jpg`). Give notes on
+     copy, zooms and framing, then re-run it. Most rounds need no re-capture.
+  3. Re-capture only when the tour itself changes: timing, scrolling, or what's clicked.
+  4. Export, then check frame strips of the changed beats before watching the whole thing.
+- **Pitfalls hit so far:**
+  - The camera and a page scroll moving at once look jumpy. Add waits in `capture.ts` so the zoom
+    and the scroll happen one after the other.
+  - The screencast repeats frames during scrolls and drops frames while page video plays. Use an
+    `inset` for page video (see the CAMP notes below).
+  - Keep the web MP4 under 4MB by raising the CRFs in `scripts/export.sh` if needed.
+  - Back up `out/<id>/` and the clips before re-rendering a version you like, for example to
+    `out/backups/<id>-<date>/`. Both directories are gitignored.
+
+## Putting it on the site
+
+`npm run export` copies `web-1080.mp4`, `poster.jpg` and `thumb.jpg` to `../public/assets/projects/<id>/`.
+In `../app/data/portfolio.ts`, give the project a `media` entry like the CAMP one: `type: "video"`
+plus `src`, `poster`, `thumb` and `alt`. Videos get the play button on the collapsed card automatically.
 
 ## Notes for the CAMP capture
 
