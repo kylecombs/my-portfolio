@@ -110,6 +110,12 @@ function ProjectCard({
   useLayoutEffect(() => {
     if (prevExpanded.current === expanded) return;
     prevExpanded.current = expanded;
+    // The outgoing carousel isn't layout-corrected, so the card's resize would
+    // stretch its video; hide it before the first frame of the collapse.
+    if (!expanded)
+      scope.current
+        .querySelectorAll<HTMLElement>("[data-carousel]")
+        .forEach((el) => (el.style.visibility = "hidden"));
     const items = scope.current.querySelectorAll<HTMLElement>("[data-fade]");
     items.forEach((el) => (el.style.opacity = "0"));
     animate(
@@ -245,6 +251,7 @@ function ProjectCard({
             {p.media && (
               <motion.div
                 key={expanded ? "carousel" : "thumb"}
+                data-carousel={expanded || undefined}
                 id={mediaId}
                 className="mt-6"
                 initial={{ opacity: 0, y: 8 }}
