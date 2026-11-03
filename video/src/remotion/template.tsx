@@ -81,7 +81,11 @@ export function TitleCard({ c }: { c: VideoConfig }) {
         {c.logo ? (
           <Img
             src={staticFile(c.logo)}
-            style={{ height: 168, display: "block", marginBottom: 64 }}
+            style={{
+              height: c.logoHeight ?? 168,
+              display: "block",
+              marginBottom: 64,
+            }}
           />
         ) : (
           <div
@@ -236,7 +240,7 @@ export function Callout({
   );
 }
 
-/** Browser window showing `children` (laid out at the capture viewport size) through the camera. */
+/** Browser window (or, with no `url`, a plain stage) showing `children` (laid out at the capture viewport size) through the camera. */
 export function BrowserFrame({
   c,
   url,
@@ -256,7 +260,7 @@ export function BrowserFrame({
       style={{
         position: "absolute",
         left: FRAME.x,
-        top: FRAME_Y,
+        top: url ? FRAME_Y : FRAME_Y + FRAME.bar / 2,
         width: FRAME.width,
         borderRadius: 14,
         overflow: "hidden",
@@ -268,44 +272,46 @@ export function BrowserFrame({
         transform: `translateY(${(1 - enter) * 40}px) scale(${0.98 + 0.02 * enter})`,
       }}
     >
-      <div
-        style={{
-          height: FRAME.bar,
-          display: "flex",
-          alignItems: "center",
-          padding: "0 18px",
-          gap: 8,
-        }}
-      >
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            style={{
-              width: 12,
-              height: 12,
-              borderRadius: 6,
-              background: "#E3E0D9",
-            }}
-          />
-        ))}
+      {url && (
         <div
           style={{
-            margin: "0 auto",
-            width: 560,
-            height: 28,
-            borderRadius: 8,
-            background: c.colors.background,
-            color: c.colors.muted,
-            fontSize: 15,
+            height: FRAME.bar,
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
+            padding: "0 18px",
+            gap: 8,
           }}
         >
-          {url}
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              style={{
+                width: 12,
+                height: 12,
+                borderRadius: 6,
+                background: "#E3E0D9",
+              }}
+            />
+          ))}
+          <div
+            style={{
+              margin: "0 auto",
+              width: 560,
+              height: 28,
+              borderRadius: 8,
+              background: c.colors.background,
+              color: c.colors.muted,
+              fontSize: 15,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {url}
+          </div>
+          <div style={{ width: 52 }} />
         </div>
-        <div style={{ width: 52 }} />
-      </div>
+      )}
       <div
         style={{
           width: FRAME.width,

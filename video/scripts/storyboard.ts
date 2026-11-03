@@ -6,6 +6,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
 import type { VideoConfig } from "../src/types";
 import { panelCount } from "../src/remotion/Storyboard";
+import { scenes } from "../src/remotion/scenes";
 import { timeline } from "../src/remotion/timeline";
 
 const [id, flag] = process.argv.slice(2);
@@ -16,7 +17,8 @@ const run = (cmd: string, args: string[]) =>
 
 const shots = `public/${id}/storyboard`;
 mkdirSync(shots, { recursive: true });
-for (const b of timeline(c).beats)
+// Scene apps draw their panels; there are no screenshots to grab.
+for (const b of id in scenes ? [] : timeline(c).beats)
   for (const s of b.shots) {
     const shot = `${shots}/${s.file}`;
     if (existsSync(shot) && flag !== "--reshoot") continue;

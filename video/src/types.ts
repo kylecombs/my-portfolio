@@ -51,6 +51,8 @@ export interface VideoConfig {
   role: string;
   /** Logo at the top of the title card, a path under public/ (e.g. "camp-booking/logo.png"). */
   logo?: string;
+  /** Logo height in px on the title card; default 168. Lower it for wide wordmarks. */
+  logoHeight?: number;
   tags: string[];
   /** Shown in the browser frame's address bar. */
   url: string;

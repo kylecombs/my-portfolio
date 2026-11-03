@@ -1,12 +1,13 @@
 import { Composition, registerRoot } from "remotion";
 import camp from "../../apps/camp-booking/video.config";
+import retail from "../../apps/retail-pipeline/video.config";
 import { Loop } from "./Loop";
 import { Main } from "./Main";
 import { CAPTION, Storyboard, storyboardFrames } from "./Storyboard";
 import { timeline } from "./timeline";
 
 // One entry per app. Adding an app = apps/<id>/{capture,video.config}.ts + a line here.
-const apps = [camp];
+const apps = [camp, retail];
 
 function Root() {
   return (

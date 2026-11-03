@@ -73,6 +73,16 @@ strip with clip, duration, speed and screenshot time.
 3. Add the config to `apps` in `src/remotion/Root.tsx`.
 4. `npm run capture <id>`, then `npm run storyboard -- <id>` and `npm run studio` to tune, then `npm run export -- <id>`.
 
+## Animated apps (no screen recording)
+
+For internal apps with private data, a beat can show an animated diagram in place of a clip
+(see `apps/retail-pipeline/`). `scene.tsx` draws the whole diagram at a given stage frame. It's
+registered by id in `src/remotion/scenes.ts`, because Remotion passes configs as JSON props.
+The config writes its `capture` by hand: clip ids and durations, plus any event times. There's no
+capture step, and the storyboard draws the scene itself. The stage drops the address bar when
+`url` is empty. The camera is applied as the SVG's `viewBox`: Chrome paints a CSS-scaled SVG stale
+once parts of it leave the frame and come back.
+
 ## Workflow for a new video
 
 The process the CAMP video went through, and the rules it followed:

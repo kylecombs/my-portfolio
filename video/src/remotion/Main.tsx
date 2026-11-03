@@ -6,6 +6,7 @@ import {
   useCurrentFrame,
 } from "remotion";
 import type { VideoConfig } from "../types";
+import { scenes } from "./scenes";
 import {
   BrowserFrame,
   Callout,
@@ -15,7 +16,7 @@ import {
   TitleCard,
   useEnter,
 } from "./template";
-import { cameraAt, resolveAt, timeline } from "./timeline";
+import { cameraAt, cameraFor, resolveAt, timeline } from "./timeline";
 
 type TimedBeat = ReturnType<typeof timeline>["beats"][number];
 
@@ -109,27 +110,37 @@ function Stage({ c, t }: { c: VideoConfig; t: ReturnType<typeof timeline> }) {
   const enter = useEnter(0, c.fps);
   const { width: W, height: H } = c.capture.viewport;
   const beat = t.beats.findLast((b) => b.start <= frame) ?? t.beats[0];
+  const Scene = scenes[c.id];
 
   return (
     <AbsoluteFill>
-      <BrowserFrame c={c} url={beat.url ?? c.url} cam={cam} enter={enter}>
-        {t.beats.map((b) => (
-          <Sequence
-            key={b.clip}
-            from={b.start}
-            durationInFrames={b.frames}
-            layout="none"
-          >
-            <OffthreadVideo
-              src={staticFile(`${c.id}/clips/${b.file}`)}
-              trimBefore={Math.round(b.trimStart * c.fps)}
-              playbackRate={b.speed}
-              muted
-              style={{ position: "absolute", width: W, height: H }}
-            />
-            {b.inset && <Inset c={c} b={b} />}
-          </Sequence>
-        ))}
+      <BrowserFrame
+        c={c}
+        url={beat.url ?? c.url}
+        cam={Scene ? cameraFor(c, null) : cam}
+        enter={enter}
+      >
+        {Scene ? (
+          <Scene c={c} frame={frame} cam={cam} />
+        ) : (
+          t.beats.map((b) => (
+            <Sequence
+              key={b.clip}
+              from={b.start}
+              durationInFrames={b.frames}
+              layout="none"
+            >
+              <OffthreadVideo
+                src={staticFile(`${c.id}/clips/${b.file}`)}
+                trimBefore={Math.round(b.trimStart * c.fps)}
+                playbackRate={b.speed}
+                muted
+                style={{ position: "absolute", width: W, height: H }}
+              />
+              {b.inset && <Inset c={c} b={b} />}
+            </Sequence>
+          ))
+        )}
       </BrowserFrame>
 
       {t.beats.map((b, i) => {

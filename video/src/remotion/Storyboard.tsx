@@ -6,6 +6,7 @@ import {
   useCurrentFrame,
 } from "remotion";
 import type { VideoConfig } from "../types";
+import { scenes } from "./scenes";
 import {
   BrowserFrame,
   Callout,
@@ -13,7 +14,7 @@ import {
   Outro,
   TitleCard,
 } from "./template";
-import { restingCameraAt, timeline } from "./timeline";
+import { cameraFor, restingCameraAt, timeline } from "./timeline";
 
 /** Notes strip under each 1920x1080 panel. */
 export const CAPTION = 72;
@@ -45,18 +46,24 @@ export function Storyboard({ c }: { c: VideoConfig }) {
     caption = `Outro · ${secs(t.outroFrames)}`;
   } else {
     const { b, n, s } = shot;
+    const Scene = scenes[c.id];
+    const cam = restingCameraAt(c, t, b.start + b.frameOf(s.time));
     panel = (
       <>
         <BrowserFrame
           c={c}
           url={b.url ?? c.url}
-          cam={restingCameraAt(c, t, b.start + b.frameOf(s.time))}
+          cam={Scene ? cameraFor(c, null) : cam}
           enter={1}
         >
-          <Img
-            src={staticFile(`${c.id}/storyboard/${s.file}`)}
-            style={{ width: W, height: H }}
-          />
+          {Scene ? (
+            <Scene c={c} frame={b.start + b.frameOf(s.time)} cam={cam} />
+          ) : (
+            <Img
+              src={staticFile(`${c.id}/storyboard/${s.file}`)}
+              style={{ width: W, height: H }}
+            />
+          )}
         </BrowserFrame>
         {b.callout && (
           <Callout
