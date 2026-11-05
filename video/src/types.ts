@@ -54,6 +54,8 @@ export interface VideoConfig {
   /** Logo height in px on the title card; default 168. Lower it for wide wordmarks. */
   logoHeight?: number;
   tags: string[];
+  /** Overrides for the title card's title, e.g. to set it as the app's wordmark. Fonts load in template.tsx. */
+  titleStyle?: import("react").CSSProperties;
   /** Shown in the browser frame's address bar. */
   url: string;
   colors: {
@@ -65,6 +67,8 @@ export interface VideoConfig {
   };
   fps: number;
   titleSeconds: number;
+  /** Optional card between the title and the first beat, e.g. a data disclaimer. */
+  notice?: { text: string; seconds: number };
   outroSeconds: number;
   beats: Beat[];
   /** Seamless hover loop, cut from one beat. */
@@ -75,6 +79,8 @@ export interface VideoConfig {
     speed?: number;
     region: Region | null;
   };
+  /** The capture recorded the page's sound (startRecorder's `audio`); keeps it in the web exports. */
+  audio?: boolean;
   /** Seconds into the main video for the poster frame. */
   posterAt: number;
   capture: CaptureLog;

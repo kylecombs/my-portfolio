@@ -1,6 +1,7 @@
 // The shared look of every app's video: title card, browser window, callout column, outro.
 // Main (the video) and Storyboard (one still per beat) both render from here.
 import { loadFont } from "@remotion/google-fonts/Inter";
+import { loadFont as loadSpaceGrotesk } from "@remotion/google-fonts/SpaceGrotesk";
 import type { CSSProperties, ReactNode } from "react";
 import {
   AbsoluteFill,
@@ -17,6 +18,8 @@ export const { fontFamily } = loadFont("normal", {
   weights: ["400", "500", "600"],
   subsets: ["latin"],
 });
+// ORA's wordmark (its config's titleStyle).
+loadSpaceGrotesk("normal", { weights: ["700"], subsets: ["latin"] });
 
 // Layout on the 1920x1080 canvas: browser frame on the right, callout column on the left.
 export const FRAME = { x: 424, width: 1408, bar: 44 };
@@ -106,6 +109,7 @@ export function TitleCard({ c }: { c: VideoConfig }) {
           fontWeight: 600,
           letterSpacing: "-0.03em",
           lineHeight: 1.02,
+          ...c.titleStyle,
         }}
       >
         {c.title}
@@ -121,6 +125,25 @@ export function TitleCard({ c }: { c: VideoConfig }) {
         }}
       >
         {c.description}
+      </Rise>
+    </AbsoluteFill>
+  );
+}
+
+export function NoticeCard({ c }: { c: VideoConfig }) {
+  return (
+    <AbsoluteFill
+      style={{ justifyContent: "center", paddingLeft: 160, paddingRight: 160 }}
+    >
+      <Rise at={2} fps={c.fps}>
+        <div style={{ width: 56, height: 4, background: c.colors.accent, marginBottom: 36 }} />
+      </Rise>
+      <Rise
+        at={6}
+        fps={c.fps}
+        style={{ fontSize: 56, fontWeight: 500, letterSpacing: "-0.02em", lineHeight: 1.2, maxWidth: 1600 }}
+      >
+        {c.notice?.text}
       </Rise>
     </AbsoluteFill>
   );

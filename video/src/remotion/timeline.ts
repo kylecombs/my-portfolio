@@ -57,13 +57,15 @@ export function timeline(c: VideoConfig) {
     return beat;
   });
   const titleFrames = Math.round(c.titleSeconds * c.fps);
+  const noticeFrames = Math.round((c.notice?.seconds ?? 0) * c.fps);
   const outroFrames = Math.round(c.outroSeconds * c.fps);
   return {
     beats,
     stageFrames: start,
     titleFrames,
+    noticeFrames,
     outroFrames,
-    total: titleFrames + start + outroFrames,
+    total: titleFrames + noticeFrames + start + outroFrames,
   };
 }
 

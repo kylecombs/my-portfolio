@@ -10,7 +10,7 @@ import { selectedWorkCount } from "~/data/portfolio";
 
 const title = "Kyle Combs — Fullstack & Shopify Engineer for Hire, NYC";
 const description =
-  "Part-time fullstack contract engineer: React frontends, Node and Rails APIs, Shopify apps, and dbt/Snowflake data pipelines.";
+  "Fullstack contract engineer: React frontends, Node and Rails APIs, Shopify apps, and dbt/Snowflake data pipelines.";
 
 export const meta: MetaFunction = () => {
   return [

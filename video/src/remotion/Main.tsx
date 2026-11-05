@@ -1,5 +1,6 @@
 import {
   AbsoluteFill,
+  interpolate,
   OffthreadVideo,
   Sequence,
   staticFile,
@@ -12,6 +13,7 @@ import {
   Callout,
   Fade,
   fontFamily,
+  NoticeCard,
   Outro,
   TitleCard,
   useEnter,
@@ -134,7 +136,13 @@ function Stage({ c, t }: { c: VideoConfig; t: ReturnType<typeof timeline> }) {
                 src={staticFile(`${c.id}/clips/${b.file}`)}
                 trimBefore={Math.round(b.trimStart * c.fps)}
                 playbackRate={b.speed}
-                muted
+                // Fade each cut so the jump between beats doesn't click; clips without audio stay silent.
+                volume={(f) =>
+                  interpolate(f, [0, 4, b.frames - 4, b.frames], [0, 1, 1, 0], {
+                    extrapolateLeft: "clamp",
+                    extrapolateRight: "clamp",
+                  })
+                }
                 style={{ position: "absolute", width: W, height: H }}
               />
               {b.inset && <Inset c={c} b={b} />}
@@ -187,13 +195,23 @@ export function Main({ c }: { c: VideoConfig }) {
           <TitleCard c={c} />
         </Fade>
       </Sequence>
-      <Sequence from={t.titleFrames} durationInFrames={t.stageFrames}>
+      {t.noticeFrames > 0 && (
+        <Sequence from={t.titleFrames} durationInFrames={t.noticeFrames}>
+          <Fade frames={t.noticeFrames}>
+            <NoticeCard c={c} />
+          </Fade>
+        </Sequence>
+      )}
+      <Sequence
+        from={t.titleFrames + t.noticeFrames}
+        durationInFrames={t.stageFrames}
+      >
         <Fade frames={t.stageFrames} out={12}>
           <Stage c={c} t={t} />
         </Fade>
       </Sequence>
       <Sequence
-        from={t.titleFrames + t.stageFrames}
+        from={t.titleFrames + t.noticeFrames + t.stageFrames}
         durationInFrames={t.outroFrames}
       >
         <Outro c={c} />

@@ -11,5 +11,7 @@
     "lib": ["ES2023", "DOM"],
     "types": ["node"]
   },
-  "include": ["src", "apps", "scripts"]
+  "include": ["src", "apps", "scripts"],
+  // Polaris bundles its own @types/react, which clashes with ours; esbuild builds the mocks untyped.
+  "exclude": ["apps/*/mock"]
 }

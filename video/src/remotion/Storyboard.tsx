@@ -11,6 +11,7 @@ import {
   BrowserFrame,
   Callout,
   fontFamily,
+  NoticeCard,
   Outro,
   TitleCard,
 } from "./template";
@@ -22,9 +23,9 @@ export const CAPTION = 72;
 /** Frame every panel is frozen at, so springs have settled. */
 const SETTLED = 60;
 
-/** Panels: title, one per beat screenshot, outro. */
+/** Panels: title, notice (if any), one per beat screenshot, outro. */
 export const panelCount = (c: VideoConfig) =>
-  timeline(c).beats.reduce((n, b) => n + b.shots.length, 0) + 2;
+  timeline(c).beats.reduce((n, b) => n + b.shots.length, 0) + (c.notice ? 3 : 2);
 /** Remotion clamps frames to the composition, so it runs past SETTLED; only the first panelCount frames are rendered. */
 export const storyboardFrames = (c: VideoConfig) => panelCount(c) + SETTLED;
 
@@ -35,12 +36,16 @@ export function Storyboard({ c }: { c: VideoConfig }) {
   const { width: W, height: H } = c.capture.viewport;
   const secs = (frames: number) => `${(frames / c.fps).toFixed(1)}s`;
   const shots = t.beats.flatMap((b, n) => b.shots.map((s) => ({ b, n, s })));
-  const shot = shots[i - 1];
+  const first = c.notice ? 2 : 1; // panel index of the first beat shot
+  const shot = shots[i - first];
 
   let panel, caption;
   if (i === 0) {
     panel = <TitleCard c={c} />;
     caption = `Title · ${secs(t.titleFrames)}`;
+  } else if (i < first) {
+    panel = <NoticeCard c={c} />;
+    caption = `Notice · ${secs(t.noticeFrames)}`;
   } else if (!shot) {
     panel = <Outro c={c} />;
     caption = `Outro · ${secs(t.outroFrames)}`;

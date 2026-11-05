@@ -22,6 +22,8 @@ export interface ProjectMedia {
   /** Collapsed-card still, when it should differ from the poster. */
   thumb?: string;
   alt: string;
+  /** The video has sound: it still starts muted, with a mute/unmute button. */
+  audio?: boolean;
 }
 
 export interface Project {
@@ -84,7 +86,7 @@ export const availability = "Accepting new clients in 2027";
 export const hero = {
   label: "Fullstack & Product Engineer",
   intro:
-    "I’m a fullstack engineer who helps teams ship polished products: React frontends, Node and Rails APIs, Shopify apps, and data pipelines. I bring engineering, design, and product thinking to every project, and I work part-time on contract, so you get senior help without a full-time hire.",
+    "I’m a fullstack engineer who helps teams ship polished products: React frontends, Node and Rails APIs, Shopify apps, and data pipelines. I bring engineering, design, and product thinking to every project, and I work on contract in whatever shape fits, from a single project to an ongoing role on your team, so you get senior help without a full-time hire.",
 };
 
 export const services: Service[] = [
@@ -122,15 +124,14 @@ export const services: Service[] = [
 
 export const howIWork: Principle[] = [
   {
-    title: "Part-time, ongoing.",
-    // TODO: confirm typical weekly hours
+    title: "The support you need.",
     description:
-      "Typically [10–20] hours a week, for months rather than weeks. Enough to own real work without the cost of a full-time hire.",
+      "Contract work made to fit your needs. Available on a project basis or as an embedded member of your team, with experience to own real work without the cost of a full-time hire.",
   },
   {
     title: "Inside your tools.",
     description:
-      "I work in your Slack, Linear or Jira, and GitHub, and I join standups when that helps.",
+      "I work in your Slack, Linear or Jira, and GitHub, and I join meetings when that helps. Adaptable to fit into your business rhythms.",
   },
   {
     title: "Product-minded.",
@@ -147,13 +148,13 @@ export const howIWork: Principle[] = [
 // *text* renders as <em>
 export const about: { paragraphs: string[]; facts: Fact[] } = {
   paragraphs: [
-    "I’m a fullstack engineer working part-time on contract. Right now I lead frontend at *CAMP* and build the analytics pipeline for *ALEX AND ANI*.",
-    "I came to software from the art world. After a BFA in Studio Art, I spent eight years as a preparator at David Zwirner, installing complex exhibitions and caring for the artworks in them. It taught me to sweat the details people only notice when they’re wrong.",
+    "I’m a fullstack engineer leading frontend at *CAMP* and building the analytics pipeline for *ALEX AND ANI*. I’m currently accepting new clients.",
+    "I came to software from the art world. After receiving my BFA, I spent eight years as a preparator at David Zwirner, installing complex exhibitions and caring for the artworks in them. It taught me to sweat the details people only notice when they’re wrong.",
     "Since then I’ve shipped React frontends, Node and Rails APIs, AWS media pipelines and dbt/Snowflake warehouses, usually as one of two or three engineers who own the whole product. I’m based in Brooklyn and work remotely.",
   ],
   facts: [
     { label: "Based", value: "Brooklyn · Remote" },
-    { label: "Working", value: "Part-time contract, remote" },
+    { label: "Working", value: "Contract, remote" },
     { label: "Focus", value: "Frontend, Shopify, Node and Rails APIs, data pipelines" },
     { label: "Currently", value: "CAMP · ALEX AND ANI" },
   ],
@@ -167,7 +168,7 @@ export const experienceLinks = {
 
 export const contact = {
   intro:
-    "I’m currently booking part-time contract work for 2027. Tell me a little about your team, what you’re building, and where you’re stuck. I’ll reply within one business day.",
+    "I’m currently booking contract work for 2027. Tell me a little about your team, what you’re building, and where you’re stuck. I’ll reply within one business day.",
   booking: {
     label: "Book a 15-min intro call",
     // The "30min" slug is Calendly's default; the event itself is 15 minutes.
@@ -282,20 +283,6 @@ export const selectedWorkCount = 6;
 // TODO: add `media` (short screen-capture video + poster) to each project as it's recorded
 export const projects: Project[] = [
   {
-    title: "ORA",
-    // TODO: confirm label and year
-    context: "[Personal project · 2026]",
-    problem:
-      "Modular synthesis usually means expensive hardware or desktop software, and it’s hard to make music with someone else in real time.",
-    built:
-      "A browser-based modular synth: patch modules together on a canvas and hear them instantly, with SuperCollider compiled to WebAssembly running all audio in the browser. Several people can edit one patch live while only the patch state syncs between them, and a built-in Claude assistant helps build patches.",
-    result:
-      "Live and free to try: 80+ synth modules, real-time multiplayer patching and an AI patch assistant, all in a browser tab with nothing to install.",
-    tags: ["React", "WebAssembly", "SuperCollider", "WebSockets", "Claude API"],
-    media: placeholderMedia,
-    link: { label: "Try it", href: "https://ora-fm.fly.dev/" },
-  },
-  {
     title: "Experience Booking Flow",
     context: "CAMP",
     year: "2023–Present",
@@ -315,6 +302,28 @@ export const projects: Project[] = [
         poster: "/assets/projects/camp-booking/poster.jpg",
         thumb: "/assets/projects/camp-booking/thumb.jpg",
         alt: "Booking a Bluey’s House visit: picking a date and time, adding two tickets and souvenir ears, then reaching checkout",
+      },
+    ],
+  },
+  {
+    title: "Shopify Admin & POS Extensions",
+    context: "CAMP",
+    year: "2023–Present",
+    problem:
+      "Store teams managed reservations in a separate, self-hosted scheduling app that didn’t talk to the Shopify inventory and point of sale they used every day.",
+    built:
+      "We moved scheduling into Shopify itself: an embedded admin app and POS extensions where staff build activities and time slots, check customers in, reschedule and refund bookings, and manage add-ons, ticket bundles and activity content. I wrote custom discounts and promos with Shopify Functions and built a birthday party pipeline that turns online inquiries into leads staff can book and invoice, all kept in sync with the Rails backend.",
+    result:
+      "Every team, from store staff to marketing and growth, now manages reservations, activities, add-ons and birthday parties in one place.",
+    tags: ["Shopify", "Shopify Functions", "React", "Ruby on Rails"],
+    // Generated by video/ (npm run export -- shopify-admin); records a Polaris mock with made-up data
+    media: [
+      {
+        type: "video",
+        src: "/assets/projects/shopify-admin/web-1080.mp4",
+        poster: "/assets/projects/shopify-admin/poster.jpg",
+        thumb: "/assets/projects/shopify-admin/thumb.jpg",
+        alt: "The CAMP app inside Shopify admin: bulk-updating time slot prices, turning an add-on off at one store, ticket bundles, and tracking an invoice on a birthday party lead",
       },
     ],
   },
@@ -341,30 +350,28 @@ export const projects: Project[] = [
     ],
   },
   {
-    title: "Shopify Admin & POS Extensions",
-    context: "CAMP",
-    year: "2023–Present",
-    problem:
-      "Store teams managed reservations in a separate, self-hosted scheduling app that didn’t talk to the Shopify inventory and point of sale they used every day.",
-    built:
-      "We moved scheduling into Shopify itself: an embedded admin app and POS extensions where staff build activities and time slots, check customers in, reschedule and refund bookings, and manage add-ons, ticket bundles and activity content. I wrote custom discounts and promos with Shopify Functions and built a birthday party pipeline that turns online inquiries into leads staff can book and invoice, all kept in sync with the Rails backend.",
-    result:
-      "Every team, from store staff to marketing and growth, now manages reservations, activities, add-ons and birthday parties in one place.",
-    tags: ["Shopify", "Shopify Functions", "React", "Ruby on Rails"],
-    media: placeholderMedia,
-  },
-  {
-    title: "Agent Coding Workflow",
+    title: "ORA",
     // TODO: confirm label and year
     context: "[Personal project · 2026]",
     problem:
-      "Teams want AI coding agents but can’t let them push unreviewed code.",
+      "Modular synthesis usually means expensive hardware or desktop software, and it’s hard to make music with someone else in real time.",
     built:
-      "A Python orchestrator that turns a one-line request or Linear ticket into a reviewed pull request. Claude agents write the spec, code and tests in a sandboxed Docker container, automated checks gate every round, and design, code and security reviewers must all pass before a PR opens. A human approves every spec and merges every PR.",
+      "A browser-based modular synth: patch modules together on a canvas and hear them instantly, with SuperCollider compiled to WebAssembly running all audio in the browser. Several people can edit one patch live while only the patch state syncs between them, and a built-in Claude assistant helps build patches.",
     result:
-      "Dozens of merged PRs and thousands of lines of production code so far, saving hundreds of hours of developer time.",
-    tags: ["Python", "Claude Code", "Linear", "Docker", "Playwright"],
-    media: placeholderMedia,
+      "Live and free to try: 80+ synth modules, real-time multiplayer patching and an AI patch assistant, all in a browser tab with nothing to install.",
+    tags: ["React", "WebAssembly", "SuperCollider", "WebSockets", "Claude API"],
+    // Generated by video/ (npm run export -- ora)
+    media: [
+      {
+        type: "video",
+        src: "/assets/projects/ora/web-1080.mp4",
+        poster: "/assets/projects/ora/poster.jpg",
+        thumb: "/assets/projects/ora/thumb.jpg",
+        alt: "Patching in ORA: booting the engine, cabling a saw oscillator to the output and a scope, loading a patch and moving its sliders, then a second person joining the room and editing live",
+        audio: true,
+      },
+    ],
+    link: { label: "Try it", href: "https://ora-fm.fly.dev/" },
   },
   {
     title: "IPFS Deploy for NFC Chips",
@@ -377,7 +384,37 @@ export const projects: Project[] = [
     result:
       "Brand partners could update a physical item’s experience without reissuing hardware.",
     tags: ["IPFS", "NFC", "ERS"],
-    media: placeholderMedia,
+    media: [
+      {
+        type: "video",
+        src: "/assets/projects/arx-ipfs/web-1080.mp4",
+        poster: "/assets/projects/arx-ipfs/poster.jpg",
+        thumb: "/assets/projects/arx-ipfs/thumb.jpg",
+        alt: "A replica of the deploy tool: pinning a web app to IPFS, linking six NFC hang tags to it through ERS, tapping one to open the app, then redeploying so the same tag opens a new version",
+      },
+    ],
+  },
+  {
+    title: "Agent Coding Workflow",
+    // TODO: confirm label and year
+    context: "[Personal project · 2026]",
+    problem:
+      "Teams want AI coding agents but can’t let them push unreviewed code.",
+    built:
+      "A Python orchestrator that turns a one-line request or Linear ticket into a reviewed pull request. Claude agents write the spec, code and tests in a sandboxed Docker container, automated checks gate every round, and design, code and security reviewers must all pass before a PR opens. A human approves every spec and merges every PR.",
+    result:
+      "Dozens of merged PRs and thousands of lines of production code so far, saving hundreds of hours of developer time.",
+    tags: ["Python", "Claude Code", "Linear", "Docker", "Playwright"],
+    // Generated by video/ (npm run export -- agent-workflow); records the dashboard with mock tickets
+    media: [
+      {
+        type: "video",
+        src: "/assets/projects/agent-workflow/web-1080.mp4",
+        poster: "/assets/projects/agent-workflow/poster.jpg",
+        thumb: "/assets/projects/agent-workflow/thumb.jpg",
+        alt: "The agent workflow dashboard: tickets moving across the board, signing off a spec, a job's workflow graph with its loop-backs, a design review with screenshots, and the pull request's diff and decision",
+      },
+    ],
   },
   // Archive: shown on /projects only
   {

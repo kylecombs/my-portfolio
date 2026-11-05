@@ -1,13 +1,17 @@
 import { Composition, registerRoot } from "remotion";
 import camp from "../../apps/camp-booking/video.config";
 import retail from "../../apps/retail-pipeline/video.config";
+import shopifyAdmin from "../../apps/shopify-admin/video.config";
+import ora from "../../apps/ora/video.config";
+import agentWorkflow from "../../apps/agent-workflow/video.config";
+import arxIpfs from "../../apps/arx-ipfs/video.config";
 import { Loop } from "./Loop";
 import { Main } from "./Main";
 import { CAPTION, Storyboard, storyboardFrames } from "./Storyboard";
 import { timeline } from "./timeline";
 
 // One entry per app. Adding an app = apps/<id>/{capture,video.config}.ts + a line here.
-const apps = [camp, retail];
+const apps = [camp, retail, shopifyAdmin, ora, agentWorkflow, arxIpfs];
 
 function Root() {
   return (

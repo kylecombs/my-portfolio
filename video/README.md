@@ -73,6 +73,15 @@ strip with clip, duration, speed and screenshot time.
 3. Add the config to `apps` in `src/remotion/Root.tsx`.
 4. `npm run capture <id>`, then `npm run storyboard -- <id>` and `npm run studio` to tune, then `npm run export -- <id>`.
 
+## Sound
+
+For apps that make sound (ORA), pass `{ audio: true }` to `startRecorder` and launch Chrome with
+`--autoplay-policy=no-user-gesture-required`. The recorder mixes everything the page sends to its
+speakers, across every AudioContext, into one recording. It keeps the recording as `clips/audio.webm`
+and cuts each clip's stretch into its mp4. Set `audio: true` in the config so the web exports keep the
+sound (the hover loop stays silent). On the site, `audio: true` on a `media` entry adds a
+mute/unmute button. The video still starts muted, because browsers only autoplay muted video.
+
 ## Animated apps (no screen recording)
 
 For internal apps with private data, a beat can show an animated diagram in place of a clip

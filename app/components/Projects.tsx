@@ -110,12 +110,15 @@ function ProjectCard({
   useLayoutEffect(() => {
     if (prevExpanded.current === expanded) return;
     prevExpanded.current = expanded;
-    // The outgoing carousel isn't layout-corrected, so the card's resize would
-    // stretch its video; hide it before the first frame of the collapse.
-    if (!expanded)
-      scope.current
-        .querySelectorAll<HTMLElement>("[data-carousel]")
-        .forEach((el) => (el.style.visibility = "hidden"));
+    // The outgoing media isn't layout-corrected, so the card's resize would
+    // stretch or squish it; hide it before the first frame of the resize.
+    // A quick toggle back can revive a hidden one, so show the incoming media.
+    scope.current
+      .querySelectorAll<HTMLElement>("[data-media]")
+      .forEach((el) => {
+        const outgoing = el.dataset.media !== (expanded ? "carousel" : "thumb");
+        el.style.visibility = outgoing ? "hidden" : "";
+      });
     const items = scope.current.querySelectorAll<HTMLElement>("[data-fade]");
     items.forEach((el) => (el.style.opacity = "0"));
     animate(
@@ -251,14 +254,14 @@ function ProjectCard({
             {p.media && (
               <motion.div
                 key={expanded ? "carousel" : "thumb"}
-                data-carousel={expanded || undefined}
+                data-media={expanded ? "carousel" : "thumb"}
                 id={mediaId}
                 className="mt-6"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{
                   opacity: 1,
                   y: 0,
-                  transition: { duration: 0.4, delay: 0.4, ease },
+                  transition: { duration: 0.4, delay: 0.55, ease }, // after the layout spring
                 }}
                 exit={{ opacity: 0, transition: { duration: 0.05 } }}
               >
@@ -465,6 +468,8 @@ function MediaCarousel({ media, title }: MediaCarouselProps) {
 function MediaSlide({ media }: { media: Media }) {
   const video = useRef<HTMLVideoElement>(null);
   const reduceMotion = useReducedMotion();
+  // Browsers only autoplay muted video, so sound is opt-in.
+  const [muted, setMuted] = useState(true);
 
   // Played from here rather than via autoPlay, so reduced-motion visitors never
   // see it start; for them the poster stays up as a still.
@@ -480,25 +485,65 @@ function MediaSlide({ media }: { media: Media }) {
     }
   }, [reduceMotion]);
 
-  return media.type === "video" ? (
+  if (media.type !== "video")
+    return (
+      <img
+        src={media.src}
+        alt={media.alt}
+        loading="lazy"
+        draggable={false}
+        className="aspect-video w-full object-cover"
+      />
+    );
+
+  const player = (
     <video
       ref={video}
       src={media.src}
       poster={media.poster}
-      muted
+      muted={muted}
       loop
       playsInline
       preload="metadata"
       aria-label={media.alt}
       className="aspect-video w-full object-cover"
+      // TODO: remove before release. Click-to-pause is only for taking notes on the videos.
+      onClick={(e) =>
+        e.currentTarget.paused
+          ? e.currentTarget.play().catch(() => {})
+          : e.currentTarget.pause()
+      }
     />
-  ) : (
-    <img
-      src={media.src}
-      alt={media.alt}
-      loading="lazy"
-      draggable={false}
-      className="aspect-video w-full object-cover"
-    />
+  );
+  if (!media.audio) return player;
+
+  return (
+    <div className="relative">
+      {player}
+      <button
+        type="button"
+        onClick={() => setMuted((m) => !m)}
+        aria-label={muted ? "Unmute video" : "Mute video"}
+        className="absolute right-3 top-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-dark-green backdrop-blur-sm transition-colors hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-dark-green"
+      >
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          className="h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M11 5 6 9H2v6h4l5 4V5z" fill="currentColor" />
+          {muted ? (
+            <path d="m22 9-6 6m0-6 6 6" />
+          ) : (
+            <path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14" />
+          )}
+        </svg>
+      </button>
+    </div>
   );
 }

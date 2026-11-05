@@ -18,7 +18,50 @@ export interface CaptureLog {
 
 const FPS = 30;
 
-export async function startRecorder(page: Page, outDir: string) {
+// Mixes everything a page sends to any AudioContext's speakers into one MediaRecorder,
+// which runs from startRecorder on. Apps may swap contexts (ORA does on Load), so each gets its own feed.
+// Needs Chrome's --autoplay-policy=no-user-gesture-required, or the mixing context starts suspended.
+// shortcut: patched into the current document only, so a navigation drops it; use addInitScript if an app with sound navigates.
+export const AUDIO_TAP = `(() => {
+  const connect = AudioNode.prototype.connect;
+  const mixer = new AudioContext();
+  const mix = mixer.createMediaStreamDestination();
+  const tap = (window.__tap = { chunks: [], start: 0, rec: new MediaRecorder(mix.stream, { mimeType: "audio/webm;codecs=opus", audioBitsPerSecond: 192000 }) });
+  tap.rec.ondataavailable = (e) => tap.chunks.push(e.data);
+  tap.rec.onstart = () => (tap.start = Date.now() / 1000);
+  tap.rec.start(1000);
+  const feeds = new Map();
+  AudioNode.prototype.connect = function (dest, output = 0, ...rest) {
+    const r = connect.call(this, dest, output, ...rest);
+    if (dest instanceof AudioDestinationNode && dest.context !== mixer) {
+      let feed = feeds.get(dest.context);
+      if (!feed) {
+        feed = dest.context.createMediaStreamDestination();
+        feeds.set(dest.context, feed);
+        connect.call(mixer.createMediaStreamSource(feed.stream), mix);
+      }
+      connect.call(this, feed, output);
+    }
+    return r;
+  };
+})()`;
+
+export const STOP_AUDIO_TAP = `new Promise((done) => {
+  const tap = window.__tap;
+  if (!tap) return done(null);
+  tap.rec.onstop = () => {
+    const r = new FileReader();
+    r.onload = () => done({ start: tap.start, data: r.result.split(",")[1] });
+    r.readAsDataURL(new Blob(tap.chunks, { type: "audio/webm" }));
+  };
+  tap.rec.stop();
+})`;
+
+export async function startRecorder(
+  page: Page,
+  outDir: string,
+  { audio = false } = {}
+) {
   const framesDir = join(outDir, ".frames");
   rmSync(framesDir, { recursive: true, force: true });
   mkdirSync(framesDir, { recursive: true });
@@ -57,6 +100,7 @@ export async function startRecorder(page: Page, outDir: string) {
       maxHeight: viewport.height * 2,
     });
   await start();
+  if (audio) await page.evaluate(AUDIO_TAP);
   // Cross-site navigations can swap the renderer and silently end the screencast.
   page.on("load", () => start().catch(() => {}));
 
@@ -80,6 +124,12 @@ export async function startRecorder(page: Page, outDir: string) {
       const end = now();
       stopped = true;
       await cdp.send("Page.stopScreencast");
+      const tap = audio
+        ? ((await page.evaluate(STOP_AUDIO_TAP)) as { start: number; data: string } | null)
+        : null;
+      const audioFile = join(outDir, "clips", "audio.webm"); // kept: the whole take's sound, for checking sync
+      if (tap) writeFileSync(audioFile, Buffer.from(tap.data, "base64"));
+      else if (audio) console.warn("audio: nothing connected to the speakers, clips stay silent");
       const log: CaptureLog = { viewport, clips: [], events: {} };
 
       marks.forEach((m, i) => {
@@ -102,6 +152,25 @@ export async function startRecorder(page: Page, outDir: string) {
         writeFileSync(list, lines.join("\n"));
 
         const file = `${m.id}.mp4`;
+        const len = until - m.t;
+        // The recording starts at tap.start; pad silence before it and cut this clip's stretch.
+        const audioArgs = tap
+          ? [
+              "-i",
+              audioFile,
+              "-map",
+              "0:v",
+              "-map",
+              "1:a",
+              "-af",
+              `asetpts=PTS-STARTPTS,adelay=${Math.round(Math.max(0, tap.start - m.t) * 1000)}:all=1,` +
+                `atrim=start=${Math.max(0, m.t - tap.start).toFixed(3)},asetpts=PTS-STARTPTS,apad,atrim=duration=${len.toFixed(3)}`,
+              "-c:a",
+              "aac",
+              "-b:a",
+              "192k",
+            ]
+          : [];
         execFileSync("ffmpeg", [
           "-y",
           "-loglevel",
@@ -112,10 +181,11 @@ export async function startRecorder(page: Page, outDir: string) {
           "0",
           "-i",
           list,
+          ...audioArgs,
           "-vf",
           `fps=${FPS},scale=${viewport.width * 2}:${viewport.height * 2}:flags=lanczos`,
           "-t",
-          (until - m.t).toFixed(3),
+          len.toFixed(3),
           "-c:v",
           "libx264",
           "-preset",
