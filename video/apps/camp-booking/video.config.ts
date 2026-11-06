@@ -35,9 +35,9 @@ const config: VideoConfig = {
     accent: "#0F3325",
   },
   fps: 30,
-  titleSeconds: 1.8,
+  titleSeconds: 3,
   outroSeconds: 2,
-  posterAt: 35.5,
+  posterAt: 39, // shifted by the longer title card and Ticket Select beat
   beats: [
     {
       clip: "01-gallery",
@@ -106,7 +106,7 @@ const config: VideoConfig = {
     {
       clip: "04-people",
       url: "camp.com/new-york-city/activities/bluey-x-camp/booking/tickets",
-      speed: 1.15,
+      speed: 0.8, // slowed so the callout has time to be read
       zoom: [
         {
           at: { event: "ga-1", offset: -1.2 },
@@ -149,6 +149,7 @@ const config: VideoConfig = {
     {
       clip: "06-checkout",
       url: "shop.camp.com/checkouts",
+      speed: 0.5, // short static clip; slowed so the callout has time to be read
       zoom: [{ at: 0.3, region: { x: 310, y: 26, w: 1300, h: 731 } }],
       callout: {
         at: 0.5,
