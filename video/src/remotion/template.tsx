@@ -122,6 +122,7 @@ export function TitleCard({ c }: { c: VideoConfig }) {
           color: c.colors.muted,
           marginTop: 28,
           maxWidth: 1100,
+          textWrap: "balance", // no single orphaned word on the last line
         }}
       >
         {c.description}

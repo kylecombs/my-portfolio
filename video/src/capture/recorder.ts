@@ -23,6 +23,7 @@ const FPS = 30;
 // Needs Chrome's --autoplay-policy=no-user-gesture-required, or the mixing context starts suspended.
 // shortcut: patched into the current document only, so a navigation drops it; use addInitScript if an app with sound navigates.
 export const AUDIO_TAP = `(() => {
+  if (window.__tap) return; // already installed by an init script, for apps wired at page load
   const connect = AudioNode.prototype.connect;
   const mixer = new AudioContext();
   const mix = mixer.createMediaStreamDestination();

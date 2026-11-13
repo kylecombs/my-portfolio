@@ -57,7 +57,8 @@ export function human(page: Page, rec?: Recorder) {
       .catch(() => {});
   });
 
-  async function moveTo(target: Locator | { x: number; y: number }) {
+  /** `ms` overrides the distance-based duration, e.g. for fast moves between piano keys. */
+  async function moveTo(target: Locator | { x: number; y: number }, ms?: number) {
     let to = target as { x: number; y: number };
     if ("boundingBox" in target) {
       const b = await target.boundingBox();
@@ -70,7 +71,7 @@ export function human(page: Page, rec?: Recorder) {
     }
     const from = pos;
     const dist = Math.hypot(to.x - from.x, to.y - from.y);
-    const steps = Math.round(Math.min(Math.max(dist / 1.6, 320), 850) / 16);
+    const steps = Math.max(1, Math.round((ms ?? Math.min(Math.max(dist / 1.6, 320), 850)) / 16));
     for (let i = 1; i <= steps; i++) {
       const k = ease(i / steps);
       await page.mouse.move(

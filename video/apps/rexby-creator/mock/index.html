@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<!-- Replica of Rexby's 2022 creator tool for the portfolio video. Made-up creator and copy; photos from
+     Wikimedia Commons (img/CREDITS.json). Map tiles: Esri World Topo. -->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Rexby Creator Tool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="legs.js"></script>
+<style>
+  :root {
+    --primary: #1282a6; --primary-hover: #0f6e8c; --primary-faded: #e7f3f6; --tags: #daecf0;
+    --header: #14142b; --content: #4e4b66; --label: #6e7191; --placeholder: #a0a3bd;
+    --line: #d9dbe9; --inputbg: #eff0f6; --bg2: #f7f7fc; --offwhite: #fcfcfc; --success: #00ba88;
+    --day: #eff0f7; --day-active: #e5f3f3;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { font-family: Poppins, sans-serif; color: var(--header); background: #fff; -webkit-font-smoothing: antialiased; }
+  button { font: inherit; cursor: pointer; }
+  input, textarea { font: inherit; color: var(--header); }
+  .hidden { display: none !important; }
+
+  /* Header */
+  header { position: fixed; z-index: 1000; top: 0; left: 0; right: 0; height: 72px; background: #fff;
+    border-bottom: 1px solid var(--line); display: flex; align-items: center; padding: 0 40px; gap: 14px; }
+  header .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 22px; color: var(--primary); letter-spacing: .01em; }
+  header .brand img { width: 34px; height: 34px; }
+  header .crumb { color: var(--placeholder); font-size: 14px; margin-left: 18px; padding-left: 18px; border-left: 1px solid var(--line); }
+  header .crumb b { color: var(--header); font-weight: 500; }
+  header .right { margin-left: auto; display: flex; align-items: center; gap: 22px; font-size: 14px; color: var(--content); }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #1496bf, #0f6e8c);
+    color: #fff; display: grid; place-items: center; font-weight: 600; font-size: 14px; }
+
+  /* Buttons + inputs */
+  .btn { border: 2px solid var(--primary); background: var(--primary); color: #fff; border-radius: 10px;
+    height: 44px; padding: 0 20px; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; transition: background .15s, transform .15s; }
+  .btn:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+  .btn.outline { background: #fff; color: var(--primary); }
+  .btn.outline:hover { background: var(--primary-faded); }
+  .btn.big { height: 56px; width: 100%; justify-content: center; font-size: 15px; }
+  .btn .spin { width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { rotate: 360deg; } }
+  .field { margin-top: 20px; }
+  .field label { display: block; font-size: 13px; color: var(--label); margin-bottom: 8px; }
+  .field label i { font-style: normal; color: var(--placeholder); }
+  .input { width: 100%; height: 48px; border: 1.5px solid var(--line); border-radius: 10px; padding: 0 14px; font-size: 15px;
+    background: #fff; outline: none; transition: border-color .15s, box-shadow .15s; display: flex; align-items: center; }
+  .input:focus, .input.focus { border-color: var(--primary); box-shadow: 0 0 0 4px #d6ebf1; }
+  textarea.input { height: 112px; padding: 12px 14px; resize: none; line-height: 1.55; }
+  .row3 { display: flex; gap: 12px; }
+  .row3 > * { flex: 1; }
+  .select { position: relative; }
+  .select .input { justify-content: space-between; cursor: pointer; }
+  .select .input.empty span { color: var(--placeholder); }
+  .select .menu { position: absolute; z-index: 20; top: 54px; left: 0; right: 0; background: #fff; border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(20,20,43,.16); padding: 6px; border: 1px solid var(--line); }
+  .select .menu div { padding: 10px 12px; border-radius: 8px; font-size: 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .select .menu div:hover { background: var(--primary-faded); color: var(--primary); }
+  .chev { width: 10px; height: 10px; border-right: 2px solid var(--label); border-bottom: 2px solid var(--label); rotate: 45deg; margin: -4px 4px 0 0; }
+  .link { color: var(--primary); font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; background: none; border: 0; padding: 0; }
+  .back { color: var(--content); font-size: 14px; display: inline-flex; gap: 8px; align-items: center; cursor: pointer; }
+
+  /* Guide view */
+  #guide { padding-top: 72px; display: flex; min-height: 100vh; }
+  .side { width: 440px; flex: none; border-right: 1px solid var(--line); padding: 40px 40px; position: fixed; top: 72px; bottom: 0; background: #fff; }
+  .cover { height: 168px; border-radius: 16px; background: center/cover; position: relative; }
+  .side .avatar { width: 96px; height: 96px; font-size: 30px; border: 5px solid #fff; box-shadow: 0 4px 14px rgba(0,0,0,.12);
+    position: absolute; left: 24px; bottom: -44px; }
+  .side h1 { font-size: 22px; margin: 60px 0 2px; font-weight: 600; }
+  .muted { color: var(--label); font-size: 14px; }
+  .side h2 { font-size: 17px; font-weight: 600; margin: 26px 0 6px; }
+  .side p { color: var(--content); font-size: 14px; line-height: 1.65; margin: 0; }
+  .tagrow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .tag { background: var(--tags); color: var(--primary-hover); font-size: 12px; font-weight: 500; padding: 6px 12px; border-radius: 999px; }
+  .stats { display: flex; margin-top: 26px; border: 1px solid var(--line); border-radius: 14px; }
+  .stats div { flex: 1; padding: 14px 0; text-align: center; font-size: 12px; color: var(--label); }
+  .stats div + div { border-left: 1px solid var(--line); }
+  .stats b { display: block; font-size: 20px; color: var(--header); font-weight: 600; }
+  .price { display: flex; justify-content: space-between; align-items: center; margin-top: 22px; padding: 16px 18px; border-radius: 14px; background: var(--bg2); }
+  .price b { font-size: 22px; font-weight: 600; }
+  .side .actions { display: flex; gap: 10px; margin-top: 22px; }
+  .side .actions .btn { flex: 1; justify-content: center; }
+  .content { margin-left: 440px; flex: 1; padding: 40px 64px 60px; }
+  .tabs { display: flex; align-items: center; gap: 36px; border-bottom: 1px solid var(--line); }
+  .tab { padding: 14px 0; font-size: 15px; color: var(--placeholder); border-bottom: 3px solid transparent; margin-bottom: -1px; cursor: pointer; font-weight: 500; }
+  .tab.on { color: var(--primary); border-color: var(--primary); }
+  .tab small { font-size: 12px; background: var(--inputbg); color: var(--label); padding: 2px 8px; border-radius: 999px; margin-left: 6px; }
+  .tab.on small { background: var(--tags); color: var(--primary-hover); }
+  .tabs .tools { margin-left: auto; display: flex; gap: 12px; padding-bottom: 10px; }
+  .chips { display: flex; gap: 10px; margin: 22px 0 22px; }
+  .chip { font-size: 13px; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--line); color: var(--content); }
+  .chip.on { background: var(--header); color: #fff; border-color: var(--header); }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px 24px; }
+  .card { cursor: pointer; }
+  .card .ph { aspect-ratio: 4 / 3.3; border-radius: 16px; background: center/cover #f6f6f6; position: relative; overflow: hidden; transition: box-shadow .3s; }
+  .card .ph::after { content: ""; position: absolute; inset: 0; background: rgba(20,20,43,0); transition: background .2s; }
+  .card:hover .ph::after { background: rgba(20,20,43,.08); }
+  .card .cat { position: absolute; z-index: 1; left: 12px; top: 12px; background: rgba(255,255,255,.94); font-size: 12px; font-weight: 500; padding: 5px 10px; border-radius: 999px; display: flex; gap: 6px; align-items: center; }
+  .card .edit { position: absolute; z-index: 1; right: 12px; top: 12px; width: 34px; height: 34px; border-radius: 50%; background: #fff; display: grid; place-items: center; opacity: 0; transition: opacity .2s; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+  .card:hover .edit { opacity: 1; }
+  .card .bk { position: absolute; z-index: 1; left: 12px; bottom: 12px; background: var(--primary); color: #fff; font-size: 11px; font-weight: 600; padding: 4px 9px; border-radius: 6px; }
+  .card h3 { font-size: 15px; font-weight: 600; margin: 12px 0 2px; }
+  .card .loc { font-size: 13px; color: var(--label); display: flex; align-items: center; gap: 5px; }
+  .card.new .ph { box-shadow: 0 0 0 4px #fff, 0 0 0 7px var(--primary); }
+  .card.enter { animation: pop .6s cubic-bezier(.2,.9,.3,1.2); }
+  @keyframes pop { from { opacity: 0; scale: .85; } }
+  .newtile { border: 2px dashed var(--line); border-radius: 16px; aspect-ratio: 4 / 3.3; display: grid; place-items: center; color: var(--primary); font-weight: 600; font-size: 15px; cursor: pointer; background: var(--offwhite); }
+  .newtile:hover { border-color: var(--primary); background: var(--primary-faded); }
+  .newtile span { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .plus { width: 44px; height: 44px; border-radius: 50%; background: var(--primary-faded); display: grid; place-items: center; font-size: 26px; font-weight: 400; }
+  .itcard .meta { display: flex; gap: 10px; font-size: 13px; color: var(--label); }
+  .badge { position: absolute; z-index: 1; right: 12px; top: 12px; background: var(--success); color: #fff; font-size: 11px; font-weight: 600; padding: 4px 9px; border-radius: 6px; }
+  .badge.draft { background: var(--placeholder); }
+
+  /* Split editors (spot + itinerary) */
+  .editor { padding: 104px 56px 56px; }
+  #spot.editor { width: 780px; }
+  #itin.editor { width: 960px; padding-bottom: 0; }
+  .editor h1 { font-size: 26px; font-weight: 600; margin: 18px 0 4px; letter-spacing: .01em; }
+  .editor .sub { color: var(--label); font-size: 14px; margin: 0; }
+  .search { position: relative; margin-top: 28px; }
+  .search .input { padding-left: 46px; }
+  .search > svg { position: absolute; left: 16px; top: 15px; }
+  .results { position: absolute; z-index: 20; left: 0; right: 0; top: 56px; background: #fff; border-radius: 12px; box-shadow: 0 12px 32px rgba(20,20,43,.16); padding: 6px; border: 1px solid var(--line); }
+  .results div { display: flex; gap: 12px; align-items: center; padding: 10px 12px; border-radius: 8px; font-size: 14px; cursor: pointer; }
+  .results div:hover { background: var(--primary-faded); }
+  .results small { display: block; color: var(--label); font-size: 12px; }
+  .results .pinico { width: 32px; height: 32px; border-radius: 50%; background: var(--inputbg); display: grid; place-items: center; flex: none; }
+  .results .g { margin: 4px 12px 2px; font-size: 11px; color: var(--placeholder); padding: 0; justify-content: flex-end; cursor: default; }
+  .results .g:hover { background: none; }
+  .photos { display: flex; gap: 10px; margin-top: 20px; }
+  .addph { flex: 1; height: 160px; border-radius: 12px; border: 1.5px dashed var(--placeholder); background: #f6f6f6; display: grid; place-items: center; color: var(--placeholder); font-size: 13px; font-weight: 600; transition: flex .4s; }
+  .addph span { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .photos.has .addph { flex: 0 0 155px; }
+  .thumb { width: 155px; height: 160px; border-radius: 12px; background: center/cover; position: relative; flex: none; animation: pop .45s cubic-bezier(.2,.9,.3,1.2) both; }
+  .thumb .cv { position: absolute; left: 8px; bottom: 8px; background: rgba(20,20,43,.72); color: #fff; font-size: 11px; padding: 3px 8px; border-radius: 6px; }
+  .thumb .x { position: absolute; right: 8px; top: 8px; width: 24px; height: 24px; border-radius: 50%; background: rgba(255,255,255,.92); display: grid; place-items: center; font-size: 14px; color: var(--content); }
+  .gphotos { margin-top: 12px; }
+  .toolbar { display: flex; gap: 2px; border: 1.5px solid var(--line); border-bottom: 0; border-radius: 10px 10px 0 0; padding: 6px 8px; }
+  .toolbar span { width: 30px; height: 28px; display: grid; place-items: center; border-radius: 6px; color: var(--content); font-size: 14px; }
+  .toolbar + textarea.input { border-radius: 0 0 10px 10px; }
+  .reveal { animation: reveal .4s ease both; }
+  @keyframes reveal { from { opacity: 0; translate: 0 -8px; } }
+  .dots { display: flex; gap: 5px; }
+  .dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+  .dots i.on { background: var(--primary); }
+
+  /* Map */
+  #map { position: fixed; top: 72px; right: 0; bottom: 0; z-index: 1; background: #aad3df; }
+  body.v-guide #map { display: none; }
+  body.v-spot #map { left: 780px; }
+  body.v-itin #map { left: 960px; }
+  body.v-mapview #map { left: 0; }
+  .leaflet-control-attribution { font-family: Poppins, sans-serif; font-size: 10px !important; }
+  .pin { width: 40px; height: 52px; }
+  .pin.drop { animation: drop .7s cubic-bezier(.3,1.4,.5,1) both; transform-origin: 50% 100%; }
+  @keyframes drop { 0% { translate: 0 -60px; opacity: 0; } 60% { opacity: 1; } }
+  .dot { width: 18px; height: 18px; border-radius: 50%; background: var(--primary); border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.3); transition: scale .25s; }
+  .dot.dim { background: #8bb9c9; }
+  .num { width: 34px; height: 34px; border-radius: 50%; background: var(--primary); border: 3px solid #fff; color: #fff; font-weight: 600; font-size: 14px;
+    display: grid; place-items: center; box-shadow: 0 3px 10px rgba(0,0,0,.3); animation: pop .4s cubic-bezier(.2,.9,.3,1.4) both; }
+  .catpin { width: 38px; height: 38px; border-radius: 50%; background: #fff; border: 3px solid var(--primary); display: grid; place-items: center; box-shadow: 0 3px 10px rgba(0,0,0,.25); transition: scale .25s, background .25s; }
+  .catpin.sel { scale: 1.3; background: var(--primary); }
+  .catpin.sel svg path, .catpin.sel svg circle { stroke: #fff; }
+
+  /* Itinerary builder */
+  .titlerow { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; }
+  .titlerow h1 { margin: 0; }
+  .check { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--content); }
+  .check i { width: 20px; height: 20px; border: 1.5px solid var(--line); border-radius: 5px; }
+  .namewrap { position: relative; }
+  .namewrap small { position: absolute; right: 14px; top: 15px; color: var(--placeholder); font-size: 12px; }
+  .links3 { display: flex; justify-content: space-between; margin-top: 22px; }
+  .links3 .link span { color: var(--header); font-weight: 600; background: var(--tags); border-radius: 6px; padding: 1px 8px; margin-left: -2px; }
+  .days { display: flex; gap: 10px; margin: 22px 0 0; padding: 6px 4px; align-items: center; }
+  .day { width: 72px; height: 46px; border-radius: 10px; background: var(--day); color: var(--placeholder); font-size: 13px; display: grid; place-items: center; cursor: pointer; transition: scale .25s, background .25s, color .25s; border: 1px solid transparent; }
+  .day.on { background: var(--day-active); color: var(--primary); border-color: var(--primary); scale: 1.1; font-weight: 500; }
+  .day.add { width: auto; padding: 0 16px; }
+  .day.enter { animation: pop .4s cubic-bezier(.2,.9,.3,1.3); }
+  .isearch { margin-top: 16px; height: 42px; background: var(--day); border: 0; border-radius: 10px; width: 100%; padding: 0 14px; font-size: 14px; color: var(--placeholder); display: flex; align-items: center; gap: 10px; }
+  .igrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px 14px; margin-top: 18px; }
+  .tile { cursor: pointer; }
+  .tile .ph { aspect-ratio: 4 / 3; border-radius: 12px; background: center/cover; position: relative; transition: box-shadow .2s, scale .2s; }
+  .tile:hover .ph { scale: 1.02; }
+  .tile.sel .ph { box-shadow: 0 0 0 3px #fff, 0 0 0 6px var(--primary); }
+  .tile .n { position: absolute; left: 8px; top: 8px; width: 30px; height: 30px; border-radius: 50%; background: var(--primary); color: #fff; font-weight: 600; font-size: 14px; display: grid; place-items: center; border: 2px solid #fff; animation: pop .35s cubic-bezier(.2,.9,.3,1.4) both; }
+  .tile .other { position: absolute; left: 8px; top: 8px; font-size: 11px; background: rgba(20,20,43,.7); color: #fff; padding: 3px 8px; border-radius: 6px; }
+  .tile.used .ph { opacity: .5; }
+  .tile h4 { font-size: 13px; font-weight: 500; margin: 8px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar { position: sticky; bottom: 0; display: flex; gap: 14px; padding: 18px 0 22px; background: linear-gradient(transparent, #fff 20%); margin-top: 8px; }
+  .bar .btn { flex: 1; justify-content: center; height: 56px; }
+
+  /* Modal */
+  .scrim { position: fixed; inset: 0; z-index: 2000; background: rgba(20,20,43,.45); display: grid; place-items: center; animation: fade .3s ease both; }
+  @keyframes fade { from { opacity: 0; } }
+  .modal { background: #fff; border-radius: 20px; padding: 32px; width: 640px; box-shadow: 0 30px 80px rgba(0,0,0,.25); animation: rise .45s cubic-bezier(.17,.84,.44,1) both; }
+  @keyframes rise { from { translate: 0 -40px; opacity: 0; } }
+  .modal h2 { margin: 0; font-size: 22px; font-weight: 600; }
+  .modal p { color: var(--content); font-size: 14px; margin: 6px 0 0; }
+  .modal .foot { display: flex; justify-content: flex-end; gap: 12px; margin-top: 26px; }
+  .gpick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 22px; }
+  .gpick div { aspect-ratio: 1; border-radius: 12px; background: center/cover; position: relative; cursor: pointer; transition: box-shadow .2s; }
+  .gpick div::after { content: ""; position: absolute; right: 10px; top: 10px; width: 26px; height: 26px; border-radius: 50%; border: 2px solid #fff; background: rgba(0,0,0,.2); }
+  .gpick div.on { box-shadow: 0 0 0 4px var(--primary); }
+  .gpick div.on::after { background: var(--primary) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4 8-9' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat; }
+  .gpick small { position: absolute; left: 8px; bottom: 8px; font-size: 10px; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+  .money { display: flex; align-items: center; gap: 0; margin-top: 20px; }
+  .money span { height: 52px; display: grid; place-items: center; padding: 0 16px; background: var(--inputbg); border: 1.5px solid var(--line); border-right: 0; border-radius: 10px 0 0 10px; color: var(--label); }
+  .money .input { border-radius: 0 10px 10px 0; height: 52px; font-size: 18px; }
+  .modal .hint { margin-top: 12px; font-size: 13px; color: var(--label); }
+
+  /* Toast */
+  .toast { position: fixed; z-index: 3000; left: 50%; top: 96px; translate: -50% 0; background: var(--header); color: #fff; font-size: 14px; padding: 14px 22px; border-radius: 12px; display: flex; gap: 10px; align-items: center; box-shadow: 0 12px 30px rgba(0,0,0,.25); animation: rise .4s cubic-bezier(.17,.84,.44,1) both; }
+  .toast i { width: 22px; height: 22px; border-radius: 50%; background: var(--success); display: grid; place-items: center; font-style: normal; font-size: 13px; }
+
+  /* Map view */
+  .mv-top { position: fixed; z-index: 500; top: 96px; left: 28px; right: 28px; display: flex; align-items: flex-start; pointer-events: none; }
+  .mv-top > * { pointer-events: auto; }
+  .round { width: 48px; height: 48px; border-radius: 50%; background: #fff; box-shadow: 0 3px 12px rgba(0,0,0,.18); display: grid; place-items: center; }
+  .mv-title { margin-left: 16px; background: #fff; border-radius: 999px; box-shadow: 0 3px 12px rgba(0,0,0,.18); height: 48px; display: flex; align-items: center; gap: 12px; padding: 0 22px 0 6px; font-size: 15px; font-weight: 600; }
+  .mv-title .avatar { width: 36px; height: 36px; font-size: 12px; }
+  .mv-title small { font-weight: 400; color: var(--label); font-size: 13px; }
+  .mv-pills { margin-left: auto; display: flex; gap: 10px; position: relative; }
+  .pill { height: 48px; padding: 0 22px; border-radius: 999px; background: var(--offwhite); color: var(--primary); box-shadow: 0 3px 12px rgba(0,0,0,.18); display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; border: 0; }
+  .embed { position: absolute; right: 0; top: 60px; width: 470px; background: var(--offwhite); border-radius: 18px; padding: 18px; box-shadow: 0 10px 30px rgba(0,0,0,.2); animation: rise .35s cubic-bezier(.17,.84,.44,1) both; }
+  .embed h5 { margin: 0 0 4px; font-size: 15px; font-weight: 600; }
+  .embed p { margin: 0 0 12px; font-size: 13px; color: var(--label); }
+  .embed code { display: block; font-family: ui-monospace, Menlo, monospace; font-size: 12px; line-height: 1.6; background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; color: var(--content); word-break: break-all; }
+  .embed .foot { display: flex; justify-content: flex-end; margin-top: 14px; }
+  .embed .btn.done { background: var(--success); border-color: var(--success); }
+  .carousel { position: fixed; z-index: 500; left: 0; right: 0; bottom: 0; display: flex; gap: 16px; padding: 24px 28px 28px; overflow-x: auto; scrollbar-width: none; }
+  .ccard { flex: none; width: 360px; height: 128px; border-radius: 16px; background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,.16); display: flex; overflow: hidden; cursor: pointer; transition: translate .3s, box-shadow .3s; }
+  .ccard .ph { width: 128px; background: center/cover; flex: none; }
+  .ccard .tx { padding: 14px 16px; display: flex; flex-direction: column; min-width: 0; }
+  .ccard h4 { margin: 0; font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ccard .loc { font-size: 12px; color: var(--label); margin-top: 2px; }
+  .ccard .cta { margin-top: auto; display: flex; gap: 8px; align-items: center; font-size: 12px; }
+  .ccard .cta b { background: var(--primary); color: #fff; font-weight: 600; padding: 5px 10px; border-radius: 6px; }
+  .ccard.sel { translate: 0 -10px; box-shadow: 0 0 0 3px var(--primary), 0 12px 28px rgba(0,0,0,.22); }
+
+  /* Video upload (PickUploadContentModal, upload dashboard, UploadedMedia, VideoPickCoverPhoto, ItineraryItemModal) */
+  .addph { cursor: pointer; }
+  .thumb.vid { overflow: hidden; background: #000; }
+  .thumb.vid video, .thumb.vid img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 12px; }
+  .thumb .coverbtn { position: absolute; left: 50%; bottom: 10px; translate: -50% 0; background: #fff; border: 1px solid var(--line); border-radius: 6px; font-size: 13px; padding: 3px 22px; cursor: pointer; }
+  .thumb .vbadge { position: absolute; left: 8px; top: 8px; background: rgba(20,20,43,.72); color: #fff; font-size: 11px; padding: 3px 8px; border-radius: 6px; display: flex; gap: 5px; align-items: center; }
+  .typepick { display: flex; gap: 24px; margin-top: 48px; }
+  .typepick div { flex: 1; background: #f4f4f8; border-radius: 12px; padding: 30px 0 24px; display: flex; flex-direction: column; align-items: center; gap: 16px; cursor: pointer; color: var(--placeholder); font-weight: 600; font-size: 14px; letter-spacing: .02em; transition: background .15s, color .15s; }
+  .typepick div:hover { background: var(--primary-faded); color: var(--primary); }
+  .drop { margin-top: 22px; border: 2px dashed var(--line); border-radius: 16px; background: var(--offwhite); height: 230px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: var(--content); font-size: 15px; }
+  .drop small { color: var(--placeholder); font-size: 12px; }
+  .file { margin-top: 22px; display: flex; gap: 16px; align-items: center; border: 1px solid var(--line); border-radius: 14px; padding: 12px; animation: reveal .35s ease both; }
+  .file img { width: 54px; height: 96px; object-fit: cover; border-radius: 8px; flex: none; }
+  .file .nm { font-weight: 600; font-size: 15px; }
+  .file .meta { color: var(--label); font-size: 13px; margin-top: 2px; }
+  .file .grow { flex: 1; min-width: 0; }
+  .prog { height: 8px; border-radius: 99px; background: var(--inputbg); margin-top: 12px; overflow: hidden; }
+  .prog i { display: block; height: 100%; width: 0; background: var(--primary); border-radius: 99px; }
+  .prog.done i { background: var(--success); }
+  .ptext { display: flex; justify-content: space-between; font-size: 12px; color: var(--label); margin-top: 6px; }
+  .steps { margin-top: 18px; display: flex; flex-direction: column; gap: 12px; }
+  .step { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--placeholder); }
+  .step .ic { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--line); flex: none; display: grid; place-items: center; color: #fff; font-size: 13px; }
+  .step small { margin-left: auto; font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--placeholder); }
+  .step.run { color: var(--header); }
+  .step.run .ic { border-color: var(--inputbg); border-top-color: var(--primary); animation: spin .7s linear infinite; }
+  .step.ok { color: var(--header); }
+  .step.ok .ic { background: var(--success); border-color: var(--success); }
+  .cpick { display: grid; grid-template-columns: repeat(3, 200px); gap: 10px; margin-top: 20px; }
+  .cpick div { width: 200px; height: 200px; border-radius: 12px; background: center/cover; position: relative; cursor: pointer; }
+  .cpick div.on::after { content: ""; position: absolute; inset: 0; border-radius: 12px; background: var(--primary); opacity: .4; }
+  .btn.off { background: #8e8e99; border-color: #8e8e99; }
+  .card .play { position: absolute; z-index: 1; right: 12px; bottom: 12px; background: rgba(20,20,43,.72); color: #fff; font-size: 12px; font-weight: 500; padding: 5px 10px; border-radius: 999px; display: flex; gap: 6px; align-items: center; }
+  .card.vid .ph { background-position: center 30%; }
+  .spotmodal { width: 1080px; padding: 0; display: flex; overflow: hidden; }
+  .spotmodal video { width: 450px; height: 800px; object-fit: cover; display: block; flex: none; background: #000; }
+  .spotmodal .tx { padding: 40px 44px; flex: 1; display: flex; flex-direction: column; }
+  .spotmodal h2 { font-size: 26px; margin-top: 16px; }
+  .spotmodal .loc { margin-top: 6px; }
+  .spotmodal .facts { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+  .spotmodal .facts span { background: var(--bg2); border-radius: 10px; padding: 10px 14px; font-size: 13px; color: var(--content); }
+  .spotmodal .tx p { font-size: 15px; line-height: 1.7; margin-top: 22px; }
+  .spotmodal .cat { position: static; align-self: flex-start; background: var(--tags); }
+  .spotmodal .foot { margin-top: auto; }
+</style>
+</head>
+<body class="v-guide">
+<header>
+  <div class="brand"><img src="img/RexbyLogo.svg" alt="" />Rexby</div>
+  <div class="crumb">Creator tool · <b id="crumb">Best of South Iceland</b></div>
+  <div class="right"><span>My guides</span><span>Sales</span><div class="avatar">SA</div></div>
+</header>
+
+<!-- 1. The guide: creator profile + spots/itineraries grids (CreatorEdit) -->
+<section id="guide" class="view">
+  <aside class="side">
+    <div class="cover" style="background-image:url(img/reynisfjara.jpg)"><div class="avatar">SA</div></div>
+    <h1>Sóley Arnar</h1>
+    <div class="muted">South Coast, Iceland</div>
+    <h2>Best of South Iceland</h2>
+    <p>Ten years of road trips along Route 1, boiled down to the stops I actually send my friends to: waterfalls, black beaches and glacier lagoons, with the timing that beats the tour buses.</p>
+    <div class="tagrow"><span class="tag">Waterfalls</span><span class="tag">Road trip</span><span class="tag">Hiking</span><span class="tag">Photography</span></div>
+    <div class="stats"><div><b id="n-spots">9</b>Spots</div><div><b id="n-itins">1</b>Itineraries</div><div><b>4</b>Travel tips</div></div>
+    <div class="price"><div><div class="muted">Full guide access</div><b>$19</b></div><button class="link">Edit price</button></div>
+    <div class="actions"><button class="btn outline">Edit profile</button><button class="btn outline">Preview</button></div>
+  </aside>
+  <div class="content">
+    <div class="tabs">
+      <div class="tab on" id="tab-spots" data-tab="spots">Things to do <small id="c-spots">9</small></div>
+      <div class="tab" id="tab-itins" data-tab="itins">Itineraries <small id="c-itins">1</small></div>
+      <div class="tab" data-tab="tips">Travel tips <small>4</small></div>
+      <div class="tools">
+        <button class="btn outline" id="mapbtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg>Map view</button>
+        <button class="btn" id="addspot"><span style="font-size:20px;line-height:0">+</span> Add spot</button>
+      </div>
+    </div>
+    <div id="pane-spots">
+      <div class="chips"><span class="chip on">All</span><span class="chip">Sightseeing</span><span class="chip">Hike</span><span class="chip">Activity</span><span class="chip">Food &amp; drink</span></div>
+      <div class="grid" id="spotgrid"></div>
+    </div>
+    <div id="pane-itins" class="hidden">
+      <div class="chips"><span class="chip on">All</span><span class="chip">Published</span><span class="chip">Drafts</span></div>
+      <div class="grid" id="itingrid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. Add a spot (itineraryItemCreate) -->
+<section id="spot" class="view editor hidden">
+  <div class="back" data-go="guide">← Back to guide</div>
+  <h1 id="spottitle">Add a spot</h1>
+  <p class="sub">Search for the place, add photos and tell travelers why it's worth the stop.</p>
+  <div class="search">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6e7191" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input class="input" id="place" placeholder="Search for a place" autocomplete="off" />
+    <div class="results hidden" id="results"></div>
+  </div>
+  <div class="photos" id="photos">
+    <button class="addph" id="addmedia"><span><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#a0a3bd" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-8 8"/></svg>+ Add photos or videos</span></button>
+  </div>
+  <div class="gphotos hidden" id="gphotos"><button class="link" id="googlephotos">Get photos from Google <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-8 8"/></svg></button></div>
+  <div class="field"><label>Location name *</label><input class="input" id="locname" /></div>
+  <div class="field"><label>Title * <i>· the name travelers see before they buy access</i></label><input class="input" id="title" /></div>
+  <div class="row3 field">
+    <div><label>Est. time</label><div class="input">1–2 hours</div></div>
+    <div><label>Est. price</label><div class="input">Free</div></div>
+    <div class="select" id="catsel"><label>Category *</label><div class="input empty" id="catbtn"><span>Select</span><i class="chev"></i></div>
+      <div class="menu hidden" id="catmenu"><div>Sightseeing</div><div>Hike</div><div>Activity</div><div>Food &amp; drink</div><div>Accommodation</div></div></div>
+  </div>
+  <div class="row3 field hidden" id="hikerow">
+    <div><label>Activity level</label><div class="input"><span class="dots"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span>&nbsp; Easy</div></div>
+    <div><label>Seasonality</label><div class="input">May – October</div></div>
+    <div><label>Age requirement</label><div class="input">All ages</div></div>
+  </div>
+  <div class="field"><label>Description *</label>
+    <div class="toolbar"><span><b>B</b></span><span><i>I</i></span><span>≡</span><span>🔗</span></div>
+    <textarea class="input" id="desc"></textarea></div>
+  <div class="field"><label>Affiliate link <i>· earn a commission when travelers book</i></label><input class="input" id="aff" placeholder="https://" /></div>
+  <div class="field"><label>What to bring</label><input class="input" placeholder="One item per line" /></div>
+  <div class="field" style="margin-top:28px"><button class="btn big" id="save">Save spot</button></div>
+</section>
+
+<!-- 3. Itinerary builder (ItineraryCreate) -->
+<section id="itin" class="view editor hidden">
+  <div class="back" data-go="guide">← Back to guide</div>
+  <div class="titlerow"><h1>Create the Itinerary</h1><div class="check"><i></i>Hide from grid</div></div>
+  <div class="field namewrap"><label>Name of Itinerary *</label><input class="input" id="iname" maxlength="50" placeholder="Name of Itinerary" /><small id="icount" style="top:44px">0/50</small></div>
+  <div class="links3">
+    <button class="link">Add description <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button>
+    <button class="link" id="addprice">Add Price <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7.5" cy="8.5" r="1.5"/></svg></button>
+    <button class="link">Add Cover <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-8 8"/></svg></button>
+  </div>
+  <div class="days" id="days"></div>
+  <div class="isearch"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a0a3bd" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Search your spots</div>
+  <div class="igrid" id="igrid"></div>
+  <div class="bar"><button class="btn outline">Save as draft</button><button class="btn" id="share">Share</button></div>
+</section>
+
+<!-- 4. Map view (creatorMapView) -->
+<section id="mapview" class="view hidden">
+  <div class="mv-top">
+    <div class="round" data-go="guide"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14142b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></div>
+    <div class="mv-title"><div class="avatar">SA</div>Best of South Iceland <small id="mv-count">10 spots</small></div>
+    <div class="mv-pills">
+      <button class="pill" id="embedbtn">Embed <svg width="22" height="14" viewBox="0 0 30 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2 3 8l6 6M21 2l6 6-6 6"/></svg></button>
+      <button class="pill">Filter <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg></button>
+      <div class="embed hidden" id="embed">
+        <h5>Embed this map</h5>
+        <p>Paste it into your blog or link-in-bio page. Bookings still go through your affiliate links.</p>
+        <code>&lt;iframe src="https://rexby.com/creatorMapView/soley?embed=1" style="width: 100%; height: 80vh" sandbox="allow-same-origin allow-scripts allow-top-navigation allow-popups-to-escape-sandbox" allow="fullscreen"&gt;&lt;/iframe&gt;</code>
+        <div class="foot"><button class="btn" id="copy">Copy</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="carousel" id="carousel"></div>
+</section>
+
+<div id="map"></div>
+
+<script>
+const SPOTS = [
+  { id: "thingvellir", title: "Walk between two continents", loc: "Þingvellir National Park", cat: "Hike", ll: [64.2559, -21.1299] },
+  { id: "strokkur", title: "A geyser that goes off every 8 minutes", loc: "Strokkur, Haukadalur", cat: "Sightseeing", ll: [64.3127, -20.3008] },
+  { id: "gullfoss", title: "The golden falls", loc: "Gullfoss", cat: "Sightseeing", ll: [64.3271, -20.1199] },
+  { id: "seljalandsfoss", title: "The waterfall you can walk behind", loc: "Seljalandsfoss", cat: "Hike", ll: [63.6156, -19.9886] },
+  { id: "skogafoss", title: "527 steps to the top", loc: "Skógafoss", cat: "Hike", ll: [63.5321, -19.5114] },
+  { id: "reynisfjara", title: "Black sand and basalt stacks", loc: "Reynisfjara Beach", cat: "Sightseeing", ll: [63.4044, -19.045] },
+  { id: "jokulsarlon", title: "Boat tour among icebergs", loc: "Jökulsárlón Glacier Lagoon", cat: "Activity", ll: [64.0784, -16.2306], aff: true },
+  { id: "diamond-beach", title: "Ice on black sand", loc: "Diamond Beach", cat: "Sightseeing", ll: [64.044, -16.178] },
+  { id: "hallgrimskirkja", title: "The best view of Reykjavík", loc: "Hallgrímskirkja", cat: "Sightseeing", ll: [64.1417, -21.9266], aff: true },
+];
+const NEW_SPOT = { id: "fjadrargljufur", title: "", loc: "Fjaðrárgljúfur Canyon", cat: "Hike", ll: [63.7713, -18.172] };
+const ITINS = [{ title: "Golden Circle in a day", img: "gullfoss", days: 1, stops: 4, price: 12 }];
+const $ = (id) => document.getElementById(id);
+const img = (id) => `img/${id}.jpg`;
+const CAT_ICON = {
+  Hike: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1282a6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 20 6-11 4 6 3-4 5 9z"/></svg>',
+  Sightseeing: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1282a6" stroke-width="2.2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  Activity: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1282a6" stroke-width="2.2" stroke-linecap="round"><path d="M13 3 5 14h6l-1 7 8-11h-6z"/></svg>',
+};
+const PIN = '<svg class="pin drop" viewBox="0 0 40 52"><path d="M20 50s16-17 16-30A16 16 0 0 0 4 20c0 13 16 30 16 30z" fill="#1282a6" stroke="#fff" stroke-width="3"/><circle cx="20" cy="20" r="6" fill="#fff"/></svg>';
+
+let spots = SPOTS.slice();
+let itins = ITINS.slice();
+
+// ---- guide grids
+function renderSpots(fresh) {
+  $("spotgrid").innerHTML = spots.map((s, i) => `
+    <div class="card${(fresh === true && i === 0) || fresh === s.id ? " new enter" : ""}${s.cover ? " vid" : ""}" data-id="${s.id}">
+      <div class="ph" style="background-image:url(${s.cover ?? img(s.id)})">
+        <span class="cat">${CAT_ICON[s.cat]}${s.cat}</span>
+        <span class="edit"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#14142b" stroke-width="2" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></span>
+        ${s.aff ? '<span class="bk">Bookable</span>' : ""}
+        ${s.cover ? `<span class="play">${PLAY}0:16</span>` : ""}
+      </div>
+      <h3>${s.title}</h3>
+      <div class="loc"><svg width="12" height="12" viewBox="0 0 24 24" fill="#a0a3bd"><path d="M12 22s8-7.5 8-13a8 8 0 0 0-16 0c0 5.5 8 13 8 13z"/></svg>${s.loc}</div>
+    </div>`).join("");
+  $("spotgrid").querySelectorAll(".card").forEach((c) => (c.onclick = (e) => (e.target.closest(".edit") ? editSpot : previewSpot)(c.dataset.id)));
+  $("c-spots").textContent = $("n-spots").textContent = spots.length;
+}
+function renderItins(fresh) {
+  $("itingrid").innerHTML = itins.map((t, i) => `
+    <div class="card itcard${fresh && i === 0 ? " new enter" : ""}">
+      <div class="ph" style="background-image:url(${img(t.img)})"><span class="badge">Published</span></div>
+      <h3>${t.title}</h3>
+      <div class="meta"><span>${t.days} day${t.days > 1 ? "s" : ""}</span>·<span>${t.stops} stops</span>·<span>$${t.price}</span></div>
+    </div>`).join("") +
+    `<div class="newtile" id="newitin"><span><span class="plus">+</span>Create itinerary</span></div>`;
+  $("newitin").onclick = () => go("itin");
+  $("c-itins").textContent = $("n-itins").textContent = itins.length;
+}
+document.querySelectorAll(".tab[data-tab]").forEach((t) => (t.onclick = () => showTab(t.dataset.tab)));
+function showTab(tab) {
+  if (tab === "tips") return;
+  document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("on", t.dataset.tab === tab));
+  $("pane-spots").classList.toggle("hidden", tab !== "spots");
+  $("pane-itins").classList.toggle("hidden", tab !== "itins");
+  $("addspot").classList.toggle("hidden", tab !== "spots");
+}
+
+// ---- map
+const map = L.map("map", { zoomControl: false, zoomSnap: 0.25, attributionControl: true }).setView([64.6, -18.6], 6.5);
+L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}", {
+  attribution: "Tiles © Esri", maxZoom: 18, detectRetina: true,
+}).addTo(map);
+let layer = L.layerGroup().addTo(map);
+const icon = (html, size) => L.divIcon({ html, className: "", iconSize: size, iconAnchor: [size[0] / 2, size[1] / 2] });
+
+function go(view) {
+  document.querySelectorAll(".view").forEach((v) => v.classList.toggle("hidden", v.id !== view));
+  document.body.className = "v-" + view;
+  scrollTo(0, 0);
+  layer.clearLayers();
+  map.invalidateSize();
+  ({ guide: enterGuide, spot: enterSpot, itin: enterItin, mapview: enterMapView })[view]();
+}
+document.querySelectorAll("[data-go]").forEach((b) => (b.onclick = () => go(b.dataset.go)));
+
+function enterGuide() {}
+$("addspot").onclick = () => go("spot");
+$("mapbtn").onclick = () => go("mapview");
+
+// ---- add a spot
+function enterSpot() {
+  map.setView([64.5, -18.8], 6.25, { animate: false });
+}
+$("place").oninput = (e) => {
+  const q = e.target.value.trim();
+  $("results").classList.toggle("hidden", q.length < 3);
+  $("results").innerHTML = `
+    <div id="r0"><span class="pinico">${PIN_SMALL}</span><span>Fjaðrárgljúfur Canyon<small>Kirkjubæjarklaustur, Iceland</small></span></div>
+    <div><span class="pinico">${PIN_SMALL}</span><span>Fjaðrárgljúfur Parking<small>Road 206, Iceland</small></span></div>
+    <div><span class="pinico">${PIN_SMALL}</span><span>Fjaðrá<small>River · South Iceland</small></span></div>
+    <div class="g">Powered by Google</div>`;
+  $("r0").onclick = pickPlace;
+};
+const PIN_SMALL = '<svg width="14" height="14" viewBox="0 0 24 24" fill="#6e7191"><path d="M12 22s8-7.5 8-13a8 8 0 0 0-16 0c0 5.5 8 13 8 13z"/></svg>';
+function pickPlace() {
+  $("results").classList.add("hidden");
+  $("place").value = "Fjaðrárgljúfur Canyon, Kirkjubæjarklaustur, Iceland";
+  $("place").blur();
+  $("locname").value = "Fjaðrárgljúfur Canyon";
+  $("gphotos").classList.remove("hidden");
+  $("gphotos").classList.add("reveal");
+  map.flyTo(NEW_SPOT.ll, 11, { duration: 1.6 });
+  setTimeout(() => {
+    L.marker(NEW_SPOT.ll, { icon: L.divIcon({ html: PIN, className: "", iconSize: [40, 52], iconAnchor: [20, 50] }) }).addTo(layer);
+  }, 1500);
+}
+$("googlephotos").onclick = () => {
+  const s = document.createElement("div");
+  s.className = "scrim";
+  s.innerHTML = `<div class="modal" id="gmodal"><h2>Photos from Google</h2><p>Pick photos of Fjaðrárgljúfur Canyon to add to this spot.</p>
+    <div class="gpick">${["fjadrargljufur", "fjadra-2", "fjadra-3"].map((p) => `<div data-p="${p}" style="background-image:url(${img(p)})"><small>Google Maps contributor</small></div>`).join("")}</div>
+    <div class="foot"><button class="btn outline" id="gcancel">Cancel</button><button class="btn" id="gadd">Add photos</button></div></div>`;
+  document.body.append(s);
+  s.querySelectorAll(".gpick div").forEach((d) => (d.onclick = () => {
+    d.classList.toggle("on");
+    const n = s.querySelectorAll(".gpick .on").length;
+    $("gadd").textContent = n ? `Add ${n} photo${n > 1 ? "s" : ""}` : "Add photos";
+  }));
+  $("gcancel").onclick = () => s.remove();
+  $("gadd").onclick = () => {
+    const picked = [...s.querySelectorAll(".gpick .on")].map((d) => d.dataset.p);
+    s.remove();
+    $("photos").classList.add("has");
+    picked.forEach((p, i) => {
+      const t = document.createElement("div");
+      t.className = "thumb";
+      t.style.backgroundImage = `url(${img(p)})`;
+      t.style.animationDelay = i * 0.12 + "s";
+      t.innerHTML = (i === 0 ? '<span class="cv">Cover</span>' : "") + '<span class="x">×</span>';
+      $("photos").append(t);
+    });
+  };
+};
+$("catbtn").onclick = () => $("catmenu").classList.toggle("hidden");
+$("catmenu").querySelectorAll("div").forEach((o) => (o.onclick = () => {
+  $("catmenu").classList.add("hidden");
+  $("catbtn").classList.remove("empty");
+  $("catbtn").firstElementChild.innerHTML = (CAT_ICON[o.textContent] ?? "") + " " + o.textContent;
+  $("catbtn").firstElementChild.style.cssText = "display:flex;gap:8px;align-items:center";
+  if (o.textContent === "Hike") { $("hikerow").classList.remove("hidden"); $("hikerow").classList.add("reveal"); }
+}));
+$("save").onclick = () => {
+  $("save").innerHTML = '<span class="spin"></span>';
+  setTimeout(() => {
+    if (editing) Object.assign(spots.find((s) => s.id === editing), { cover: video.cover });
+    else spots.unshift({ ...NEW_SPOT, title: $("title").value || "Moss-green canyon rim walk" });
+    go("guide");
+    showTab("spots");
+    renderSpots(editing || true);
+    toast(editing ? "Spot updated" : "Spot saved to Best of South Iceland");
+  }, 900);
+};
+
+// ---- video upload (itineraryItemCreate: PickUploadContentModal → upload → UploadedMedia → VideoPickCoverPhoto)
+const PLAY = '<svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 1l7 4-7 4z" fill="#fff"/></svg>';
+const VIDEO_SRC = "media/seljalandsfoss.mp4";
+const DESC = {
+  seljalandsfoss: "Take the path behind the falls for the classic shot. Bring a rain jacket, you will get soaked. Late evening light hits it straight on in summer.",
+};
+let editing = null;
+const video = { cover: null };
+function modal(html, cls = "") {
+  const s = document.createElement("div");
+  s.className = "scrim";
+  s.innerHTML = `<div class="modal ${cls}">${html}</div>`;
+  document.body.append(s);
+  return s;
+}
+function editSpot(id) {
+  const s = spots.find((x) => x.id === id);
+  go("spot");
+  editing = id;
+  $("spottitle").textContent = "Edit spot";
+  $("place").value = `${s.loc}, South Iceland`;
+  $("locname").value = s.loc;
+  $("title").value = s.title;
+  $("desc").value = DESC[id] ?? "";
+  $("catbtn").classList.remove("empty");
+  $("catbtn").firstElementChild.innerHTML = CAT_ICON[s.cat] + " " + s.cat;
+  $("catbtn").firstElementChild.style.cssText = "display:flex;gap:8px;align-items:center";
+  $("photos").classList.add("has");
+  $("photos").insertAdjacentHTML("beforeend", `<div class="thumb" style="background-image:url(${img(id)});animation:none"><span class="cv">Cover</span><span class="x">×</span></div>`);
+  map.setView(s.ll, 11, { animate: false });
+  L.marker(s.ll, { icon: L.divIcon({ html: PIN.replace(" drop", ""), className: "", iconSize: [40, 52], iconAnchor: [20, 50] }) }).addTo(layer);
+}
+$("addmedia").onclick = () => {
+  const s = modal(`<h2 style="font-size:19px">Select type of content</h2>
+    <div class="typepick">
+      <div id="upphoto"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="m21 16-5-5-8 8"/></svg>UPLOAD PHOTO</div>
+      <div id="upvideo"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="m16 10 6-3v10l-6-3z"/></svg>UPLOAD VIDEO</div>
+    </div>`, "");
+  s.firstElementChild.style.width = "600px";
+  s.onclick = (e) => e.target === s && s.remove();
+  $("upphoto").onclick = () => s.remove();
+  $("upvideo").onclick = () => { s.remove(); uploadVideo(); };
+};
+function uploadVideo() {
+  const s = modal(`<h2>Upload a video</h2><p>It's converted for fast streaming on any phone or browser.</p>
+    <div id="upbody"><div class="drop"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#a0a3bd" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a5 5 0 0 1-.5-9.97A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9"/><path d="M12 12v8m-3-5 3-3 3 3"/></svg>
+      <div>Drop a video here or <button class="link" id="browse">browse files</button></div><small>MP4, MOV or WebM · up to 2 GB</small></div></div>
+    <div class="foot"><button class="btn outline" id="upcancel">Cancel</button><button class="btn off" id="upgo">Upload</button></div>`);
+  s.firstElementChild.style.width = "620px";
+  $("upcancel").onclick = () => s.remove();
+  $("browse").onclick = () => {
+    $("upbody").innerHTML = `<div class="file"><img src="media/poster.jpg" /><div class="grow">
+      <div class="nm">IMG_4127.MOV</div><div class="meta">108 MB · 0:16 · 1080 × 1920</div>
+      <div class="prog" id="prog"><i></i></div><div class="ptext"><span id="pleft">Ready to upload</span><span id="pright"></span></div></div></div>
+      <div class="steps" id="steps"></div>`;
+    $("upgo").classList.remove("off");
+    $("upgo").textContent = "Upload 1 file";
+  };
+  $("upgo").onclick = () => {
+    if (!$("prog")) return;
+    $("upgo").innerHTML = '<span class="spin"></span>Uploading';
+    $("upcancel").classList.add("hidden");
+    const t0 = performance.now(), ms = 3000;
+    (function tick() {
+      const p = Math.min(1, (performance.now() - t0) / ms);
+      const e = 1 - (1 - p) ** 1.6;
+      $("prog").firstElementChild.style.width = e * 100 + "%";
+      $("pleft").textContent = p < 1 ? `Uploading to S3 · ${Math.round(e * 100)}%` : "Uploaded to S3";
+      $("pright").textContent = `${Math.round(e * 108)} of 108 MB`;
+      if (p < 1) return requestAnimationFrame(tick);
+      $("prog").classList.add("done");
+      process(s);
+    })();
+  };
+}
+function process(s) {
+  const STEPS = [
+    ["Converting to MP4 and WebM", "Lambda → MediaConvert"],
+    ["Generating cover thumbnails", "frame capture"],
+    ["Publishing to the CDN", "cdn.rexby.com"],
+  ];
+  $("upgo").innerHTML = '<span class="spin"></span>Processing';
+  $("steps").innerHTML = STEPS.map(([t, k], i) => `<div class="step reveal" id="st${i}" style="animation-delay:${i * 0.08}s"><span class="ic"></span>${t}<small>${k}</small></div>`).join("");
+  STEPS.forEach((_, i) => {
+    setTimeout(() => $("st" + i).classList.add("run"), 200 + i * 1100);
+    setTimeout(() => { $("st" + i).classList.replace("run", "ok"); $("st" + i).querySelector(".ic").textContent = "✓"; }, 1200 + i * 1100);
+  });
+  setTimeout(() => { $("upgo").innerHTML = "Done"; $("upgo").style.background = $("upgo").style.borderColor = "var(--success)"; }, 1300 + 2 * 1100);
+  setTimeout(() => { s.remove(); addVideoTile(); }, 1900 + 2 * 1100);
+}
+function addVideoTile() {
+  $("photos").insertAdjacentHTML("beforeend", `<div class="thumb vid" id="vtile">
+    <video src="${VIDEO_SRC}" autoplay loop muted playsinline></video>
+    <span class="vbadge">${PLAY}0:16</span><span class="x">×</span><span class="coverbtn" id="coverbtn">cover</span></div>`);
+  $("coverbtn").onclick = pickCover;
+}
+function pickCover() {
+  const s = modal(`<h2>Add a cover photo</h2><p>Frames from your video. Pick the one travelers see before it plays.</p>
+    <div class="cpick" id="cpick"><div style="grid-column:1/-1;height:410px;width:auto;display:grid;place-items:center;cursor:default"><span class="spin" style="width:36px;height:36px;border-width:3px;border-color:var(--inputbg);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite"></span></div></div>
+    <div class="foot" style="margin-top:20px"><button class="btn big off" id="ccontinue">Continue</button></div>`);
+  s.firstElementChild.style.width = "684px";
+  let pick = null;
+  setTimeout(() => {
+    $("cpick").innerHTML = [1, 2, 3, 4, 5, 6].map((n) => `<div data-c="${n}" class="reveal" style="background-image:url(media/covers/${n}.jpg);animation-delay:${n * 0.04}s"></div>`).join("");
+    $("cpick").querySelectorAll("div").forEach((d) => (d.onclick = () => {
+      $("cpick").querySelectorAll("div").forEach((x) => x.classList.toggle("on", x === d));
+      pick = `media/covers/${d.dataset.c}.jpg`;
+      $("ccontinue").classList.remove("off");
+    }));
+  }, 700);
+  $("ccontinue").onclick = () => {
+    if (!pick) return;
+    video.cover = pick;
+    s.remove();
+    $("vtile").querySelector("video").outerHTML = `<img src="${pick}" class="reveal" />`;
+  };
+}
+function previewSpot(id) {
+  const s = spots.find((x) => x.id === id);
+  const m = modal(`${s.cover ? `<video id="pv" src="${VIDEO_SRC}" autoplay loop muted playsinline poster="${s.cover}"></video>` : `<video poster="${img(id)}"></video>`}
+    <div class="tx"><span class="cat">${CAT_ICON[s.cat]}${s.cat}</span><h2>${s.title}</h2>
+    <div class="loc muted">${s.loc} · South Iceland</div>
+    <div class="facts"><span>1–2 hours</span><span>Free</span><span>All ages</span><span>May – October</span></div>
+    <p>${DESC[id] ?? ""}</p>
+    <div class="foot"><button class="btn outline" id="pvclose">Close</button><button class="btn">Get directions</button></div></div>`, "spotmodal");
+  m.onclick = (e) => e.target === m && m.remove();
+  $("pvclose").onclick = () => m.remove();
+}
+
+// ---- itinerary builder
+let days = [[]], day = 0;
+function enterItin() {
+  renderDays();
+  renderTiles();
+  map.setView([64.0, -20.2], 7.6, { animate: false });
+  drawRoute(false);
+}
+$("iname").oninput = (e) => ($("icount").textContent = e.target.value.length + "/50");
+function renderDays(fresh) {
+  $("days").innerHTML = days.map((_, i) => `<div class="day${i === day ? " on" : ""}${fresh && i === days.length - 1 ? " enter" : ""}" data-d="${i}">Day ${i + 1}</div>`).join("") +
+    '<div class="day add" id="addday">+ Add day</div>';
+  $("days").querySelectorAll("[data-d]").forEach((d) => (d.onclick = () => { day = +d.dataset.d; renderDays(); renderTiles(); drawRoute(true); }));
+  $("addday").onclick = () => { days.push([]); day = days.length - 1; renderDays(true); renderTiles(); drawRoute(true); };
+}
+function renderTiles() {
+  $("igrid").innerHTML = spots.map((s) => {
+    const n = days[day].indexOf(s.id);
+    const other = days.findIndex((d, i) => i !== day && d.includes(s.id));
+    return `<div class="tile${n >= 0 ? " sel" : ""}${other >= 0 ? " used" : ""}" data-id="${s.id}">
+      <div class="ph" style="background-image:url(${img(s.id)})">${n >= 0 ? `<span class="n">${n + 1}</span>` : other >= 0 ? `<span class="other">Day ${other + 1}</span>` : ""}</div>
+      <h4>${s.loc}</h4></div>`;
+  }).join("");
+  $("igrid").querySelectorAll(".tile").forEach((t) => (t.onclick = () => toggleStop(t.dataset.id)));
+}
+function toggleStop(id) {
+  const d = days[day], i = d.indexOf(id);
+  i >= 0 ? d.splice(i, 1) : d.push(id);
+  renderTiles();
+  drawRoute(true);
+}
+function drawRoute(move) {
+  layer.clearLayers();
+  const byId = Object.fromEntries(spots.map((s) => [s.id, s]));
+  const stops = days[day].map((id) => byId[id]);
+  spots.forEach((s) => { if (!days[day].includes(s.id)) L.marker(s.ll, { icon: icon('<div class="dot dim"></div>', [18, 18]) }).addTo(layer); });
+  if (stops.length > 1) {
+    // Road geometry per leg; a straight line only for pairs the tour never routes.
+    const path = stops.slice(1).flatMap((s, i) => LEGS[`${stops[i].id}>${s.id}`] ?? [stops[i].ll, s.ll]);
+    L.polyline(path, { color: "#1a5fb4", weight: 9, lineJoin: "round", lineCap: "round" }).addTo(layer);
+    L.polyline(path, { color: "#4a8ef0", weight: 6, lineJoin: "round", lineCap: "round" }).addTo(layer);
+  }
+  stops.forEach((s, i) => L.marker(s.ll, { icon: icon(`<div class="num">${i + 1}</div>`, [34, 34]), zIndexOffset: 1000 }).addTo(layer));
+  if (move && stops.length) {
+    const b = L.latLngBounds(stops.map((s) => s.ll));
+    map.flyToBounds(b.pad(0.5), { maxZoom: 9, duration: 1.1 });
+  }
+}
+$("addprice").onclick = () => {
+  const s = document.createElement("div");
+  s.className = "scrim";
+  const name = $("iname").value || "this";
+  s.innerHTML = `<div class="modal" style="width:560px"><h2>Add a price</h2><p>How much does it cost to unlock the <b style="color:#1282a6">${name}</b> itinerary?</p>
+    <div class="money"><span>USD $</span><input class="input" id="pinput" inputmode="numeric" /></div>
+    <div class="hint">You keep 80% of every sale. Travelers who own your full guide get it free.</div>
+    <div class="foot"><button class="btn" id="pcontinue">Continue</button></div></div>`;
+  document.body.append(s);
+  $("pcontinue").onclick = () => {
+    const v = $("pinput").value;
+    s.remove();
+    if (v) { $("addprice").innerHTML = `Edit Price <span>$${v}</span>`; $("addprice").dataset.price = v; }
+  };
+};
+$("share").onclick = () => {
+  $("share").innerHTML = '<span class="spin"></span>';
+  setTimeout(() => {
+    itins.unshift({ title: $("iname").value || "South Coast", img: days[0][0] || "skogafoss", days: days.length, stops: days.flat().length, price: $("addprice").dataset.price || 0 });
+    go("guide");
+    showTab("itins");
+    renderItins(true);
+    toast("Itinerary shared to your guide");
+  }, 900);
+};
+
+// ---- map view
+function enterMapView() {
+  $("mv-count").textContent = spots.length + " spots";
+  $("carousel").innerHTML = spots.map((s) => `
+    <div class="ccard" data-id="${s.id}"><div class="ph" style="background-image:url(${img(s.id)})"></div>
+      <div class="tx"><h4>${s.loc}</h4><div class="loc">${s.cat} · ${s.title}</div>
+      <div class="cta">${s.aff ? "<b>Book</b>" : ""}<span class="muted" style="font-size:12px">View spot →</span></div></div></div>`).join("");
+  $("carousel").querySelectorAll(".ccard").forEach((c) => (c.onclick = () => selectSpot(c.dataset.id)));
+  spots.forEach((s) => {
+    const m = L.marker(s.ll, { icon: icon(`<div class="catpin" data-pin="${s.id}">${CAT_ICON[s.cat]}</div>`, [38, 38]) }).addTo(layer);
+    m.on("click", () => selectSpot(s.id));
+  });
+  map.fitBounds(L.latLngBounds(spots.map((s) => s.ll)), { paddingTopLeft: [80, 160], paddingBottomRight: [80, 220], animate: false });
+}
+function selectSpot(id) {
+  document.querySelectorAll(".catpin").forEach((p) => p.classList.toggle("sel", p.dataset.pin === id));
+  document.querySelectorAll(".ccard").forEach((c) => c.classList.toggle("sel", c.dataset.id === id));
+  const c = document.querySelector(`.ccard[data-id="${id}"]`);
+  $("carousel").scrollTo({ left: c.offsetLeft - 28, behavior: "smooth" });
+}
+$("embedbtn").onclick = () => $("embed").classList.toggle("hidden");
+$("copy").onclick = () => { $("copy").textContent = "Copied!"; $("copy").classList.add("done"); };
+
+function toast(text) {
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.innerHTML = `<i>✓</i>${text}`;
+  document.body.append(t);
+  setTimeout(() => t.remove(), 2600);
+}
+
+renderSpots();
+renderItins();
+if (location.hash) go(location.hash.slice(1));
+</script>
+</body>
+</html>
