@@ -110,6 +110,15 @@ function ProjectCard({
   useLayoutEffect(() => {
     if (prevExpanded.current === expanded) return;
     prevExpanded.current = expanded;
+    // The outgoing media isn't layout-corrected, so the card's resize would
+    // stretch or squish it; hide it before the first frame of the resize.
+    // A quick toggle back can revive a hidden one, so show the incoming media.
+    scope.current
+      .querySelectorAll<HTMLElement>("[data-media]")
+      .forEach((el) => {
+        const outgoing = el.dataset.media !== (expanded ? "carousel" : "thumb");
+        el.style.visibility = outgoing ? "hidden" : "";
+      });
     const items = scope.current.querySelectorAll<HTMLElement>("[data-fade]");
     items.forEach((el) => (el.style.opacity = "0"));
     animate(
@@ -214,7 +223,7 @@ function ProjectCard({
                   className="-my-2 -mr-2 ml-2 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-dark-green transition-colors hover:bg-dark-green/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-dark-green"
                 >
                   <span data-fade className="inline-flex">
-                    <motion.svg
+                    <svg
                       viewBox="0 0 24 24"
                       className="h-5 w-5"
                       fill="none"
@@ -223,11 +232,16 @@ function ProjectCard({
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       aria-hidden="true"
-                      animate={{ rotate: expanded ? 180 : 0 }}
-                      transition={{ duration: 0.4, ease }}
                     >
-                      <path d="M7 17 17 7M9 7h8v8" />
-                    </motion.svg>
+                      {/* Expand: arrows out to opposite corners; collapse: arrows in. */}
+                      <path
+                        d={
+                          expanded
+                            ? "M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"
+                            : "M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"
+                        }
+                      />
+                    </svg>
                   </span>
                 </motion.button>
               )}
@@ -240,27 +254,44 @@ function ProjectCard({
             {p.media && (
               <motion.div
                 key={expanded ? "carousel" : "thumb"}
+                data-media={expanded ? "carousel" : "thumb"}
                 id={mediaId}
                 className="mt-6"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{
                   opacity: 1,
                   y: 0,
-                  transition: { duration: 0.4, delay: 0.4, ease },
+                  transition: { duration: 0.4, delay: 0.55, ease }, // after the layout spring
                 }}
                 exit={{ opacity: 0, transition: { duration: 0.05 } }}
               >
                 {expanded ? (
                   <MediaCarousel media={p.media} title={p.title} />
                 ) : (
-                  <div className="overflow-hidden border border-dark-green/20">
+                  <div className="relative overflow-hidden border border-dark-green/20">
                     <img
-                      src={p.media[0].poster}
+                      src={p.media[0].thumb ?? p.media[0].poster}
                       alt={p.media[0].alt}
                       loading="lazy"
                       draggable={false}
                       className="h-40 w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03] motion-reduce:transition-none sm:h-48"
                     />
+                    {p.media[0].type === "video" && (
+                      <span
+                        aria-hidden="true"
+                        className="absolute inset-0 flex items-center justify-end pr-[9%]"
+                      >
+                        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-dark-green/80 text-white shadow-lg backdrop-blur-sm transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none">
+                          <svg
+                            viewBox="0 0 24 24"
+                            className="ml-0.5 h-6 w-6"
+                            fill="currentColor"
+                          >
+                            <path d="M8 5.5v13l11-6.5z" />
+                          </svg>
+                        </span>
+                      </span>
+                    )}
                   </div>
                 )}
               </motion.div>
@@ -437,6 +468,8 @@ function MediaCarousel({ media, title }: MediaCarouselProps) {
 function MediaSlide({ media }: { media: Media }) {
   const video = useRef<HTMLVideoElement>(null);
   const reduceMotion = useReducedMotion();
+  // Browsers only autoplay muted video, so sound is opt-in.
+  const [muted, setMuted] = useState(true);
 
   // Played from here rather than via autoPlay, so reduced-motion visitors never
   // see it start; for them the poster stays up as a still.
@@ -452,25 +485,65 @@ function MediaSlide({ media }: { media: Media }) {
     }
   }, [reduceMotion]);
 
-  return media.type === "video" ? (
+  if (media.type !== "video")
+    return (
+      <img
+        src={media.src}
+        alt={media.alt}
+        loading="lazy"
+        draggable={false}
+        className="aspect-video w-full object-cover"
+      />
+    );
+
+  const player = (
     <video
       ref={video}
       src={media.src}
       poster={media.poster}
-      muted
+      muted={muted}
       loop
       playsInline
       preload="metadata"
       aria-label={media.alt}
       className="aspect-video w-full object-cover"
+      // TODO: remove before release. Click-to-pause is only for taking notes on the videos.
+      onClick={(e) =>
+        e.currentTarget.paused
+          ? e.currentTarget.play().catch(() => {})
+          : e.currentTarget.pause()
+      }
     />
-  ) : (
-    <img
-      src={media.src}
-      alt={media.alt}
-      loading="lazy"
-      draggable={false}
-      className="aspect-video w-full object-cover"
-    />
+  );
+  if (!media.audio) return player;
+
+  return (
+    <div className="relative">
+      {player}
+      <button
+        type="button"
+        onClick={() => setMuted((m) => !m)}
+        aria-label={muted ? "Unmute video" : "Mute video"}
+        className="absolute right-3 top-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-dark-green backdrop-blur-sm transition-colors hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-dark-green"
+      >
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          className="h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M11 5 6 9H2v6h4l5 4V5z" fill="currentColor" />
+          {muted ? (
+            <path d="m22 9-6 6m0-6 6 6" />
+          ) : (
+            <path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14" />
+          )}
+        </svg>
+      </button>
+    </div>
   );
 }

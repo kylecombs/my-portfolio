@@ -1,0 +1,173 @@
+{
+  "name": "Smeared Arp",
+  "version": 1,
+  "createdAt": "2026-08-06T15:13:48.138Z",
+  "nextId": 9,
+  "connId": 16,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "audioOut",
+      "x": 1115,
+      "y": 278,
+      "params": {}
+    },
+    {
+      "id": 2,
+      "type": "buchla259",
+      "x": 500,
+      "y": 192,
+      "params": {
+        "freq": 1847.8,
+        "linked": 1,
+        "modFreq": 300,
+        "fmRatio": 0.89,
+        "fmIndex": 0,
+        "timbre": 3,
+        "symmetry": -0.94,
+        "amp": 0.3
+      }
+    },
+    {
+      "id": 3,
+      "type": "lfo",
+      "x": 94,
+      "y": 145,
+      "params": {
+        "freq": 0.5,
+        "amp": 1,
+        "waveform": 0,
+        "width": 0.5
+      }
+    },
+    {
+      "id": 4,
+      "type": "lfo",
+      "x": 81,
+      "y": 443,
+      "params": {
+        "freq": 0.8,
+        "amp": 1,
+        "waveform": 2,
+        "width": 0.5
+      }
+    },
+    {
+      "id": 5,
+      "type": "pitch_quant",
+      "x": 318,
+      "y": 490,
+      "params": {
+        "lo": 98,
+        "hi": 110
+      },
+      "scaleNotes": [
+        true,
+        false,
+        true,
+        false,
+        true,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "id": 6,
+      "type": "scrambler",
+      "x": 828,
+      "y": 239,
+      "params": {
+        "segment": 0.266666666666667,
+        "speed": 1,
+        "reverse": 0,
+        "divisions": 0,
+        "random_jump": 1,
+        "freeze": 0,
+        "fade_mode": 0,
+        "amp": 1
+      }
+    },
+    {
+      "id": 8,
+      "type": "granular",
+      "x": 792,
+      "y": 534,
+      "params": {
+        "record": 1,
+        "position": 0.18,
+        "grain_size": 1,
+        "density": 0.17,
+        "scatter": 0.3,
+        "amp": 0.8
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": 2,
+      "from": 3,
+      "fromPort": 0,
+      "to": 2,
+      "toPort": -1,
+      "toParam": "fmIndex"
+    },
+    {
+      "id": 3,
+      "from": 3,
+      "fromPort": 0,
+      "to": 2,
+      "toPort": -1,
+      "toParam": "timbre",
+      "isAudioRate": true
+    },
+    {
+      "id": 6,
+      "from": 4,
+      "fromPort": 0,
+      "to": 5,
+      "toPort": 0
+    },
+    {
+      "id": 7,
+      "from": 5,
+      "fromPort": 0,
+      "to": 2,
+      "toPort": -1,
+      "toParam": "note",
+      "isAudioRate": true
+    },
+    {
+      "id": 8,
+      "from": 2,
+      "fromPort": 0,
+      "to": 6,
+      "toPort": 0
+    },
+    {
+      "id": 12,
+      "from": 2,
+      "fromPort": 0,
+      "to": 8,
+      "toPort": 0
+    },
+    {
+      "id": 13,
+      "from": 8,
+      "fromPort": 0,
+      "to": 1,
+      "toPort": 0
+    },
+    {
+      "id": 15,
+      "from": 8,
+      "fromPort": 0,
+      "to": 1,
+      "toPort": 1
+    }
+  ]
+}

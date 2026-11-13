@@ -1,0 +1,289 @@
+<!doctype html>
+<!-- Mock of the IPFS deploy tool built for Arx (2023). Made-up project, chips and CIDs; nothing touches IPFS or a chain. -->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Arx Deploy</title>
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+  :root { --ink: #0c0c0c; --paper: #f1f5f3; --line: #dfe5e2; --muted: #6b7470; --green: #51df20; --green-ink: #1f7a06; }
+  * { box-sizing: border-box; margin: 0; }
+  body { font: 15px/1.45 Inter, system-ui, sans-serif; color: var(--ink); background: var(--paper); height: 100vh; display: grid; grid-template-columns: 240px 1fr 520px; overflow: hidden; }
+  .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+  button { font: inherit; cursor: pointer; border: 0; border-radius: 10px; padding: 11px 18px; font-weight: 600; }
+  .primary { background: var(--ink); color: #fff; }
+  .primary:disabled { opacity: .35; cursor: default; }
+  .ghost { background: #fff; border: 1px solid var(--line); }
+  /* sidebar */
+  nav { background: var(--ink); color: #cfd6d2; padding: 28px 18px; display: flex; flex-direction: column; gap: 4px; }
+  nav .brand { display: flex; align-items: center; gap: 10px; color: #fff; font-weight: 700; font-size: 19px; margin: 0 8px 30px; }
+  nav .brand svg { width: 30px; height: 30px; }
+  nav a { padding: 10px 12px; border-radius: 8px; text-decoration: none; color: inherit; }
+  nav a.on { background: #222; color: #fff; }
+  nav .net { margin-top: auto; font-size: 13px; padding: 10px 12px; border: 1px solid #2b2b2b; border-radius: 8px; }
+  nav .net b { color: var(--green); }
+  /* main */
+  main { padding: 34px 40px; overflow: hidden; display: flex; flex-direction: column; gap: 22px; }
+  header h1 { font-size: 28px; letter-spacing: -.01em; }
+  header p { color: var(--muted); }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 22px 24px; }
+  .card h2 { font-size: 17px; display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .step { width: 26px; height: 26px; border-radius: 50%; background: var(--paper); display: grid; place-items: center; font-size: 13px; }
+  .done .step { background: var(--green); }
+  .row { display: flex; align-items: center; gap: 14px; }
+  .grow { flex: 1; }
+  .files { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px 22px; font-size: 13.5px; color: #333; margin: 4px 0 16px; }
+  .pill { font-size: 12.5px; padding: 3px 10px; border-radius: 99px; background: var(--paper); font-weight: 500; }
+  .pill.green { background: #e3f9da; color: var(--green-ink); }
+  .bar { height: 8px; background: var(--paper); border-radius: 99px; overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--green); transition: width .25s linear; }
+  .log { font-size: 13px; color: #444; min-height: 22px; }
+  .cid { display: none; margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: var(--paper); font-size: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; color: var(--muted); font-weight: 500; font-size: 12.5px; padding: 0 10px 8px; }
+  td { padding: 10px; border-top: 1px solid var(--line); }
+  td.target { font-size: 12.5px; color: var(--muted); }
+  td.target.set { color: var(--green-ink); }
+  input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--ink); }
+  .toggle { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #333; }
+  /* modal */
+  .scrim { position: fixed; inset: 0; background: rgba(12,12,12,.4); display: none; place-items: center; z-index: 5; }
+  .scrim.open { display: grid; }
+  .modal { width: 620px; background: #fff; border-radius: 18px; padding: 28px; display: flex; flex-direction: column; gap: 16px; }
+  .modal h3 { font-size: 20px; }
+  .kv { display: grid; grid-template-columns: 150px 1fr; gap: 8px 14px; font-size: 14px; }
+  .kv span:nth-child(odd) { color: var(--muted); }
+  .wallet { border: 1px solid var(--line); border-radius: 12px; padding: 14px; font-size: 14px; display: none; }
+  /* phone */
+  aside { display: grid; place-items: center; border-left: 1px solid var(--line); background: #e8edea; position: relative; }
+  aside .label { position: absolute; top: 34px; left: 0; right: 0; text-align: center; color: var(--muted); font-size: 13px; }
+  .phone { width: 340px; height: 700px; background: #111; border-radius: 48px; padding: 12px; box-shadow: 0 30px 60px rgba(0,0,0,.18); position: relative; }
+  .screen { width: 100%; height: 100%; border-radius: 37px; background: #fff; overflow: hidden; display: flex; flex-direction: column; }
+  .addr { margin: 44px 14px 0; padding: 8px 12px; background: #eef1ef; border-radius: 10px; font-size: 11.5px; color: #444; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .view { flex: 1; display: flex; flex-direction: column; }
+  .idle { flex: 1; display: grid; place-items: center; text-align: center; color: var(--muted); padding: 30px; }
+  .nfc { width: 110px; height: 110px; border-radius: 50%; border: 2px dashed #c8d0cc; display: grid; place-items: center; margin: 0 auto 16px; position: relative; }
+  .nfc.ping::after { content: ""; position: absolute; inset: -2px; border-radius: 50%; border: 3px solid var(--green); animation: ping 1s ease-out 2; }
+  @keyframes ping { from { transform: scale(.7); opacity: 1 } to { transform: scale(1.6); opacity: 0 } }
+  .resolve { padding: 26px 22px; font-size: 13px; display: flex; flex-direction: column; gap: 10px; }
+  .resolve div { opacity: 0; transition: opacity .3s; }
+  .resolve div.on { opacity: 1; }
+  .app { flex: 1; display: flex; flex-direction: column; animation: fade .5s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(8px) } to { opacity: 1 } }
+  .hero { height: 270px; margin: 14px; border-radius: 22px; display: grid; place-items: end start; padding: 18px; color: #fff; font-weight: 700; font-size: 22px; line-height: 1.15; }
+  .v1 .hero { background: linear-gradient(160deg, #3d5a4c, #1d2b24); }
+  .v2 .hero { background: linear-gradient(160deg, #c46b3c, #5a2a14); }
+  .app .body { padding: 2px 22px; display: flex; flex-direction: column; gap: 10px; font-size: 14px; }
+  .app .auth { display: flex; align-items: center; gap: 8px; color: var(--green-ink); font-weight: 600; }
+  .app button { margin: auto 18px 26px; background: var(--ink); color: #fff; }
+  .tapbtn { position: absolute; bottom: 40px; }
+</style>
+</head>
+<body>
+<nav>
+  <div class="brand">
+    <svg viewBox="0 0 64 64"><path d="M32.0052 0C14.326 0 0 14.326 0 32.0052C0 49.6843 14.326 64.0104 32.0052 64.0104C49.6843 64.0104 64.0104 49.6843 64.0104 32.0052C64.0104 14.326 49.674 0 32.0052 0ZM44.5768 40.7669L48.2829 46.3312H39.6769L33.6247 37.2477C33.6143 37.2269 33.5935 37.2062 33.5831 37.1854L33.5001 37.0608C32.8045 35.9708 32.3166 34.7354 32.1194 33.4066H31.9014C31.7041 34.7354 31.2162 35.9708 30.5207 37.0608L30.4376 37.1854C30.4272 37.2062 30.4065 37.2269 30.3961 37.2477L24.3439 46.3312H15.7379L22.4856 36.2096L25.2886 32.0052L19.444 23.2435L15.7379 17.6792H24.3439L30.3961 26.7627C30.4065 26.7835 30.4272 26.8042 30.4376 26.825L30.5207 26.9496C31.2162 28.0396 31.7041 29.2749 31.9014 30.6037H32.1194C32.3166 29.2749 32.8045 28.0396 33.5001 26.9496L33.5831 26.825C33.5935 26.8042 33.6143 26.7835 33.6247 26.7627L39.6769 17.6792H48.2829L41.5351 27.8008L38.7322 32.0052L44.5768 40.7669Z"
+d="clip0_3624_6039" fill="#fff"/></svg>
+    Deploy
+  </div>
+  <a class="on" href="#">Projects</a>
+  <a href="#">Chips</a>
+  <a href="#">Deployments</a>
+  <a href="#">Settings</a>
+  <div class="net">Network <b>●</b> Sepolia testnet</div>
+</nav>
+
+<main>
+  <header class="row">
+    <div class="grow">
+      <h1>Ridgeline Alpine Shell</h1>
+      <p>Tap-to-open experience for the hang tag on every jacket</p>
+    </div>
+    <span class="pill mono" id="version">v1.2.0</span>
+  </header>
+
+  <section class="card" id="build">
+    <h2><span class="step">1</span>Build</h2>
+    <div class="files mono">
+      <span>index.html</span><span>app.js</span><span>styles.css</span>
+      <span>assets/jacket.webp</span><span>assets/care.svg</span><span>manifest.json</span>
+    </div>
+    <div class="row">
+      <span class="grow" style="color:var(--muted);font-size:14px" id="build-note">14 files · 2.3 MB · built from main</span>
+      <label class="toggle" id="auto-wrap" style="display:none"><input type="checkbox" id="auto" checked /> Update linked chips</label>
+      <button class="primary" id="deploy">Deploy to IPFS</button>
+    </div>
+  </section>
+
+  <section class="card" id="pin">
+    <h2><span class="step">2</span>Pin to IPFS</h2>
+    <div class="bar"><i id="progress"></i></div>
+    <div class="log mono" id="log" style="margin-top:10px">Waiting for a build</div>
+    <div class="cid mono" id="cid-box">
+      <div class="row"><span class="grow">CID <b id="cid"></b></span><span class="pill green">Pinned</span></div>
+    </div>
+  </section>
+
+  <section class="card" id="link">
+    <h2><span class="step">3</span>Link chips</h2>
+    <table>
+      <thead><tr><th style="width:30px"><input type="checkbox" id="all" /></th><th>Chip</th><th>Form factor</th><th>ERS target</th></tr></thead>
+      <tbody id="chips"></tbody>
+    </table>
+    <div class="row" style="margin-top:16px">
+      <span class="grow" style="color:var(--muted);font-size:14px" id="sel">0 selected</span>
+      <button class="primary" id="linkbtn" disabled>Link chips</button>
+    </div>
+  </section>
+</main>
+
+<aside>
+  <div class="label">Phone preview</div>
+  <div class="phone"><div class="screen">
+    <div class="addr mono" id="addr">Waiting for tap</div>
+    <div class="view" id="view">
+      <div class="idle"><div><div class="nfc" id="nfc">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#9aa39f" stroke-width="1.6"><path d="M6 8.5a6 6 0 0 1 0 7M9.5 6a10 10 0 0 1 0 12M13 3.5a14 14 0 0 1 0 17"/></svg>
+      </div>Hold the phone near a hang tag</div></div>
+    </div>
+  </div></div>
+  <button class="ghost tapbtn" id="tap">Simulate tap</button>
+</aside>
+
+<div class="scrim" id="scrim"><div class="modal">
+  <h3 id="m-title">Update ERS records</h3>
+  <div class="kv">
+    <span>Chips</span><span id="m-chips"></span>
+    <span>New target</span><span class="mono" id="m-target"></span>
+    <span>Contract</span><span class="mono">ERS Registry · 0x5E1a…c09B</span>
+    <span>Network</span><span>Sepolia testnet</span>
+  </div>
+  <div class="wallet" id="wallet">
+    <div class="row"><span class="grow">Waiting for wallet signature…</span><span class="pill" id="w-state">Pending</span></div>
+  </div>
+  <div class="row" style="justify-content:flex-end;gap:10px">
+    <button class="ghost" id="cancel">Cancel</button>
+    <button class="primary" id="confirm">Confirm in wallet</button>
+  </div>
+</div></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const CIDS = ["bafybeigq4zx7ll2c3nrxkd6hm5ve4w2yy3dkuq7ykjpwm6nq2fzbhvhpe4", "bafybeih2rk5qbmt4ofx7d3nlwvjcs6uyxa2e5p3qgz7vk4hmrw1tz6nbea"];
+const short = (cid) => cid.slice(0, 10) + "…" + cid.slice(-6);
+const CHIPS = [
+  ["0x8f3A…41c2", "Hang tag"], ["0x2bE9…77d0", "Hang tag"], ["0xC41d…0e9a", "Hang tag"],
+  ["0x6a07…b3F5", "Hang tag"], ["0x91Dc…5a18", "Hang tag"], ["0x3F6e…c2B7", "Hang tag"],
+];
+let deploys = 0, cid = null, linked = false;
+
+$("chips").innerHTML = CHIPS.map(([a, f], i) =>
+  `<tr><td><input type="checkbox" class="chip" data-i="${i}" /></td><td class="mono">${a}</td><td>${f}</td><td class="target mono" id="t${i}">Not linked</td></tr>`).join("");
+const boxes = [...document.querySelectorAll(".chip")];
+const syncSel = () => {
+  const n = boxes.filter((b) => b.checked).length;
+  $("sel").textContent = linked ? `${n} chips linked` : `${n} selected`;
+  $("linkbtn").disabled = !n || !cid;
+  $("linkbtn").textContent = n ? `Link ${n} chip${n > 1 ? "s" : ""}` : "Link chips";
+  $("all").checked = n === boxes.length;
+};
+boxes.forEach((b) => (b.onchange = syncSel));
+$("all").onchange = () => { boxes.forEach((b) => (b.checked = $("all").checked)); syncSel(); };
+
+async function setRecords(rows) {
+  for (const i of rows) {
+    const t = $("t" + i);
+    t.textContent = "ipfs://" + short(cid);
+    t.classList.add("set");
+    await sleep(140);
+  }
+}
+
+$("deploy").onclick = async () => {
+  $("deploy").disabled = true;
+  const steps = deploys
+    ? ["Building v1.3.0", "Uploading 15 files", "Pinning to 3 providers"]
+    : ["Building v1.2.0", "Uploading 14 files", "Pinning to 3 providers"];
+  $("cid-box").style.display = "none";
+  $("progress").style.width = "0";
+  for (let i = 0; i < steps.length; i++) {
+    $("log").textContent = steps[i] + "…";
+    for (let p = 0; p < 4; p++) { $("progress").style.width = ((i * 4 + p + 1) / 12) * 100 + "%"; await sleep(230); }
+  }
+  cid = CIDS[deploys];
+  $("cid").textContent = short(cid);
+  $("log").textContent = "Done in 3.1s · ipfs://" + short(cid);
+  $("cid-box").style.display = "block";
+  $("build").classList.add("done"); $("pin").classList.add("done");
+  if (deploys && linked && $("auto").checked) {
+    $("log").textContent = "Updating 6 ERS records…";
+    await sleep(500);
+    await setRecords(boxes.map((_, i) => i));
+    $("log").textContent = "6 chips now open v1.3.0";
+  }
+  deploys++;
+  $("deploy").disabled = false;
+  syncSel();
+};
+
+$("linkbtn").onclick = () => {
+  const n = boxes.filter((b) => b.checked).length;
+  $("m-chips").textContent = `${n} hang tags`;
+  $("m-target").textContent = "ipfs://" + short(cid);
+  $("wallet").style.display = "none";
+  $("confirm").disabled = false;
+  $("scrim").classList.add("open");
+};
+$("cancel").onclick = () => $("scrim").classList.remove("open");
+$("confirm").onclick = async () => {
+  $("confirm").disabled = true;
+  $("wallet").style.display = "block";
+  $("w-state").textContent = "Pending";
+  await sleep(1300);
+  $("w-state").textContent = "Confirmed";
+  $("w-state").className = "pill green";
+  await sleep(700);
+  $("scrim").classList.remove("open");
+  await setRecords(boxes.filter((b) => b.checked).map((b) => +b.dataset.i));
+  linked = true;
+  $("link").classList.add("done");
+  $("sel").textContent = "6 chips linked";
+};
+
+// Second deploy: the build card offers to update the linked chips.
+window.prepareUpdate = () => {
+  $("version").textContent = "v1.3.0";
+  $("build-note").textContent = "15 files · 2.6 MB · spring colorway";
+  $("auto-wrap").style.display = "flex";
+  $("deploy").textContent = "Redeploy";
+  $("build").classList.remove("done"); $("pin").classList.remove("done");
+};
+
+$("tap").onclick = async () => {
+  if (!linked) return;
+  const v = deploys > 1 ? 2 : 1;
+  $("nfc")?.classList.add("ping");
+  $("addr").textContent = "Reading chip…";
+  await sleep(900);
+  $("view").innerHTML = `<div class="resolve mono">
+    <div>chip 0x8f3A…41c2</div><div>→ ERS lookup</div><div>→ ipfs://${short(cid)}</div></div>`;
+  for (const d of $("view").querySelectorAll(".resolve div")) { await sleep(380); d.classList.add("on"); }
+  await sleep(500);
+  $("addr").textContent = cid.slice(0, 14) + "….ipfs.dweb.link";
+  $("view").innerHTML = `<div class="app v${v}">
+    <div class="hero">Alpine Shell${v === 2 ? "<br>Ember colorway" : ""}</div>
+    <div class="body">
+      <div class="auth">✓ Authentic · No. 0142 of 500</div>
+      <div style="color:#555">${v === 2 ? "Spring drop: register this jacket to unlock early access to the new colorway." : "Waterproof 3-layer shell. Care guide, repairs and warranty for this jacket."}</div>
+    </div>
+    <button>${v === 2 ? "Get early access" : "Register my jacket"}</button></div>`;
+};
+// Reset the phone between taps.
+window.resetPhone = () => {
+  $("addr").textContent = "Waiting for tap";
+  $("view").innerHTML = `<div class="idle"><div><div class="nfc" id="nfc"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#9aa39f" stroke-width="1.6"><path d="M6 8.5a6 6 0 0 1 0 7M9.5 6a10 10 0 0 1 0 12M13 3.5a14 14 0 0 1 0 17"/></svg></div>Hold the phone near a hang tag</div></div>`;
+};
+</script>
+</body>
+</html>

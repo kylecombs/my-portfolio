@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Software Factory</title>
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<link rel="stylesheet" href="drawer.css">
+<style>
+  main { display: grid; grid-template-columns: repeat(4, minmax(220px, 1fr)); gap: 16px;
+         padding: 12px 24px 24px; align-items: start; }
+  .col { min-width: 0; }
+  .col h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted);
+            margin: 0 0 8px; display: flex; justify-content: space-between; }
+  .lane { display: flex; flex-direction: column; gap: 8px; min-height: 80px; padding: 6px;
+          border-radius: 10px; border: 1px dashed var(--line); }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+          padding: 10px 12px; display: block; text-decoration: none; color: inherit; transition: border-color .15s, transform .15s; }
+  .card:hover, .card:focus-visible { border-color: var(--accent); outline: none; transform: translateY(-1px); }
+  /* Both wait on a human; sign-off is highlighted but nothing is wrong, so it isn't red. */
+  .card.human { border: 1.5px solid var(--human); box-shadow: 0 0 0 3px var(--human-bg); }
+  .card.signoff { border: 1.5px solid var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
+  .card .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .round { display: flex; align-items: center; gap: 4px; margin-top: 6px; }
+  .round b { font: 600 10px ui-monospace, Menlo, monospace; color: var(--muted); width: 20px; }
+  .empty { color: var(--muted); font-size: 12px; padding: 24px; text-align: center; grid-column: 1 / -1; }
+  /* Liveness: an agent is on this job (sweep + pulse), a busy button spins. */
+  .card { position: relative; overflow: hidden; }
+  .card.working::before { content: ""; position: absolute; inset: 0 0 auto; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    transform: translateX(-100%); animation: sweep 1.6s ease-in-out infinite; }
+  .live { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--accent); margin-top: 6px; }
+  .live.wait { color: var(--muted); }
+  .live .since { color: var(--muted); }
+  .card.stale::before { animation: none; transform: none; background: var(--changes-line); }
+  .card.stale .live { color: var(--muted); }
+  .card.stale .pulse { animation: none; }
+  .quiet { font-size: 12px; color: var(--human); margin-top: 4px; }
+  .quiet:empty { display: none; }
+  .card.working .chip.pending { animation: fade 1.4s ease-in-out infinite; }
+  @keyframes sweep { to { transform: translateX(100%); } }
+  @keyframes fade { 50% { opacity: .4; } }
+  @media (prefers-reduced-motion: reduce) {
+    .card.working::before { animation: none; transform: none; }
+  }
+  @media (max-width: 1000px) { main { grid-template-columns: repeat(2, minmax(220px, 1fr)); } }
+  @media (max-width: 720px) { main { grid-template-columns: 1fr; padding: 12px 16px; } }
+</style>
+</head>
+<body>
+<header class="top"><h1>Software factory</h1><span id="status">connecting…</span></header>
+<main id="board"></main>
+
+<script src="drawer.js"></script>
+<script>
+// Board columns -> the driver stages they hold (machine.STAGES minus "closed"; legacy jobs use a
+// subset). Within a column, stages waiting on a human come first.
+const COLUMNS = [["Queue", ["backlog"]],
+                 ["Spec", ["questions", "signoff", "spec"]],
+                 ["In progress", ["queued", "build", "checks", "design", "review", "approve"]],
+                 ["Review", ["needs-human", "pr-open", "ready"]]];
+
+let last = "";
+
+function chips(reviews, label) {
+  return `<div class="round"><b>${esc(label)}</b>${REVIEWERS.map(r =>
+    `<span class="chip ${esc(reviews?.[r])}" title="${r}: ${esc(reviews?.[r] || "pending")}">${r}</span>`).join("")}</div>`;
+}
+
+const ACTIVE = { spec: "Writing spec", build: "Building", checks: "Running checks", design: "Design review",
+                 review: "Reviewing", approve: "Approver deciding" };
+// What's happening on a job right now, if anything: [label, waiting?].
+function activity(j) {
+  if (j.rework === "requested") return ["Comment queued for /factory", true];
+  if (!ACTIVE[j.stage]) return null;
+  if (j.stage !== "review") return [ACTIVE[j.stage], false];
+  const picked = (v2(j) ? ["code", "security"] : REVIEWERS).filter(r => j.reviews?.[r] && j.reviews[r] !== "skipped");
+  return [`Reviewing · ${picked.filter(r => j.reviews[r] !== "pending").length}/${picked.length} done`, false];
+}
+
+const ago = t => {  // t: ISO string or ms timestamp
+  const s = Math.max(0, (Date.now() - new Date(t).getTime()) / 1000);
+  return !t || isNaN(s) ? "" : s < 60 ? "just now" : s < 3600 ? `${Math.floor(s / 60)}m` : `${Math.floor(s / 3600)}h ${Math.floor(s / 60) % 60}m`;
+};
+// No file change in the job folder or worktree for this long (factory/server.py /api/activity) → maybe stuck.
+const STALE_MIN = 15;
+let changedAt = {};  // job id -> newest file change, unix seconds
+function tick() {
+  document.querySelectorAll("[data-since]").forEach(e => e.textContent = ago(e.dataset.since));
+  document.querySelectorAll(".card.working").forEach(c => {
+    const t = changedAt[c.dataset.id] * 1000, stale = t && Date.now() - t > STALE_MIN * 60000;
+    c.classList.toggle("stale", !!stale);
+    c.querySelector(".quiet").textContent = stale ? `No file changes for ${ago(t)}. It may be stuck.` : "";
+  });
+}
+
+function card(j) {
+  // Legacy history is one reviews object per round; v2 history is the human actions log.
+  const rounds = v2(j) ? [[j.reviews, ""]]
+    : [...(j.history || []), ...(j.round ? [j.reviews] : [])].map((r, i) => [r, `R${i + 1}`]);
+  const a = activity(j), [badge, hl] = stageBadge(j);
+  return `<a class="card ${hl} ${a && !a[1] ? "working" : ""}" data-id="${esc(j.id)}" href="job.html?id=${encodeURIComponent(j.id)}"
+    ${a && !a[1] ? `aria-busy="true"` : ""}>
+    <div class="top"><span class="id">${esc(j.id)}</span><span class="badge ${hl || (j.stage === "pr-open" ? "pr" : "")}">${esc(badge)}</span></div>
+    <div class="title">${esc(j.title || j.id)}</div>
+    <div class="meta">${esc(metaLine(j))}</div>
+    ${rounds.map(([r, label]) => chips(r, label)).join("")}
+    ${a ? `<div class="live ${a[1] ? "wait" : ""}"><span class="pulse" aria-hidden="true"></span>${esc(a[0])}
+      ${j.updated ? `<span class="since" title="since the last job update" data-since="${esc(j.updated)}">${ago(j.updated)}</span>` : ""}</div>
+    ${a[1] ? "" : `<div class="quiet"></div>`}` : ""}
+    ${j.note ? `<div class="note ${noteIsError(j) ? "" : "wait"}">${esc(j.note)}</div>` : ""}
+  </a>`;
+}
+
+function render() {
+  const el = document.getElementById("board");
+  if (!jobs.length) { el.innerHTML = `<div class="empty">No jobs yet. Run <code>/factory &lt;feature&gt;</code>.</div>`; return; }
+  el.innerHTML = COLUMNS.map(([label, stages]) => {
+    const here = stages.flatMap(s => jobs.filter(j => j.stage === s));
+    return `<section class="col"><h2><span>${label}</span><span>${here.length}</span></h2>
+      <div class="lane">${here.map(card).join("")}</div></section>`;
+  }).join("");
+}
+
+async function poll() {
+  const status = document.getElementById("status");
+  try {
+    // One job.json per job; python's http.server lists the jobs/ folder as HTML links.
+    const res = await fetch("jobs/", { cache: "no-store" });
+    const listing = res.ok ? await res.text() : "";
+    const ids = [...listing.matchAll(/href="(\d{3}-[^"/]+)\/"/g)].map(m => decodeURIComponent(m[1])).sort();
+    const found = await Promise.all(ids.map(id =>
+      fetch(`jobs/${encodeURIComponent(id)}/job.json`, { cache: "no-store" })
+        .then(r => r.ok ? r.json() : null).catch(() => null)));
+    const text = JSON.stringify(found.filter(Boolean));
+    if (text !== last) {
+      last = text; jobs = JSON.parse(text); render();
+    }
+    // Absent with a plain static server: then no stuck warnings, just the stage timer.
+    changedAt = await fetch("api/activity", { cache: "no-store" }).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+    tick();
+    status.className = ""; status.textContent = `live · ${new Date().toLocaleTimeString()}`;
+  } catch (e) { status.className = "off"; status.textContent = "factory server unreachable"; }
+}
+
+poll(); setInterval(poll, 2000);
+</script>
+</body>
+</html>

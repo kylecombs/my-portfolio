@@ -19,7 +19,11 @@ export interface ProjectMedia {
   src: string;
   /** Still frame: shown before a video loads and instead of it under reduced motion. */
   poster: string;
+  /** Collapsed-card still, when it should differ from the poster. */
+  thumb?: string;
   alt: string;
+  /** The video has sound: it still starts muted, with a mute/unmute button. */
+  audio?: boolean;
 }
 
 export interface Project {
@@ -62,13 +66,6 @@ export function isPlaceholder(value: string) {
 }
 
 // Stand-in images until real project media is recorded.
-const placeholderMedia: ProjectMedia[] = [1, 2, 3].map((n) => ({
-  type: "image",
-  src: `/assets/projects/placeholder-${n}.svg`,
-  poster: `/assets/projects/placeholder-${n}.svg`,
-  alt: `Placeholder image ${n}`,
-}));
-
 // Keyed by Job.company / Project.context; entries without a logo render name only.
 export const companyLogos: Record<string, string> = {
   CAMP: "/assets/logos/camp.svg",
@@ -82,7 +79,7 @@ export const availability = "Accepting new clients in 2027";
 export const hero = {
   label: "Fullstack & Product Engineer",
   intro:
-    "I’m a fullstack engineer who helps teams ship polished products: React frontends, Node and Rails APIs, Shopify apps, and data pipelines. I bring engineering, design, and product thinking to every project, and I work part-time on contract, so you get senior help without a full-time hire.",
+    "I’m a fullstack engineer who helps teams ship polished products: React frontends, Node and Rails APIs, Shopify apps, and data pipelines. I bring engineering, design, and product thinking to every project, and I work on contract in whatever shape fits, from a single project to an ongoing role on your team, so you get senior help without a full-time hire.",
 };
 
 export const services: Service[] = [
@@ -120,15 +117,14 @@ export const services: Service[] = [
 
 export const howIWork: Principle[] = [
   {
-    title: "Part-time, ongoing.",
-    // TODO: confirm typical weekly hours
+    title: "The support you need.",
     description:
-      "Typically [10–20] hours a week, for months rather than weeks. Enough to own real work without the cost of a full-time hire.",
+      "Contract work made to fit your needs. Available on a project basis or as an embedded member of your team, with experience to own real work without the cost of a full-time hire.",
   },
   {
     title: "Inside your tools.",
     description:
-      "I work in your Slack, Linear or Jira, and GitHub, and I join standups when that helps.",
+      "I work in your Slack, Linear or Jira, and GitHub, and I join meetings when that helps. Adaptable to fit into your business rhythms.",
   },
   {
     title: "Product-minded.",
@@ -145,13 +141,13 @@ export const howIWork: Principle[] = [
 // *text* renders as <em>
 export const about: { paragraphs: string[]; facts: Fact[] } = {
   paragraphs: [
-    "I’m a fullstack engineer working part-time on contract. Right now I lead frontend at *CAMP* and build the analytics pipeline for *ALEX AND ANI*.",
-    "I came to software from the art world. After a BFA in Studio Art, I spent eight years as a preparator at David Zwirner, installing complex exhibitions and caring for the artworks in them. It taught me to sweat the details people only notice when they’re wrong.",
+    "I’m a fullstack engineer leading frontend at *CAMP* and building the analytics pipeline for *ALEX AND ANI*. I’m currently accepting new clients.",
+    "I came to software from the art world. After receiving my BFA, I spent eight years as a preparator at David Zwirner, installing complex exhibitions and caring for the artworks in them. It taught me to sweat the details people only notice when they’re wrong.",
     "Since then I’ve shipped React frontends, Node and Rails APIs, AWS media pipelines and dbt/Snowflake warehouses, usually as one of two or three engineers who own the whole product. I’m based in Brooklyn and work remotely.",
   ],
   facts: [
     { label: "Based", value: "Brooklyn · Remote" },
-    { label: "Working", value: "Part-time contract, remote" },
+    { label: "Working", value: "Contract, remote" },
     { label: "Focus", value: "Frontend, Shopify, Node and Rails APIs, data pipelines" },
     { label: "Currently", value: "CAMP · ALEX AND ANI" },
   ],
@@ -165,7 +161,7 @@ export const experienceLinks = {
 
 export const contact = {
   intro:
-    "I’m currently booking part-time contract work for 2027. Tell me a little about your team, what you’re building, and where you’re stuck. I’ll reply within one business day.",
+    "I’m currently booking contract work for 2027. Tell me a little about your team, what you’re building, and where you’re stuck. I’ll reply within one business day.",
   booking: {
     label: "Book a 15-min intro call",
     // The "30min" slug is Calendly's default; the event itself is 15 minutes.
@@ -275,24 +271,10 @@ export const experience: Job[] = [
 ];
 
 /** Number of projects shown in Selected Work on the home page; the rest appear on /projects. */
-export const selectedWorkCount = 6;
+export const selectedWorkCount = 8;
 
 // TODO: add `media` (short screen-capture video + poster) to each project as it's recorded
 export const projects: Project[] = [
-  {
-    title: "ORA",
-    // TODO: confirm label and year
-    context: "[Personal project · 2026]",
-    problem:
-      "Modular synthesis usually means expensive hardware or desktop software, and it’s hard to make music with someone else in real time.",
-    built:
-      "A browser-based modular synth: patch modules together on a canvas and hear them instantly, with SuperCollider compiled to WebAssembly running all audio in the browser. Several people can edit one patch live while only the patch state syncs between them, and a built-in Claude assistant helps build patches.",
-    result:
-      "Live and free to try: 80+ synth modules, real-time multiplayer patching and an AI patch assistant, all in a browser tab with nothing to install.",
-    tags: ["React", "WebAssembly", "SuperCollider", "WebSockets", "Claude API"],
-    media: placeholderMedia,
-    link: { label: "Try it", href: "https://ora-fm.fly.dev/" },
-  },
   {
     title: "Experience Booking Flow",
     context: "CAMP",
@@ -305,20 +287,16 @@ export const projects: Project[] = [
     result:
       "After the relaunch, conversion climbed as much as 90% year over year, add-on sales grew, and the checkout’s Lighthouse score rose 20 points.",
     tags: ["React", "TypeScript", "Ruby on Rails", "Shopify"],
-    media: placeholderMedia,
-  },
-  {
-    title: "Retail Analytics Pipeline",
-    context: "ALEX AND ANI",
-    year: "2025–Present",
-    problem:
-      "A national jewelry brand selling online, wholesale and on Amazon needed sales and ad data from Shopify, Meta, Google, Amazon and Bing it could trust in one place.",
-    built:
-      "I took over the Fivetran, dbt, Snowflake and Looker stack and now own it. I’ve fixed refund discrepancies, ad metrics over-reporting and duplicated products and SKUs, and added wholesale partner reporting, merchandising fields, and repeat purchase and lifetime value analysis.",
-    result:
-      "Merchandising, marketing and leadership pull their own trusted numbers from 8 Looker explores built on 37 dbt models.",
-    tags: ["dbt", "Snowflake", "Fivetran", "Looker"],
-    media: placeholderMedia,
+    // Generated by video/ (npm run export -- camp-booking)
+    media: [
+      {
+        type: "video",
+        src: "/assets/projects/camp-booking/web-1080.mp4",
+        poster: "/assets/projects/camp-booking/poster.jpg",
+        thumb: "/assets/projects/camp-booking/thumb.jpg",
+        alt: "Booking a Bluey’s House visit: picking a date and time, adding two tickets and souvenir ears, then reaching checkout",
+      },
+    ],
   },
   {
     title: "Shopify Admin & POS Extensions",
@@ -331,20 +309,38 @@ export const projects: Project[] = [
     result:
       "Every team, from store staff to marketing and growth, now manages reservations, activities, add-ons and birthday parties in one place.",
     tags: ["Shopify", "Shopify Functions", "React", "Ruby on Rails"],
-    media: placeholderMedia,
+    // Generated by video/ (npm run export -- shopify-admin); records a Polaris mock with made-up data
+    media: [
+      {
+        type: "video",
+        src: "/assets/projects/shopify-admin/web-1080.mp4",
+        poster: "/assets/projects/shopify-admin/poster.jpg",
+        thumb: "/assets/projects/shopify-admin/thumb.jpg",
+        alt: "The CAMP app inside Shopify admin: bulk-updating time slot prices, turning an add-on off at one store, ticket bundles, and tracking an invoice on a birthday party lead",
+      },
+    ],
   },
   {
-    title: "Agent Coding Workflow",
-    // TODO: confirm label and year
-    context: "[Personal project · 2026]",
+    title: "Retail Analytics Pipeline",
+    context: "ALEX AND ANI",
+    year: "2025–Present",
     problem:
-      "Teams want AI coding agents but can’t let them push unreviewed code.",
+      "A national jewelry brand selling online, wholesale and on Amazon needed sales and ad data from Shopify, Meta, Google, Amazon and Bing it could trust in one place.",
     built:
-      "A Python orchestrator that turns a one-line request or Linear ticket into a reviewed pull request. Claude agents write the spec, code and tests in a sandboxed Docker container, automated checks gate every round, and design, code and security reviewers must all pass before a PR opens. A human approves every spec and merges every PR.",
+      "I took over the Fivetran, dbt, Snowflake and Looker stack and now own it. I’ve fixed refund discrepancies, ad metrics over-reporting and duplicated products and SKUs, and added wholesale partner reporting, merchandising fields, and repeat purchase and lifetime value analysis.",
     result:
-      "Dozens of merged PRs and thousands of lines of production code so far, saving hundreds of hours of developer time.",
-    tags: ["Python", "Claude Code", "Linear", "Docker", "Playwright"],
-    media: placeholderMedia,
+      "Merchandising, marketing and leadership pull their own trusted numbers from 8 Looker explores built on 37 dbt models.",
+    tags: ["dbt", "Snowflake", "Fivetran", "Looker"],
+    // Generated by video/ (npm run export -- retail-pipeline)
+    media: [
+      {
+        type: "video",
+        src: "/assets/projects/retail-pipeline/web-1080.mp4",
+        poster: "/assets/projects/retail-pipeline/poster.jpg",
+        thumb: "/assets/projects/retail-pipeline/thumb.jpg",
+        alt: "Animated diagram of the pipeline: five sales and ad sources sync through Fivetran into Snowflake, dbt models clean and reconcile the data, and Looker charts serve merchandising, marketing and leadership",
+      },
+    ],
   },
   {
     title: "IPFS Deploy for NFC Chips",
@@ -357,9 +353,16 @@ export const projects: Project[] = [
     result:
       "Brand partners could update a physical item’s experience without reissuing hardware.",
     tags: ["IPFS", "NFC", "ERS"],
-    media: placeholderMedia,
+    media: [
+      {
+        type: "video",
+        src: "/assets/projects/arx-ipfs/web-1080.mp4",
+        poster: "/assets/projects/arx-ipfs/poster.jpg",
+        thumb: "/assets/projects/arx-ipfs/thumb.jpg",
+        alt: "A replica of the deploy tool: pinning a web app to IPFS, linking six NFC hang tags to it through ERS, tapping one to open the app, then redeploying so the same tag opens a new version",
+      },
+    ],
   },
-  // Archive: shown on /projects only
   {
     title: "Creator Tools & Map Editor",
     context: "Rexby",
@@ -371,10 +374,19 @@ export const projects: Project[] = [
     result:
       "Creators could build, price and publish their own guides without help from Rexby’s team.",
     tags: ["Next.js", "TypeScript", "GraphQL", "Google Maps", "Cypress"],
-    media: placeholderMedia,
+    // Generated by video/ (npm run export -- rexby-creator), from a replica of the 2022 app
+    media: [
+      {
+        type: "video",
+        src: "/assets/projects/rexby-creator/web-1080.mp4",
+        poster: "/assets/projects/rexby-creator/poster.jpg",
+        thumb: "/assets/projects/rexby-creator/thumb.jpg",
+        alt: "Building a South Iceland guide: adding a canyon spot with photos and an affiliate link, planning a two-day itinerary on the map, pricing it, and copying the map embed code",
+      },
+    ],
   },
   {
-    title: "Video Transcoding Pipeline",
+    title: "Video Upload Pipeline",
     context: "Rexby",
     year: "2022",
     problem:
@@ -384,8 +396,86 @@ export const projects: Project[] = [
     result:
       "Video became a core part of creator profiles and guides, playing smoothly on any device.",
     tags: ["AWS S3", "Lambda", "MediaConvert"],
-    media: placeholderMedia,
+    // Generated by video/ (npm run export -- rexby-video), from a replica of the 2022 app
+    media: [
+      {
+        type: "video",
+        src: "/assets/projects/rexby-video/web-1080.mp4",
+        poster: "/assets/projects/rexby-video/poster.jpg",
+        thumb: "/assets/projects/rexby-video/thumb.jpg",
+        alt: "Adding a phone video of Seljalandsfoss to a guide spot: uploading to S3, processing into streaming formats, picking a cover frame, and watching it play in the traveler view",
+      },
+    ],
   },
+  {
+    title: "Agent Coding Workflow",
+    // TODO: confirm label and year
+    context: "[Personal project · 2026]",
+    problem:
+      "Teams want AI coding agents but can’t let them push unreviewed code.",
+    built:
+      "A Python orchestrator that turns a one-line request or Linear ticket into a reviewed pull request. Claude agents write the spec, code and tests in a sandboxed Docker container, automated checks gate every round, and design, code and security reviewers must all pass before a PR opens. A human approves every spec and merges every PR.",
+    result:
+      "Dozens of merged PRs and thousands of lines of production code so far, saving hundreds of hours of developer time.",
+    tags: ["Python", "Claude Code", "Linear", "Docker", "Playwright"],
+    // Generated by video/ (npm run export -- agent-workflow); records the dashboard with mock tickets
+    media: [
+      {
+        type: "video",
+        src: "/assets/projects/agent-workflow/web-1080.mp4",
+        poster: "/assets/projects/agent-workflow/poster.jpg",
+        thumb: "/assets/projects/agent-workflow/thumb.jpg",
+        alt: "The agent workflow dashboard: tickets moving across the board, signing off a spec, a job's workflow graph with its loop-backs, a design review with screenshots, and the pull request's diff and decision",
+      },
+    ],
+  },
+  {
+    title: "ORA",
+    // TODO: confirm label and year
+    context: "[Personal project · 2026]",
+    problem:
+      "Modular synthesis usually means expensive hardware or desktop software, and it’s hard to make music with someone else in real time.",
+    built:
+      "A browser-based modular synth: patch modules together on a canvas and hear them instantly, with SuperCollider compiled to WebAssembly running all audio in the browser. Several people can edit one patch live while only the patch state syncs between them, and a built-in Claude assistant helps build patches.",
+    result:
+      "Live and free to try: 80+ synth modules, real-time multiplayer patching and an AI patch assistant, all in a browser tab with nothing to install.",
+    tags: ["React", "WebAssembly", "SuperCollider", "WebSockets", "Claude API"],
+    // Generated by video/ (npm run export -- ora)
+    media: [
+      {
+        type: "video",
+        src: "/assets/projects/ora/web-1080.mp4",
+        poster: "/assets/projects/ora/poster.jpg",
+        thumb: "/assets/projects/ora/thumb.jpg",
+        alt: "Patching in ORA: booting the engine, cabling a saw oscillator to the output and a scope, loading a patch and moving its sliders, then a second person joining the room and editing live",
+        audio: true,
+      },
+    ],
+    link: { label: "Try it", href: "https://ora-fm.fly.dev/" },
+  },
+  {
+    title: "Wobble Coffee Co.",
+    // TODO: confirm label and year
+    context: "[Personal project · 2026]",
+    problem:
+      "I wanted a Shopify showcase that goes past a theme: a full headless storefront with a brand of its own.",
+    built:
+      "A fictional Brooklyn roaster, from the brand, illustrations and bag art to a Shopify Hydrogen storefront on the Storefront API. It has URL-synced collection filters, product pages with size, grind and subscribe-and-save options, an optimistic cart, a five-question coffee finder, brew guides with a ratio calculator and timer, and a stockists map. A seed script loads the catalog, metafields and selling plans into Shopify, and an offline fixture store lets it run and test with no credentials.",
+    result:
+      "A complete storefront, tested with unit tests, Playwright and Lighthouse budgets, with every piece of branding and design done by me.",
+    tags: ["Shopify Hydrogen", "React Router", "Storefront API", "GSAP", "Tailwind"],
+    // Generated by video/ (npm run export -- wobble-coffee); records the store running locally
+    media: [
+      {
+        type: "video",
+        src: "/assets/projects/wobble-coffee/web-1080.mp4",
+        poster: "/assets/projects/wobble-coffee/poster.jpg",
+        thumb: "/assets/projects/wobble-coffee/thumb.jpg",
+        alt: "Shopping the Wobble Coffee store: the wobbling wordmark, filtering the shop to coffee, choosing a size, grind and subscription for Hum, adding it to the cart, answering the coffee finder, and starting the pour-over brew timer",
+      },
+    ],
+  },
+  // Archive: shown on /projects only
   {
     title: "Browser FM Synthesizer",
     context: "Personal",
@@ -393,15 +483,16 @@ export const projects: Project[] = [
     built:
       "An FM synth that runs in the browser, built on the Web Audio API with a playable keyboard made in React and CSS.",
     tags: ["Web Audio API", "React", "CSS"],
-    media: placeholderMedia,
-  },
-  {
-    title: "Webfluence",
-    context: "Fullstack Academy",
-    year: "2021",
-    built:
-      "Interactive network visualization of politicians and their campaign donors, built with a team as a capstone project.",
-    tags: ["React", "Redux", "Node.js", "Postgres", "Vis.js"],
-    media: placeholderMedia,
+    media: [
+      {
+        type: "video",
+        src: "/assets/projects/fm-synth/web-1080.mp4",
+        poster: "/assets/projects/fm-synth/poster.jpg",
+        thumb: "/assets/projects/fm-synth/thumb.jpg",
+        alt: "Playing the FM synth: a marimba melody and a glissando, switching presets to kalimba, sawz and slap bass, raising the octave slider, then bending a held bell note with the pitch wheel",
+        audio: true,
+      },
+    ],
+    link: { label: "Try it", href: "https://fmsynth.netlify.app/" },
   },
 ];
