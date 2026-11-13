@@ -8,13 +8,14 @@ import arxIpfs from "../../apps/arx-ipfs/video.config";
 import rexbyCreator from "../../apps/rexby-creator/video.config";
 import rexbyVideo from "../../apps/rexby-video/video.config";
 import fmSynth from "../../apps/fm-synth/video.config";
+import wobbleCoffee from "../../apps/wobble-coffee/video.config";
 import { Loop } from "./Loop";
 import { Main } from "./Main";
 import { CAPTION, Storyboard, storyboardFrames } from "./Storyboard";
 import { timeline } from "./timeline";
 
 // One entry per app. Adding an app = apps/<id>/{capture,video.config}.ts + a line here.
-const apps = [camp, retail, shopifyAdmin, ora, agentWorkflow, arxIpfs, rexbyCreator, rexbyVideo, fmSynth];
+const apps = [camp, retail, shopifyAdmin, ora, agentWorkflow, arxIpfs, rexbyCreator, rexbyVideo, fmSynth, wobbleCoffee];
 
 function Root() {
   return (
