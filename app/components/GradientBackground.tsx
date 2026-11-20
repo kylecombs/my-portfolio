@@ -68,10 +68,19 @@ class GradientPointClass implements GradientPoint {
   }
 }
 
+// The blobs are blurred 80px, so they're drawn at 1/8 of the viewport's
+// resolution and blurred 10px in the canvas, which the browser upscales to
+// the same look. Blurring a full-size canvas with CSS on every frame was the
+// page's biggest rendering cost.
+const SCALE = 1 / 8;
+const BLUR = "blur(10px) contrast(1.2)";
+
 export function GradientBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const nodeRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  // Browsers without canvas filters (Safari before 18) fall back to CSS.
+  const [cssBlur, setCssBlur] = useState(false);
 
   // Trigger fade-in immediately on mount to prevent white flash
   useLayoutEffect(() => {
@@ -83,7 +92,14 @@ export function GradientBackground() {
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    // The blobs and their fading trails build up here; each frame it's
+    // copied, blurred, onto the visible canvas.
+    const buffer = document.createElement("canvas");
+    const bufferCtx = buffer.getContext("2d");
+    if (!ctx || !bufferCtx) return;
+
+    const canFilter = "filter" in ctx;
+    if (!canFilter) setCssBlur(true);
 
     const colors = [
       { r: 200, g: 160, b: 180 }, // Lighter muted mauve
@@ -94,18 +110,27 @@ export function GradientBackground() {
     ];
 
     const points: GradientPointClass[] = [];
+    let frame = 0;
+
+    // Points move in CSS pixels; the transform maps them onto the small buffer.
+    function size() {
+      if (!canvas || !bufferCtx) return;
+      const w = Math.ceil(window.innerWidth * SCALE);
+      const h = Math.ceil(window.innerHeight * SCALE);
+      canvas.width = buffer.width = w;
+      canvas.height = buffer.height = h;
+      bufferCtx.setTransform(SCALE, 0, 0, SCALE, 0, 0);
+    }
 
     function init() {
-      if (!canvas) return;
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      size();
 
       // Create gradient points
       for (let i = 0; i < 5; i++) {
         points.push(
           new GradientPointClass(
-            Math.random() * canvas.width,
-            Math.random() * canvas.height,
+            Math.random() * window.innerWidth,
+            Math.random() * window.innerHeight,
             colors[i % colors.length]
           )
         );
@@ -113,33 +138,34 @@ export function GradientBackground() {
     }
 
     function animate() {
-      if (!ctx || !canvas) return;
-      ctx.fillStyle = "rgba(245, 245, 245, 0.05)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      if (!ctx || !bufferCtx || !canvas) return;
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      bufferCtx.fillStyle = "rgba(245, 245, 245, 0.05)";
+      bufferCtx.fillRect(0, 0, width, height);
 
       // Update and draw gradient points
       points.forEach((point) => {
-        point.update(canvas.width, canvas.height);
-        point.draw(ctx);
+        point.update(width, height);
+        point.draw(bufferCtx);
       });
 
-      requestAnimationFrame(animate);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (canFilter) ctx.filter = BLUR;
+      ctx.drawImage(buffer, 0, 0);
+
+      frame = requestAnimationFrame(animate);
     }
 
-    // Handle resize
-    const handleResize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", size);
 
     // Start animation
     init();
     animate();
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      cancelAnimationFrame(frame);
+      window.removeEventListener("resize", size);
     };
   }, []);
 
@@ -152,7 +178,11 @@ export function GradientBackground() {
       unmountOnExit={false}
     >
       <div ref={nodeRef} className="gradient-container">
-        <canvas ref={canvasRef} className="gradient-canvas" />
+        <canvas
+          ref={canvasRef}
+          className="gradient-canvas"
+          style={cssBlur ? { filter: "blur(80px) contrast(1.2)" } : undefined}
+        />
         <div className="floating-orb orb-1" />
         <div className="floating-orb orb-2" />
         <div className="floating-orb orb-3" />
