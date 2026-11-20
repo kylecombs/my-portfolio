@@ -81,6 +81,9 @@ export function GradientBackground() {
   const [isVisible, setIsVisible] = useState(false);
   // Browsers without canvas filters (Safari before 18) fall back to CSS.
   const [cssBlur, setCssBlur] = useState(false);
+  // The canvas starts once the page has loaded and fades in over the static
+  // CSS gradients, so it never competes with the first paint.
+  const [canvasStarted, setCanvasStarted] = useState(false);
 
   // Trigger fade-in immediately on mount to prevent white flash
   useLayoutEffect(() => {
@@ -111,6 +114,7 @@ export function GradientBackground() {
 
     const points: GradientPointClass[] = [];
     let frame = 0;
+    let idle = 0;
 
     // Points move in CSS pixels; the transform maps them onto the small buffer.
     function size() {
@@ -157,13 +161,27 @@ export function GradientBackground() {
       frame = requestAnimationFrame(animate);
     }
 
-    window.addEventListener("resize", size);
+    function start() {
+      window.addEventListener("resize", size);
+      init();
+      animate();
+      setCanvasStarted(true);
+    }
 
-    // Start animation
-    init();
-    animate();
+    // Wait for the load event, then for the main thread to go idle (hydration,
+    // entrance animations), before starting.
+    const requestIdle =
+      window.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 200));
+    const cancelIdle = window.cancelIdleCallback ?? clearTimeout;
+    function onLoad() {
+      idle = requestIdle(start, { timeout: 1500 });
+    }
+    if (document.readyState === "complete") onLoad();
+    else window.addEventListener("load", onLoad, { once: true });
 
     return () => {
+      window.removeEventListener("load", onLoad);
+      cancelIdle(idle);
       cancelAnimationFrame(frame);
       window.removeEventListener("resize", size);
     };
@@ -181,6 +199,7 @@ export function GradientBackground() {
         <canvas
           ref={canvasRef}
           className="gradient-canvas"
+          data-started={canvasStarted || undefined}
           style={cssBlur ? { filter: "blur(80px) contrast(1.2)" } : undefined}
         />
         <div className="floating-orb orb-1" />
