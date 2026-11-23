@@ -74,12 +74,12 @@ export const companyLogos: Record<string, string> = {
   Rexby: "/assets/logos/rexby.svg",
 };
 
-export const availability = "Accepting new clients in 2027";
+export const availability = "Open to full-time roles and contracts";
 
 export const hero = {
   label: "Fullstack & Product Engineer",
   intro:
-    "I’m a fullstack engineer who helps teams ship polished products: React frontends, Node and Rails APIs, Shopify apps, and data pipelines. I bring engineering, design, and product thinking to every project, and I work on contract in whatever shape fits, from a single project to an ongoing role on your team, so you get senior help without a full-time hire.",
+    "I’m a fullstack engineer who helps teams ship polished products: React frontends, Node and Rails APIs, Shopify apps, and data pipelines. I bring engineering, design, and product thinking to every project, and I’m open to full-time roles as well as contracts, full- or part-time, from a single project to an ongoing seat on your team.",
 };
 
 export const services: Service[] = [
@@ -119,7 +119,7 @@ export const howIWork: Principle[] = [
   {
     title: "The support you need.",
     description:
-      "Contract work made to fit your needs. Available on a project basis or as an embedded member of your team, with experience to own real work without the cost of a full-time hire.",
+      "Full-time hire, full-time contract, or part-time help on a single project. I join as an embedded member of your team, with the experience to own real work.",
   },
   {
     title: "Inside your tools.",
@@ -141,13 +141,13 @@ export const howIWork: Principle[] = [
 // *text* renders as <em>
 export const about: { paragraphs: string[]; facts: Fact[] } = {
   paragraphs: [
-    "I’m a fullstack engineer leading frontend at *CAMP* and building the analytics pipeline for *ALEX AND ANI*. I’m currently accepting new clients.",
+    "I’m a fullstack engineer leading frontend at *CAMP* and building the analytics pipeline for *ALEX AND ANI*. I’m currently open to full-time roles and new contracts.",
     "I came to software from the art world. After receiving my BFA, I spent eight years as a preparator at David Zwirner, installing complex exhibitions and caring for the artworks in them. It taught me to sweat the details people only notice when they’re wrong.",
     "Since then I’ve shipped React frontends, Node and Rails APIs, AWS media pipelines and dbt/Snowflake warehouses, usually as one of two or three engineers who own the whole product. I’m based in Brooklyn and work remotely.",
   ],
   facts: [
     { label: "Based", value: "Brooklyn · Remote" },
-    { label: "Working", value: "Contract, remote" },
+    { label: "Working", value: "Full-time or contract, remote" },
     { label: "Focus", value: "Frontend, Shopify, Node and Rails APIs, data pipelines" },
     { label: "Currently", value: "CAMP · ALEX AND ANI" },
   ],
@@ -161,7 +161,7 @@ export const experienceLinks = {
 
 export const contact = {
   intro:
-    "I’m currently booking contract work for 2027. Tell me a little about your team, what you’re building, and where you’re stuck. I’ll reply within one business day.",
+    "I’m open to full-time roles and contract work, full- or part-time, starting in 2027. Tell me a little about your team, what you’re building, and where you’re stuck. I’ll reply within one business day.",
   booking: {
     label: "Book a 15-min intro call",
     // The "30min" slug is Calendly's default; the event itself is 15 minutes.
