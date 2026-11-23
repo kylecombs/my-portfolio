@@ -33,3 +33,5 @@ ffmpeg -y -loglevel error -ss 1.3 -i "$OUT/master.mp4" -frames:v 1 -vf "scale=-2
 cp "$OUT/web-1080.mp4" "$OUT/poster.jpg" "$OUT/thumb.jpg" "$SITE/" # what the site card uses
 ls -lh "$OUT" | awk 'NR>1 {print $5, $9}'
 echo "copied web-1080.mp4, poster.jpg and thumb.jpg to $SITE"
+
+sh scripts/export-mobile.sh "$APP" "$SITE"

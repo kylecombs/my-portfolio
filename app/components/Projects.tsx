@@ -470,6 +470,15 @@ function MediaSlide({ media }: { media: Media }) {
   const reduceMotion = useReducedMotion();
   // Browsers only autoplay muted video, so sound is opt-in.
   const [muted, setMuted] = useState(true);
+  const [phone, setPhone] = useState(false);
+  useEffect(() => {
+    const q = window.matchMedia("(max-width: 639px)"); // below Tailwind's sm
+    const on = () => setPhone(q.matches);
+    on();
+    q.addEventListener("change", on);
+    return () => q.removeEventListener("change", on);
+  }, []);
+  const cut = (phone && media.mobile) || media;
 
   // Played from here rather than via autoPlay, so reduced-motion visitors never
   // see it start; for them the poster stays up as a still.
@@ -483,7 +492,7 @@ function MediaSlide({ media }: { media: Media }) {
     } else {
       v.play().catch(() => {});
     }
-  }, [reduceMotion]);
+  }, [reduceMotion, cut.src]);
 
   if (media.type !== "video")
     return (
@@ -499,14 +508,14 @@ function MediaSlide({ media }: { media: Media }) {
   const player = (
     <video
       ref={video}
-      src={media.src}
-      poster={media.poster}
+      src={cut.src}
+      poster={cut.poster}
       muted={muted}
       loop
       playsInline
       preload="metadata"
       aria-label={media.alt}
-      className="aspect-video w-full object-cover"
+      className={`${cut === media ? "aspect-video" : "aspect-[4/5]"} w-full object-cover`}
       // TODO: remove before release. Click-to-pause is only for taking notes on the videos.
       onClick={(e) =>
         e.currentTarget.paused

@@ -1,3 +1,4 @@
+import { useContext } from "react";
 import {
   AbsoluteFill,
   interpolate,
@@ -13,6 +14,8 @@ import {
   Callout,
   Fade,
   fontFamily,
+  Layout,
+  MOBILE,
   NoticeCard,
   Outro,
   TitleCard,
@@ -108,11 +111,14 @@ function Inset({ c, b }: { c: VideoConfig; b: TimedBeat }) {
 
 function Stage({ c, t }: { c: VideoConfig; t: ReturnType<typeof timeline> }) {
   const frame = useCurrentFrame();
-  const cam = cameraAt(c, t, frame);
-  const enter = useEnter(0, c.fps);
   const { width: W, height: H } = c.capture.viewport;
-  const beat = t.beats.findLast((b) => b.start <= frame) ?? t.beats[0];
   const Scene = scenes[c.id];
+  // Scenes draw their own camera into a 16:9 viewBox, so they keep a 16:9 screen.
+  const layoutAspect = useContext(Layout).aspect;
+  const aspect = Scene ? W / H : layoutAspect;
+  const cam = cameraAt(c, t, frame, aspect);
+  const enter = useEnter(0, c.fps);
+  const beat = t.beats.findLast((b) => b.start <= frame) ?? t.beats[0];
 
   return (
     <AbsoluteFill>
@@ -121,6 +127,7 @@ function Stage({ c, t }: { c: VideoConfig; t: ReturnType<typeof timeline> }) {
         url={beat.url ?? c.url}
         cam={Scene ? cameraFor(c, null) : cam}
         enter={enter}
+        aspect={aspect}
       >
         {Scene ? (
           <Scene c={c} frame={frame} cam={cam} />
@@ -217,5 +224,14 @@ export function Main({ c }: { c: VideoConfig }) {
         <Outro c={c} />
       </Sequence>
     </AbsoluteFill>
+  );
+}
+
+/** The same video laid out portrait (4:5) for phones. */
+export function MainMobile({ c }: { c: VideoConfig }) {
+  return (
+    <Layout.Provider value={MOBILE}>
+      <Main c={c} />
+    </Layout.Provider>
   );
 }

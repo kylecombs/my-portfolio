@@ -65,6 +65,11 @@ strip with clip, duration, speed and screenshot time.
 - `loop-{1080,720}.{mp4,webm}`: hover loop
 - `poster.jpg`: frame at `posterAt` (the open card shows it until the video plays)
 - `thumb.jpg`: the title card at 1.3s, shown on the collapsed card under a play button
+- `mobile-1080.mp4`, `mobile-poster.jpg`: the `<id>-mobile` composition, a 1080x1350 (4:5) cut for phones.
+  Same timeline and config; the `MOBILE` layout in `template.tsx` puts the callout on top in bigger type and
+  a 4:3 browser frame below. The camera reframes each zoom region to 4:3, so full-page views crop the sides.
+  `npm run export:mobile -- <id>` renders just this cut (the full export runs it too). The site plays it
+  below 640px wide via the `mobile` field on a `media` entry.
 
 ## Adding an app
 

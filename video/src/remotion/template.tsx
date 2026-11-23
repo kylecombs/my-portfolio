@@ -2,7 +2,7 @@
 // Main (the video) and Storyboard (one still per beat) both render from here.
 import { loadFont } from "@remotion/google-fonts/Inter";
 import { loadFont as loadSpaceGrotesk } from "@remotion/google-fonts/SpaceGrotesk";
-import type { CSSProperties, ReactNode } from "react";
+import { createContext, useContext, type CSSProperties, type ReactNode } from "react";
 import {
   AbsoluteFill,
   Img,
@@ -21,11 +21,27 @@ export const { fontFamily } = loadFont("normal", {
 // ORA's wordmark (its config's titleStyle).
 loadSpaceGrotesk("normal", { weights: ["700"], subsets: ["latin"] });
 
-// Layout on the 1920x1080 canvas: browser frame on the right, callout column on the left.
-export const FRAME = { x: 424, width: 1408, bar: 44 };
-const SCREEN_H = (FRAME.width * 9) / 16; // 792
-const FRAME_Y = (1080 - SCREEN_H - FRAME.bar) / 2;
-const COLUMN = { x: 96, width: FRAME.x - 96 - 60 };
+// Desktop (1920x1080): browser frame on the right, callout column on the left.
+const FRAME_Y = (1080 - 792 - 44) / 2;
+export const DESKTOP = {
+  width: 1920,
+  height: 1080,
+  frame: { x: 424, y: FRAME_Y, width: 1408, bar: 44 },
+  /** Screen aspect of the browser frame; the camera reframes the 16:9 capture to it. */
+  aspect: 16 / 9,
+  callout: { x: 96, y: FRAME_Y + 120, width: 424 - 96 - 60, scale: 1 },
+  pad: 160,
+};
+// Mobile (1080x1350, 4:5): callout on top, a 4:3 browser frame below it, type sized for a phone.
+export const MOBILE: typeof DESKTOP = {
+  width: 1080,
+  height: 1350,
+  frame: { x: 40, y: 1350 - 44 - 750 - 56, width: 1000, bar: 44 },
+  aspect: 4 / 3,
+  callout: { x: 72, y: 64, width: 936, scale: 1.9 },
+  pad: 80,
+};
+export const Layout = createContext(DESKTOP);
 
 /** 0 -> 1 spring starting at `from`. */
 export function useEnter(from: number, fps: number, damping = 200) {
@@ -76,9 +92,10 @@ export function Fade({
 }
 
 export function TitleCard({ c }: { c: VideoConfig }) {
+  const { pad } = useContext(Layout);
   return (
     <AbsoluteFill
-      style={{ justifyContent: "center", paddingLeft: 160, paddingRight: 160 }}
+      style={{ justifyContent: "center", paddingLeft: pad, paddingRight: pad }}
     >
       <Rise at={4} fps={c.fps}>
         {c.logo ? (
@@ -132,9 +149,10 @@ export function TitleCard({ c }: { c: VideoConfig }) {
 }
 
 export function NoticeCard({ c }: { c: VideoConfig }) {
+  const { pad } = useContext(Layout);
   return (
     <AbsoluteFill
-      style={{ justifyContent: "center", paddingLeft: 160, paddingRight: 160 }}
+      style={{ justifyContent: "center", paddingLeft: pad, paddingRight: pad }}
     >
       <Rise at={2} fps={c.fps}>
         <div style={{ width: 56, height: 4, background: c.colors.accent, marginBottom: 36 }} />
@@ -151,8 +169,9 @@ export function NoticeCard({ c }: { c: VideoConfig }) {
 }
 
 export function Outro({ c }: { c: VideoConfig }) {
+  const { pad } = useContext(Layout);
   return (
-    <AbsoluteFill style={{ justifyContent: "center", paddingLeft: 160 }}>
+    <AbsoluteFill style={{ justifyContent: "center", paddingLeft: pad, paddingRight: pad }}>
       <Rise
         at={4}
         fps={c.fps}
@@ -170,7 +189,7 @@ export function Outro({ c }: { c: VideoConfig }) {
       <Rise
         at={14}
         fps={c.fps}
-        style={{ display: "flex", gap: 14, marginTop: 44 }}
+        style={{ display: "flex", flexWrap: "wrap", gap: 14, marginTop: 44 }}
       >
         {c.tags.map((t) => (
           <div
@@ -206,6 +225,8 @@ export function Callout({
   frames: number;
 }) {
   const frame = useCurrentFrame();
+  const { callout: col } = useContext(Layout);
+  const z = col.scale;
   const p = useEnter(0, c.fps);
   const out = interpolate(frame, [frames - 10, frames], [1, 0], {
     extrapolateLeft: "clamp",
@@ -215,16 +236,16 @@ export function Callout({
     <div
       style={{
         position: "absolute",
-        left: COLUMN.x,
-        width: COLUMN.width,
-        top: FRAME_Y + 120,
+        left: col.x,
+        width: col.width,
+        top: col.y,
         opacity: p * out,
         transform: `translateY(${(1 - p) * 16 - (1 - out) * 8}px)`,
       }}
     >
       <div
         style={{
-          fontSize: 18,
+          fontSize: 18 * z,
           fontWeight: 600,
           color: c.colors.accent,
           letterSpacing: "0.12em",
@@ -234,15 +255,15 @@ export function Callout({
       </div>
       <div
         style={{
-          width: 32,
-          height: 3,
+          width: 32 * z,
+          height: 3 * z,
           background: c.colors.accent,
-          margin: "16px 0 22px",
+          margin: `${16 * z}px 0 ${22 * z}px`,
         }}
       />
       <div
         style={{
-          fontSize: 40,
+          fontSize: 40 * z,
           fontWeight: 600,
           letterSpacing: "-0.02em",
           lineHeight: 1.1,
@@ -252,9 +273,9 @@ export function Callout({
       </div>
       <div
         style={{
-          fontSize: 23,
+          fontSize: 23 * z,
           color: c.colors.muted,
-          marginTop: 16,
+          marginTop: 16 * z,
           lineHeight: 1.4,
         }}
       >
@@ -271,20 +292,27 @@ export function BrowserFrame({
   cam,
   enter,
   children,
+  aspect,
 }: {
   c: VideoConfig;
   url: string;
   cam: Camera;
   enter: number;
   children: ReactNode;
+  /** Screen aspect; defaults to the layout's (scenes keep their own 16:9). */
+  aspect?: number;
 }) {
   const { width: W, height: H } = c.capture.viewport;
+  const L = useContext(Layout);
+  const FRAME = L.frame;
+  const SCREEN_H = FRAME.width / (aspect ?? L.aspect);
+  const top = FRAME.y + (FRAME.width / L.aspect - SCREEN_H) / 2; // a shorter screen sits centered in the layout's slot
   return (
     <div
       style={{
         position: "absolute",
         left: FRAME.x,
-        top: url ? FRAME_Y : FRAME_Y + FRAME.bar / 2,
+        top: url ? top : top + FRAME.bar / 2,
         width: FRAME.width,
         borderRadius: 14,
         overflow: "hidden",
@@ -320,7 +348,7 @@ export function BrowserFrame({
           <div
             style={{
               margin: "0 auto",
-              width: 560,
+              width: Math.min(560, FRAME.width - 300),
               height: 28,
               borderRadius: 8,
               background: c.colors.background,

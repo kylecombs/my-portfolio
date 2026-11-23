@@ -21,6 +21,7 @@
     "capture": "sh -c 'tsx apps/$0/capture.ts'",
     "studio": "remotion studio src/remotion/Root.tsx",
     "export": "sh scripts/export.sh",
+    "export:mobile": "sh scripts/export-mobile.sh",
     "typecheck": "tsc",
     "storyboard": "tsx scripts/storyboard.ts"
   }

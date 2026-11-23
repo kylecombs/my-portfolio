@@ -69,24 +69,35 @@ export function timeline(c: VideoConfig) {
   };
 }
 
-export function cameraFor(c: VideoConfig, region: Region | null): Camera {
-  if (!region) return { k: 1, tx: 0, ty: 0 };
+/** Camera showing `region` (null = the whole page) on a screen of `aspect`; a screen narrower than the capture crops its sides. */
+export function cameraFor(
+  c: VideoConfig,
+  region: Region | null,
+  aspect?: number
+): Camera {
   const { width: W, height: H } = c.capture.viewport;
-  const k = Math.min(W / region.w, H / region.h);
+  const S = aspect ? W / aspect : H; // screen height, in capture px
+  if (!region && S === H) return { k: 1, tx: 0, ty: 0 };
+  const r = region ?? { x: 0, y: 0, w: W, h: H };
+  const k = Math.max(S / H, Math.min(W / r.w, S / r.h)); // never zoom out past filling the screen
   const clamp = (v: number, lo: number) => Math.min(0, Math.max(lo, v));
   return {
     k,
-    tx: clamp(W / 2 - (region.x + region.w / 2) * k, W - W * k),
-    ty: clamp(H / 2 - (region.y + region.h / 2) * k, H - H * k),
+    tx: clamp(W / 2 - (r.x + r.w / 2) * k, W - W * k),
+    ty: clamp(S / 2 - (r.y + r.h / 2) * k, S - H * k),
   };
 }
 
-function zoomKeys(c: VideoConfig, t: ReturnType<typeof timeline>) {
+function zoomKeys(
+  c: VideoConfig,
+  t: ReturnType<typeof timeline>,
+  aspect?: number
+) {
   return t.beats
     .flatMap((b) =>
       (b.zoom ?? []).map((z) => ({
         frame: b.start + b.frameOf(z.at),
-        cam: cameraFor(c, z.region),
+        cam: cameraFor(c, z.region, aspect),
       }))
     )
     .sort((a, b) => a.frame - b.frame);
@@ -96,10 +107,12 @@ function zoomKeys(c: VideoConfig, t: ReturnType<typeof timeline>) {
 export function restingCameraAt(
   c: VideoConfig,
   t: ReturnType<typeof timeline>,
-  f: number
+  f: number,
+  aspect?: number
 ): Camera {
   return (
-    zoomKeys(c, t).findLast((k) => k.frame <= f)?.cam ?? cameraFor(c, null)
+    zoomKeys(c, t, aspect).findLast((k) => k.frame <= f)?.cam ??
+    cameraFor(c, null, aspect)
   );
 }
 
@@ -107,10 +120,11 @@ export function restingCameraAt(
 export function cameraAt(
   c: VideoConfig,
   t: ReturnType<typeof timeline>,
-  f: number
+  f: number,
+  aspect?: number
 ): Camera {
-  const keys = zoomKeys(c, t);
-  let cam: Camera = { k: 1, tx: 0, ty: 0 };
+  const keys = zoomKeys(c, t, aspect);
+  let cam: Camera = cameraFor(c, null, aspect);
   for (const key of keys) {
     if (key.frame > f) break;
     const p = spring({

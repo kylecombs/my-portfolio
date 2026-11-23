@@ -10,8 +10,9 @@ import rexbyVideo from "../../apps/rexby-video/video.config";
 import fmSynth from "../../apps/fm-synth/video.config";
 import wobbleCoffee from "../../apps/wobble-coffee/video.config";
 import { Loop } from "./Loop";
-import { Main } from "./Main";
+import { Main, MainMobile } from "./Main";
 import { CAPTION, Storyboard, storyboardFrames } from "./Storyboard";
+import { MOBILE } from "./template";
 import { timeline } from "./timeline";
 
 // One entry per app. Adding an app = apps/<id>/{capture,video.config}.ts + a line here.
@@ -30,6 +31,18 @@ function Root() {
           fps={c.fps}
           width={1920}
           height={1080}
+        />
+      ))}
+      {apps.map((c) => (
+        <Composition
+          key={`${c.id}-mobile`}
+          id={`${c.id}-mobile`}
+          component={MainMobile}
+          defaultProps={{ c }}
+          durationInFrames={timeline(c).total}
+          fps={c.fps}
+          width={MOBILE.width}
+          height={MOBILE.height}
         />
       ))}
       {apps.map((c) => (
