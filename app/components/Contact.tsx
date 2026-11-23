@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { MotionConfig, motion } from "motion/react";
 import { SectionHeading } from "./Experience";
 import { reveal, staggerShow } from "~/utils/reveal";
@@ -66,7 +67,7 @@ export function Contact() {
               {contact.links.map((l) => (
                 <motion.li
                   key={l.label}
-                  className="border-b border-dark-green/20"
+                  className="flex items-center gap-4 border-b border-dark-green/20"
                   variants={{
                     hidden: { opacity: 0, x: 16 },
                     show: {
@@ -82,7 +83,7 @@ export function Contact() {
                       target: "_blank",
                       rel: "noopener noreferrer",
                     })}
-                    className="group flex min-h-11 items-center justify-between gap-4 py-6 font-neue-haas text-gray-800 transition-colors hover:text-dark-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-dark-green"
+                    className="group flex min-h-11 flex-1 items-center justify-between gap-4 py-6 font-neue-haas text-gray-800 transition-colors hover:text-dark-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-dark-green"
                   >
                     <span>
                       <span className="block text-3xl font-medium italic">
@@ -102,6 +103,9 @@ export function Contact() {
                       <span className="sr-only">(opens in a new tab)</span>
                     )}
                   </a>
+                  {l.href.startsWith("mailto:") && (
+                    <CopyButton text={l.href.slice("mailto:".length)} />
+                  )}
                 </motion.li>
               ))}
             </motion.ul>
@@ -114,5 +118,37 @@ export function Contact() {
         </div>
       </section>
     </MotionConfig>
+  );
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={() =>
+        navigator.clipboard.writeText(text).then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        })
+      }
+      aria-label={copied ? "Email copied" : "Copy email address"}
+      title={copied ? "Copied" : "Copy email"}
+      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-gray-800 transition-colors hover:text-dark-green focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-dark-green"
+    >
+      <svg aria-hidden="true" viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        {copied ? (
+          <path d="M5 12.5l4.5 4.5L19 7.5" />
+        ) : (
+          <>
+            <rect x="8" y="8" width="12" height="12" rx="2" />
+            <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+          </>
+        )}
+      </svg>
+      <span className="sr-only" aria-live="polite">
+        {copied ? "Copied" : ""}
+      </span>
+    </button>
   );
 }

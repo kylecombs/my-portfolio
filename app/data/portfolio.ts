@@ -155,8 +155,7 @@ export const about: { paragraphs: string[]; facts: Fact[] } = {
 
 export const experienceLinks = {
   linkedin: "https://www.linkedin.com/in/kyledavidcombs/",
-  // TODO: add the PDF to /public and set its path, e.g. "/kyle-combs-resume.pdf"
-  resume: "[TODO: résumé file path]",
+  resume: "/kyle-combs-resume.pdf",
 };
 
 export const contact = {

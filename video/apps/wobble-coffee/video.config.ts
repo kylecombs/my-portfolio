@@ -35,7 +35,7 @@ const config: VideoConfig = {
     accent: "#FF6B4A",
   },
   fps: 30,
-  titleSeconds: 1.8,
+  titleSeconds: 3,
   outroSeconds: 2,
   posterAt: 18, // the product page, options picked
   beats: [

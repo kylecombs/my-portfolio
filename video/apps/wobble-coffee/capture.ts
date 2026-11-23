@@ -32,9 +32,14 @@ const h = human(page, rec);
 const main = page.locator("main");
 
 rec.clip("01-home");
-await h.moveTo({ x: 1200, y: 760 });
+// The wordmark's weight wave follows the pointer's x: sweep its full width, there and back.
+const mark = main.locator("h1").first();
+const m = (await mark.boundingBox())!;
+const y = m.y + m.height / 2;
+await h.moveTo({ x: m.x, y });
 await rec.event("hero", page.locator("main section").first());
-await h.wait(2600); // the wordmark wobbles and the stamp spins
+for (const x of [m.x + m.width, m.x, m.x + m.width]) await h.moveTo({ x, y }, 600); // ~1.5s real: each step costs more than its 16ms while recording
+await h.wait(600);
 await h.scrollTo(page.getByText("Our coffees", { exact: false }).first(), 140, 1600);
 await rec.event("coffees", page.locator("main section").nth(2));
 await h.wait(1800);
