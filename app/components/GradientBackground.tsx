@@ -81,7 +81,9 @@ export function GradientBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const nodeRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
-  // Browsers without canvas filters (Safari before 18) fall back to CSS.
+  // Browsers without canvas filters (WebKit, so every iOS browser) fall back to
+  // CSS. WebKit blanks the whole page with an 80px CSS blur on this canvas;
+  // 20px is enough since the 1/8-scale canvas is already soft when upscaled.
   const [cssBlur, setCssBlur] = useState(false);
   // The canvas starts once the page has loaded and fades in over the static
   // CSS gradients, so it never competes with the first paint.
@@ -205,7 +207,7 @@ export function GradientBackground() {
           ref={canvasRef}
           className="gradient-canvas"
           data-started={canvasStarted || undefined}
-          style={cssBlur ? { filter: "blur(80px) contrast(1.2)" } : undefined}
+          style={cssBlur ? { filter: "blur(20px) contrast(1.2)" } : undefined}
         />
         <div className="floating-orb orb-1" />
         <div className="floating-orb orb-2" />
