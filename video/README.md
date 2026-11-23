@@ -17,7 +17,7 @@ because bundled Chromium can't play H.264 video) and `ffmpeg` on the PATH.
 | Re-record | `npm run capture camp-booking` | `public/camp-booking/clips/*.mp4` and `events.json` |
 | Storyboard | `npm run storyboard -- camp-booking` | `out/camp-booking/storyboard.jpg` contact sheet + one panel per beat in `out/camp-booking/storyboard/` |
 | Preview / tweak | `npm run studio` | Remotion Studio at http://localhost:3000 (the `<id>-storyboard` composition updates live) |
-| Export | `npm run export -- camp-booking` | `out/camp-booking/*`, plus the files the site uses copied to `../public/assets/projects/camp-booking/` |
+| Export | `npm run export -- camp-booking` | `out/camp-booking/*`, plus the files the site uses copied to `../public/projects/camp-booking/` |
 
 A storyboard takes about 20 seconds, so iterate there first: copy, callouts, zoom regions, colors and logo
 all show up in it. Only re-export once the board looks right.
@@ -132,7 +132,7 @@ The process the CAMP video went through, and the rules it followed:
 
 ## Putting it on the site
 
-`npm run export` copies `web-1080.mp4`, `poster.jpg` and `thumb.jpg` to `../public/assets/projects/<id>/`.
+`npm run export` copies `web-1080.mp4`, `poster.jpg` and `thumb.jpg` to `../public/projects/<id>/`.
 In `../app/data/portfolio.ts`, give the project a `media` entry like the CAMP one: `type: "video"`
 plus `src`, `poster`, `thumb` and `alt`. Videos get the play button on the collapsed card automatically.
 

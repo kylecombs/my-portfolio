@@ -150,7 +150,8 @@ function ProjectCard({
   return (
     <motion.li
       layout
-      className={`md:[order:var(--order)] ${expanded ? "md:col-span-2" : ""}`}
+      // Phones: an open card bleeds past the page padding (px-4) to the screen edges.
+      className={`md:[order:var(--order)] ${expanded ? "max-sm:-mx-4 md:col-span-2" : ""}`}
       style={{ "--order": order } as React.CSSProperties}
       variants={{
         hidden: { opacity: 0, y: 32 },
@@ -166,7 +167,7 @@ function ProjectCard({
     >
       <motion.article
         ref={scope}
-        className="group relative flex h-full flex-col border border-dark-green/20 bg-white/25 p-6 backdrop-blur-md transition-colors duration-300 hover:border-dark-green/50 hover:bg-white/40 sm:p-8"
+        className={`group relative flex h-full flex-col border ${expanded ? "max-sm:border-x-0" : ""} border-dark-green/20 bg-white/25 p-6 backdrop-blur-md transition-colors duration-300 hover:border-dark-green/50 hover:bg-white/40 sm:p-8`}
         whileHover={expanded ? undefined : { y: -6 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
       >
@@ -397,8 +398,8 @@ function MediaCarousel({ media, title }: MediaCarouselProps) {
       role="region"
       aria-roledescription="carousel"
       aria-label={`${title} media`}
-      // Phones: bleed past the card and page padding (p-6 + px-4) so the 9:16 cut fills the screen width.
-      className="-mx-10 sm:mx-0"
+      // Phones: bleed past the card padding (p-6); the open card already spans the screen.
+      className="-mx-6 sm:mx-0"
     >
       <div className="relative overflow-hidden border-y border-dark-green/20 sm:border">
         <ul

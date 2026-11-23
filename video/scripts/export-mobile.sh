@@ -3,7 +3,7 @@
 # Usage: npm run export:mobile -- <app-id> [site-asset-dir]
 set -eu
 APP=${1:?usage: npm run export:mobile -- <app-id> [site-asset-dir]}
-SITE=${2:-../public/assets/projects/$APP}
+SITE=${2:-../public/projects/$APP}
 OUT=out/$APP
 # Apps re-recorded at a phone viewport have their own config (Root.tsx uses it for this composition).
 CFG=./apps/$APP; [ -d "apps/$APP-mobile" ] && CFG=./apps/$APP-mobile

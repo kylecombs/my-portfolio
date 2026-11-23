@@ -3,7 +3,7 @@
 # Usage: npm run export -- <app-id> [site-asset-dir]
 set -eu
 APP=${1:?usage: npm run export -- <app-id> [site-asset-dir]}
-SITE=${2:-../public/assets/projects/$APP}
+SITE=${2:-../public/projects/$APP}
 OUT=out/$APP
 ENTRY=src/remotion/Root.tsx
 mkdir -p "$OUT" "$SITE"

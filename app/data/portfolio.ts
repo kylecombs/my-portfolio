@@ -292,13 +292,13 @@ export const projects: Project[] = [
     media: [
       {
         type: "video",
-        src: "/assets/projects/camp-booking/web-1080.mp4",
-        poster: "/assets/projects/camp-booking/poster.jpg",
-        thumb: "/assets/projects/camp-booking/thumb.jpg",
+        src: "/projects/camp-booking/web-1080.mp4",
+        poster: "/projects/camp-booking/poster.jpg",
+        thumb: "/projects/camp-booking/thumb.jpg",
         alt: "Booking a Bluey’s House visit: picking a date and time, adding two tickets and souvenir ears, then reaching checkout",
         mobile: {
-          src: "/assets/projects/camp-booking/mobile-1080.mp4",
-          poster: "/assets/projects/camp-booking/mobile-poster.jpg",
+          src: "/projects/camp-booking/mobile-1080.mp4",
+          poster: "/projects/camp-booking/mobile-poster.jpg",
         },
       },
     ],
@@ -318,13 +318,13 @@ export const projects: Project[] = [
     media: [
       {
         type: "video",
-        src: "/assets/projects/shopify-admin/web-1080.mp4",
-        poster: "/assets/projects/shopify-admin/poster.jpg",
-        thumb: "/assets/projects/shopify-admin/thumb.jpg",
+        src: "/projects/shopify-admin/web-1080.mp4",
+        poster: "/projects/shopify-admin/poster.jpg",
+        thumb: "/projects/shopify-admin/thumb.jpg",
         alt: "The CAMP app inside Shopify admin: bulk-updating time slot prices, turning an add-on off at one store, ticket bundles, and tracking an invoice on a birthday party lead",
         mobile: {
-          src: "/assets/projects/shopify-admin/mobile-1080.mp4",
-          poster: "/assets/projects/shopify-admin/mobile-poster.jpg",
+          src: "/projects/shopify-admin/mobile-1080.mp4",
+          poster: "/projects/shopify-admin/mobile-poster.jpg",
         },
       },
     ],
@@ -344,13 +344,13 @@ export const projects: Project[] = [
     media: [
       {
         type: "video",
-        src: "/assets/projects/wobble-coffee/web-1080.mp4",
-        poster: "/assets/projects/wobble-coffee/poster.jpg",
-        thumb: "/assets/projects/wobble-coffee/thumb.jpg",
+        src: "/projects/wobble-coffee/web-1080.mp4",
+        poster: "/projects/wobble-coffee/poster.jpg",
+        thumb: "/projects/wobble-coffee/thumb.jpg",
         alt: "Shopping the Wobble Coffee store: the wobbling wordmark, filtering the shop to coffee, choosing a size, grind and subscription for Hum, adding it to the cart, answering the coffee finder, and starting the pour-over brew timer",
         mobile: {
-          src: "/assets/projects/wobble-coffee/mobile-1080.mp4",
-          poster: "/assets/projects/wobble-coffee/mobile-poster.jpg",
+          src: "/projects/wobble-coffee/mobile-1080.mp4",
+          poster: "/projects/wobble-coffee/mobile-poster.jpg",
         },
       },
     ],
@@ -370,13 +370,13 @@ export const projects: Project[] = [
     media: [
       {
         type: "video",
-        src: "/assets/projects/retail-pipeline/web-1080.mp4",
-        poster: "/assets/projects/retail-pipeline/poster.jpg",
-        thumb: "/assets/projects/retail-pipeline/thumb.jpg",
+        src: "/projects/retail-pipeline/web-1080.mp4",
+        poster: "/projects/retail-pipeline/poster.jpg",
+        thumb: "/projects/retail-pipeline/thumb.jpg",
         alt: "Animated diagram of the pipeline: five sales and ad sources sync through Fivetran into Snowflake, dbt models clean and reconcile the data, and Looker charts serve merchandising, marketing and leadership",
         mobile: {
-          src: "/assets/projects/retail-pipeline/mobile-1080.mp4",
-          poster: "/assets/projects/retail-pipeline/mobile-poster.jpg",
+          src: "/projects/retail-pipeline/mobile-1080.mp4",
+          poster: "/projects/retail-pipeline/mobile-poster.jpg",
         },
       },
     ],
@@ -395,13 +395,13 @@ export const projects: Project[] = [
     media: [
       {
         type: "video",
-        src: "/assets/projects/arx-ipfs/web-1080.mp4",
-        poster: "/assets/projects/arx-ipfs/poster.jpg",
-        thumb: "/assets/projects/arx-ipfs/thumb.jpg",
+        src: "/projects/arx-ipfs/web-1080.mp4",
+        poster: "/projects/arx-ipfs/poster.jpg",
+        thumb: "/projects/arx-ipfs/thumb.jpg",
         alt: "A replica of the deploy tool: pinning a web app to IPFS, linking six NFC hang tags to it through ERS, tapping one to open the app, then redeploying so the same tag opens a new version",
         mobile: {
-          src: "/assets/projects/arx-ipfs/mobile-1080.mp4",
-          poster: "/assets/projects/arx-ipfs/mobile-poster.jpg",
+          src: "/projects/arx-ipfs/mobile-1080.mp4",
+          poster: "/projects/arx-ipfs/mobile-poster.jpg",
         },
       },
     ],
@@ -421,13 +421,13 @@ export const projects: Project[] = [
     media: [
       {
         type: "video",
-        src: "/assets/projects/rexby-creator/web-1080.mp4",
-        poster: "/assets/projects/rexby-creator/poster.jpg",
-        thumb: "/assets/projects/rexby-creator/thumb.jpg",
+        src: "/projects/rexby-creator/web-1080.mp4",
+        poster: "/projects/rexby-creator/poster.jpg",
+        thumb: "/projects/rexby-creator/thumb.jpg",
         alt: "Building a South Iceland guide: adding a canyon spot with photos and an affiliate link, planning a two-day itinerary on the map, pricing it, and copying the map embed code",
         mobile: {
-          src: "/assets/projects/rexby-creator/mobile-1080.mp4",
-          poster: "/assets/projects/rexby-creator/mobile-poster.jpg",
+          src: "/projects/rexby-creator/mobile-1080.mp4",
+          poster: "/projects/rexby-creator/mobile-poster.jpg",
         },
       },
     ],
@@ -447,13 +447,13 @@ export const projects: Project[] = [
     media: [
       {
         type: "video",
-        src: "/assets/projects/rexby-video/web-1080.mp4",
-        poster: "/assets/projects/rexby-video/poster.jpg",
-        thumb: "/assets/projects/rexby-video/thumb.jpg",
+        src: "/projects/rexby-video/web-1080.mp4",
+        poster: "/projects/rexby-video/poster.jpg",
+        thumb: "/projects/rexby-video/thumb.jpg",
         alt: "Adding a phone video of Seljalandsfoss to a guide spot: uploading to S3, processing into streaming formats, picking a cover frame, and watching it play in the traveler view",
         mobile: {
-          src: "/assets/projects/rexby-video/mobile-1080.mp4",
-          poster: "/assets/projects/rexby-video/mobile-poster.jpg",
+          src: "/projects/rexby-video/mobile-1080.mp4",
+          poster: "/projects/rexby-video/mobile-poster.jpg",
         },
       },
     ],
@@ -473,13 +473,13 @@ export const projects: Project[] = [
     media: [
       {
         type: "video",
-        src: "/assets/projects/agent-workflow/web-1080.mp4",
-        poster: "/assets/projects/agent-workflow/poster.jpg",
-        thumb: "/assets/projects/agent-workflow/thumb.jpg",
+        src: "/projects/agent-workflow/web-1080.mp4",
+        poster: "/projects/agent-workflow/poster.jpg",
+        thumb: "/projects/agent-workflow/thumb.jpg",
         alt: "The agent workflow dashboard: tickets moving across the board, signing off a spec, a job's workflow graph with its loop-backs, a design review with screenshots, and the pull request's diff and decision",
         mobile: {
-          src: "/assets/projects/agent-workflow/mobile-1080.mp4",
-          poster: "/assets/projects/agent-workflow/mobile-poster.jpg",
+          src: "/projects/agent-workflow/mobile-1080.mp4",
+          poster: "/projects/agent-workflow/mobile-poster.jpg",
         },
       },
     ],
@@ -500,13 +500,13 @@ export const projects: Project[] = [
     media: [
       {
         type: "video",
-        src: "/assets/projects/ora/web-1080.mp4",
-        poster: "/assets/projects/ora/poster.jpg",
-        thumb: "/assets/projects/ora/thumb.jpg",
+        src: "/projects/ora/web-1080.mp4",
+        poster: "/projects/ora/poster.jpg",
+        thumb: "/projects/ora/thumb.jpg",
         alt: "Patching in ORA: booting the engine, cabling a saw oscillator to the output and a scope, loading a patch and moving its sliders, then a second person joining the room and editing live",
         mobile: {
-          src: "/assets/projects/ora/mobile-1080.mp4",
-          poster: "/assets/projects/ora/mobile-poster.jpg",
+          src: "/projects/ora/mobile-1080.mp4",
+          poster: "/projects/ora/mobile-poster.jpg",
         },
         audio: true,
       },
@@ -523,13 +523,13 @@ export const projects: Project[] = [
     media: [
       {
         type: "video",
-        src: "/assets/projects/fm-synth/web-1080.mp4",
-        poster: "/assets/projects/fm-synth/poster.jpg",
-        thumb: "/assets/projects/fm-synth/thumb.jpg",
+        src: "/projects/fm-synth/web-1080.mp4",
+        poster: "/projects/fm-synth/poster.jpg",
+        thumb: "/projects/fm-synth/thumb.jpg",
         alt: "Playing the FM synth: a marimba melody and a glissando, switching presets to kalimba, sawz and slap bass, raising the octave slider, then bending a held bell note with the pitch wheel",
         mobile: {
-          src: "/assets/projects/fm-synth/mobile-1080.mp4",
-          poster: "/assets/projects/fm-synth/mobile-poster.jpg",
+          src: "/projects/fm-synth/mobile-1080.mp4",
+          poster: "/projects/fm-synth/mobile-poster.jpg",
         },
         audio: true,
       },
