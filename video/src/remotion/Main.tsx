@@ -113,9 +113,9 @@ function Stage({ c, t }: { c: VideoConfig; t: ReturnType<typeof timeline> }) {
   const frame = useCurrentFrame();
   const { width: W, height: H } = c.capture.viewport;
   const Scene = scenes[c.id];
-  // Scenes draw their own camera into a 16:9 viewBox, so they keep a 16:9 screen.
+  // Scenes draw their own camera into a 16:9 viewBox, and phone captures fill their handset, so both keep their own shape.
   const layoutAspect = useContext(Layout).aspect;
-  const aspect = Scene ? W / H : layoutAspect;
+  const aspect = Scene || c.device ? W / H : layoutAspect;
   const cam = cameraAt(c, t, frame, aspect);
   const enter = useEnter(0, c.fps);
   const beat = t.beats.findLast((b) => b.start <= frame) ?? t.beats[0];

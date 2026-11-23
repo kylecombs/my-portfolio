@@ -83,5 +83,7 @@ export interface VideoConfig {
   audio?: boolean;
   /** Seconds into the main video for the poster frame. */
   posterAt: number;
+  /** Recorded at a phone viewport: shown in a handset on the 9:16 mobile layout (apps/<id>-mobile/). */
+  device?: "phone";
   capture: CaptureLog;
 }

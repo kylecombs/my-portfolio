@@ -32,15 +32,17 @@ export const DESKTOP = {
   callout: { x: 96, y: FRAME_Y + 120, width: 424 - 96 - 60, scale: 1 },
   pad: 160,
 };
-// Mobile (1080x1350, 4:5): callout on top, a 4:3 browser frame below it, type sized for a phone.
+// Mobile (1080x1920, 9:16): callout on top, a square browser frame below it, type sized for a phone.
 export const MOBILE: typeof DESKTOP = {
   width: 1080,
-  height: 1350,
-  frame: { x: 40, y: 1350 - 44 - 750 - 56, width: 1000, bar: 44 },
-  aspect: 4 / 3,
-  callout: { x: 72, y: 64, width: 936, scale: 1.9 },
+  height: 1920,
+  frame: { x: 40, y: 1920 - 44 - 1000 - 200, width: 1000, bar: 44 },
+  aspect: 1,
+  callout: { x: 72, y: 96, width: 936, scale: 2.1 },
   pad: 80,
 };
+/** Apps recorded at a phone viewport (`device: "phone"`) sit in this handset on the mobile layout. */
+export const PHONE = { width: 720, bezel: 20, radius: 76, bottom: 72 };
 export const Layout = createContext(DESKTOP);
 
 /** 0 -> 1 spring starting at `from`. */
@@ -307,6 +309,51 @@ export function BrowserFrame({
   const FRAME = L.frame;
   const SCREEN_H = FRAME.width / (aspect ?? L.aspect);
   const top = FRAME.y + (FRAME.width / L.aspect - SCREEN_H) / 2; // a shorter screen sits centered in the layout's slot
+  const rise = {
+    opacity: enter,
+    transform: `translateY(${(1 - enter) * 40}px) scale(${0.98 + 0.02 * enter})`,
+  };
+  if (c.device === "phone") {
+    const sw = PHONE.width - 2 * PHONE.bezel;
+    const sh = (sw * H) / W;
+    return (
+      <div
+        style={{
+          position: "absolute",
+          left: (L.width - PHONE.width) / 2,
+          top: L.height - PHONE.bottom - sh - 2 * PHONE.bezel,
+          padding: PHONE.bezel,
+          borderRadius: PHONE.radius,
+          background: "#16181A",
+          boxShadow:
+            "0 40px 90px rgba(20,32,26,0.22), 0 6px 18px rgba(20,32,26,0.08), inset 0 0 0 2px #3A3D40",
+          ...rise,
+        }}
+      >
+        <div
+          style={{
+            width: sw,
+            height: sh,
+            overflow: "hidden",
+            position: "relative",
+            borderRadius: PHONE.radius - PHONE.bezel,
+            background: c.colors.surface,
+          }}
+        >
+          <div
+            style={{
+              width: W,
+              height: H,
+              transformOrigin: "0 0",
+              transform: `scale(${sw / W}) translate(${cam.tx}px, ${cam.ty}px) scale(${cam.k})`,
+            }}
+          >
+            {children}
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div
       style={{
@@ -320,8 +367,7 @@ export function BrowserFrame({
         boxShadow:
           "0 40px 90px rgba(20,32,26,0.14), 0 6px 18px rgba(20,32,26,0.06)",
         outline: "1px solid rgba(20,32,26,0.07)",
-        opacity: enter,
-        transform: `translateY(${(1 - enter) * 40}px) scale(${0.98 + 0.02 * enter})`,
+        ...rise,
       }}
     >
       {url && (

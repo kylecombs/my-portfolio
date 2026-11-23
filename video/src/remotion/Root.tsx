@@ -9,6 +9,8 @@ import rexbyCreator from "../../apps/rexby-creator/video.config";
 import rexbyVideo from "../../apps/rexby-video/video.config";
 import fmSynth from "../../apps/fm-synth/video.config";
 import wobbleCoffee from "../../apps/wobble-coffee/video.config";
+import campPhone from "../../apps/camp-booking-mobile/video.config";
+import wobblePhone from "../../apps/wobble-coffee-mobile/video.config";
 import { Loop } from "./Loop";
 import { Main, MainMobile } from "./Main";
 import { CAPTION, Storyboard, storyboardFrames } from "./Storyboard";
@@ -17,6 +19,10 @@ import { timeline } from "./timeline";
 
 // One entry per app. Adding an app = apps/<id>/{capture,video.config}.ts + a line here.
 const apps = [camp, retail, shopifyAdmin, ora, agentWorkflow, arxIpfs, rexbyCreator, rexbyVideo, fmSynth, wobbleCoffee];
+// Apps re-recorded at a phone viewport (apps/<id>-mobile/): their <id>-mobile cut uses that config instead.
+const phone = Object.fromEntries(
+  [campPhone, wobblePhone].map((c) => [c.id, c])
+);
 
 function Root() {
   return (
@@ -38,8 +44,8 @@ function Root() {
           key={`${c.id}-mobile`}
           id={`${c.id}-mobile`}
           component={MainMobile}
-          defaultProps={{ c }}
-          durationInFrames={timeline(c).total}
+          defaultProps={{ c: phone[`${c.id}-mobile`] ?? c }}
+          durationInFrames={timeline(phone[`${c.id}-mobile`] ?? c).total}
           fps={c.fps}
           width={MOBILE.width}
           height={MOBILE.height}

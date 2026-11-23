@@ -397,8 +397,10 @@ function MediaCarousel({ media, title }: MediaCarouselProps) {
       role="region"
       aria-roledescription="carousel"
       aria-label={`${title} media`}
+      // Phones: bleed past the card and page padding (p-6 + px-4) so the 9:16 cut fills the screen width.
+      className="-mx-10 sm:mx-0"
     >
-      <div className="relative overflow-hidden border border-dark-green/20">
+      <div className="relative overflow-hidden border-y border-dark-green/20 sm:border">
         <ul
           ref={trackRef}
           onScroll={onScroll}
@@ -515,13 +517,9 @@ function MediaSlide({ media }: { media: Media }) {
       playsInline
       preload="metadata"
       aria-label={media.alt}
-      className={`${cut === media ? "aspect-video" : "aspect-[4/5]"} w-full object-cover`}
-      // TODO: remove before release. Click-to-pause is only for taking notes on the videos.
-      onClick={(e) =>
-        e.currentTarget.paused
-          ? e.currentTarget.play().catch(() => {})
-          : e.currentTarget.pause()
-      }
+      className={`${cut === media ? "aspect-video w-full" : "mx-auto block aspect-[9/16]"} object-cover`}
+      // The 9:16 cut fills the width, but no taller than the screen.
+      style={cut === media ? undefined : { width: "min(100%, calc(94svh * 9 / 16))" }}
     />
   );
   if (!media.audio) return player;

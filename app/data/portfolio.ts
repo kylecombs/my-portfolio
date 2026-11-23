@@ -24,7 +24,7 @@ export interface ProjectMedia {
   alt: string;
   /** The video has sound: it still starts muted, with a mute/unmute button. */
   audio?: boolean;
-  /** Portrait (4:5) cut shown on phones instead. */
+  /** Portrait (9:16) cut shown on phones instead. */
   mobile?: { src: string; poster: string };
 }
 

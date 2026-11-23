@@ -21,18 +21,26 @@ const CURSOR = `(() => {
     const c = document.createElement("div");
     c.id = "__cursor";
     document.documentElement.append(c);
+    // Touch mode (phone captures): no hovering pointer, just a dot at each tap.
+    const touch = !!window.__touchCursor;
+    let hide = 0;
     addEventListener("mousemove", (e) => {
       c.style.translate = e.clientX + "px " + e.clientY + "px";
-      c.style.opacity = "1";
+      if (!touch) c.style.opacity = "1";
     }, true);
     addEventListener("mousedown", () => {
+      clearTimeout(hide);
+      c.style.opacity = "1";
       c.classList.add("down");
       const r = document.createElement("div");
       r.className = "ring";
       c.append(r);
       setTimeout(() => r.remove(), 600);
     }, true);
-    addEventListener("mouseup", () => c.classList.remove("down"), true);
+    addEventListener("mouseup", () => {
+      c.classList.remove("down");
+      if (touch) hide = setTimeout(() => (c.style.opacity = "0"), 350);
+    }, true);
   };
   if (document.documentElement) mount();
   else addEventListener("DOMContentLoaded", mount);
@@ -42,7 +50,8 @@ const ease = (t: number) =>
   t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export async function installCursor(context: BrowserContext) {
+export async function installCursor(context: BrowserContext, opts: { touch?: boolean } = {}) {
+  if (opts.touch) await context.addInitScript("window.__touchCursor = true");
   await context.addInitScript(CURSOR);
 }
 
@@ -89,6 +98,15 @@ export function human(page: Page, rec?: Recorder) {
     /** Move to, click, log `label` (with the element's box) at the moment of the click, then pause. */
     async click(target: Locator, label?: string, pauseAfter = 700) {
       await target.waitFor({ state: "visible" });
+      // A mouse press off-screen hits nothing (phone viewports put buttons below the fold): bring it in first.
+      const inView = await target.evaluate((el) => {
+        const r = el.getBoundingClientRect();
+        return r.top >= 0 && r.bottom <= innerHeight;
+      });
+      if (!inView) {
+        await target.evaluate((el) => el.scrollIntoView({ behavior: "smooth", block: "center" }));
+        await wait(700);
+      }
       await moveTo(target);
       await wait(140);
       if (label) await rec?.event(label, target);

@@ -65,11 +65,20 @@ strip with clip, duration, speed and screenshot time.
 - `loop-{1080,720}.{mp4,webm}`: hover loop
 - `poster.jpg`: frame at `posterAt` (the open card shows it until the video plays)
 - `thumb.jpg`: the title card at 1.3s, shown on the collapsed card under a play button
-- `mobile-1080.mp4`, `mobile-poster.jpg`: the `<id>-mobile` composition, a 1080x1350 (4:5) cut for phones.
+- `mobile-1080.mp4`, `mobile-poster.jpg`: the `<id>-mobile` composition, a 1080x1920 (9:16) cut for phones.
   Same timeline and config; the `MOBILE` layout in `template.tsx` puts the callout on top in bigger type and
-  a 4:3 browser frame below. The camera reframes each zoom region to 4:3, so full-page views crop the sides.
+  a square browser frame below. The camera reframes each zoom region to the square, so full-page views crop the sides.
   `npm run export:mobile -- <id>` renders just this cut (the full export runs it too). The site plays it
-  below 640px wide via the `mobile` field on a `media` entry.
+  below 640px wide via the `mobile` field on a `media` entry, edge to edge and capped at 94% of the screen height.
+
+### Phone recordings
+
+CAMP and Wobble have their own phone tours (`apps/camp-booking-mobile/`, `apps/wobble-coffee-mobile/`), recorded
+at a 390x677 viewport with mobile emulation and shown in a handset (`device: "phone"`, `PHONE` in `template.tsx`).
+When `apps/<id>-mobile/` exists, Root.tsx and `export-mobile.sh` use it for the `<id>-mobile` cut. Their configs
+reuse the desktop config's copy and colors, and have no zooms or hover loop. Capture with
+`npm run capture camp-booking-mobile`. `installCursor(context, { touch: true })` shows a dot only at each tap,
+and `h.click` scrolls a target into view first, since phone layouts put buttons below the fold.
 
 ## Adding an app
 
