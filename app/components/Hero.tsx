@@ -107,7 +107,7 @@ export function Hero({ className = "" }: HeroProps) {
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-dark-green transition-opacity duration-200 group-hover:opacity-0 group-focus-visible:opacity-0" />
                   <span className="drop-shadow-glow absolute text-[1.25rem] opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100">
-                    ☺
+                    ☺︎
                   </span>
                 </span>
                 {item.label}
@@ -129,7 +129,7 @@ export function Hero({ className = "" }: HeroProps) {
               >
                 <span className="h-1.5 w-1.5 rounded-full bg-dark-green transition-opacity duration-200 group-hover:opacity-0 group-focus-visible:opacity-0" />
                 <span className="drop-shadow-glow absolute text-[1.25rem] opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100">
-                  ☺
+                  ☺︎
                 </span>
               </span>
               Get in touch
@@ -155,7 +155,7 @@ export function Hero({ className = "" }: HeroProps) {
                   aria-hidden="true"
                   className="ml-4 align-baseline font-neue-haas text-[1.375rem] lg:text-[2rem]"
                 >
-                  ☺
+                  ☺︎
                 </span>
               </span>
             </h1>

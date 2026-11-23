@@ -309,7 +309,7 @@ function ProjectCard({
               aria-hidden="true"
               className="drop-shadow-glow ml-2 inline-block text-xl opacity-0 transition-opacity duration-200 group-hover:opacity-100"
             >
-              ☺
+              ☺︎
             </span>
           </h3>
 

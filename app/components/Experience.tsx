@@ -87,7 +87,7 @@ function JobRow({ job }: { job: Job }) {
       >
         <span className="h-2 w-2 rounded-full bg-dark-green transition-opacity duration-200 group-focus-within:opacity-0 group-hover:opacity-0" />
         <span className="drop-shadow-glow absolute text-xl text-dark-green opacity-0 transition-opacity duration-200 group-focus-within:opacity-100 group-hover:opacity-100">
-          ☺
+          ☺︎
         </span>
       </span>
 

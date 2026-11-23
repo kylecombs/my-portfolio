@@ -29,7 +29,9 @@ class GradientPointClass implements GradientPoint {
     this.color = color;
     this.vx = (Math.random() - 0.5) * 0.5;
     this.vy = (Math.random() - 0.5) * 0.5;
-    this.radius = Math.random() * 300 + 200;
+    // Sized for a ~900px viewport; scaled down so blobs stay distinct on phones.
+    const scale = Math.min(1, Math.min(window.innerWidth, window.innerHeight) / 900);
+    this.radius = (Math.random() * 300 + 200) * Math.max(scale, 0.4);
   }
 
   update(width: number, height: number) {
@@ -121,6 +123,9 @@ export function GradientBackground() {
       if (!canvas || !bufferCtx) return;
       const w = Math.ceil(window.innerWidth * SCALE);
       const h = Math.ceil(window.innerHeight * SCALE);
+      // Mobile URL bar show/hide resizes height on scroll; resizing clears the
+      // canvas, so skip small height-only changes.
+      if (w === canvas.width && Math.abs(h - canvas.height) < 20) return;
       canvas.width = buffer.width = w;
       canvas.height = buffer.height = h;
       bufferCtx.setTransform(SCALE, 0, 0, SCALE, 0, 0);

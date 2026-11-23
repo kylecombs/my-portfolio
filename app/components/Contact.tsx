@@ -22,7 +22,7 @@ export function Contact() {
               <p className="drop-shadow-glow font-script text-8xl font-light leading-none text-dark-green sm:text-9xl">
                 Let&apos;s build something
                 <span aria-hidden="true" className="ml-2 text-2xl">
-                  ☺
+                  ☺︎
                 </span>
               </p>
               <p className="mt-8 max-w-md text-pretty font-neue-haas text-lg leading-relaxed text-gray-800">

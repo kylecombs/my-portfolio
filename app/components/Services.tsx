@@ -42,7 +42,7 @@ export function Services() {
                     aria-hidden="true"
                     className="drop-shadow-glow ml-2 inline-block text-xl not-italic opacity-0 transition-opacity duration-200 group-hover:opacity-100"
                   >
-                    ☺
+                    ☺︎
                   </span>
                 </h3>
                 <p className="mt-3 flex-1 font-neue-haas text-base leading-relaxed text-gray-800">
