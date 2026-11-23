@@ -47,7 +47,7 @@ await h.click(main.locator("fieldset").filter({ hasText: /product type/i }).getB
 await page.waitForURL(/\?/);
 await h.wait(800);
 await rec.event("filtered", main.locator("a[href*='/products/']").first());
-await h.wait(1000);
+await h.wait(1800);
 
 rec.clip("03-product");
 const hum = main.locator("a[href*='/products/hum-ethiopia-gedeb']").first();
@@ -70,20 +70,34 @@ await h.wait(2400);
 await page.keyboard.press("Escape");
 await h.wait(400);
 
+// Each question: try every option so the cup shows each pose, ending on the answer kept.
+const QUIZ: [id: string, tries: string[]][] = [
+  ["brew", ["Espresso machine", "Moka pot", "French press", "Whatever’s closest", "Pour-over or drip"]],
+  ["milk", ["Black, always", "Basically a latte", "A splash"]],
+  ["flavor", ["Bright and fruity", "Chocolate and nuts", "Somewhere in between"]],
+  ["adventure", ["Keep it classic", "Surprise me", "A little curious"]],
+  ["caffeine", ["Mornings, mostly", "Evenings too (decaf please)", "All day long"]],
+];
+async function answer([id, tries]: (typeof QUIZ)[number]) {
+  await rec.event(id, main.locator("form").first());
+  for (const t of tries) await h.click(main.locator("label").filter({ hasText: t }), undefined, 750);
+  await h.click(main.getByRole("button", { name: /next|see|match/i }).last(), undefined, 600);
+}
+
 rec.clip("05-finder");
 await page.goto(BASE + "/finder", { waitUntil: "load" });
 await h.wait(900);
 await rec.event("finder", main.locator("form").first());
-for (const [i, answer] of ["Pour-over or drip", "A splash", "Somewhere in between", "A little curious", "All day long"].entries()) {
-  await h.click(main.locator("label").filter({ hasText: answer }), `q${i + 1}`, 550);
-  await h.click(main.getByRole("button", { name: /next|see|match/i }).last(), undefined, 500);
-}
+for (const q of QUIZ.slice(0, 2)) await answer(q);
+
+rec.clip("06-finder-more");
+for (const q of QUIZ.slice(2)) await answer(q);
 await main.getByText("Your match").waitFor();
 await rec.event("result", main.getByText("Your match"));
 await h.moveTo(main.getByRole("button", { name: /add to cart/i }));
 await h.wait(2200);
 
-rec.clip("06-brew");
+rec.clip("07-brew");
 await page.goto(BASE + "/brew/pour-over", { waitUntil: "load" });
 await h.wait(900);
 await rec.event("brew", main.getByText("Ratio calculator"));
@@ -96,7 +110,7 @@ for (const ch of "30") {
 }
 await h.wait(1200);
 await h.click(main.getByRole("button", { name: "Start" }), "start", 0);
-await h.wait(4200);
+await h.wait(3200);
 
 const log = await rec.stop();
 console.log(log.clips.map((c) => `${c.id}: ${c.duration}s`).join("\n"));
