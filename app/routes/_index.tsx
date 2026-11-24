@@ -8,7 +8,7 @@ import { Experience } from "~/components/Experience";
 import { Contact } from "~/components/Contact";
 import { selectedWorkCount } from "~/data/portfolio";
 
-const title = "Kyle Combs — Fullstack & Shopify Engineer for Hire, NYC";
+const title = "Kyle Combs — Fullstack & Product Engineer, NYC";
 const description =
   "Fullstack engineer, open to full-time and contract work: React frontends, Node and Rails APIs, Shopify apps, and dbt/Snowflake data pipelines.";
 
