@@ -132,7 +132,7 @@ The process the CAMP video went through, and the rules it followed:
 
 ## Putting it on the site
 
-`npm run export` copies `web-1080.mp4`, `poster.jpg` and `thumb.jpg` to `../public/media/<id>/`.
+`npm run export` copies `web-1080.mp4`, `poster.jpg` and `thumb.webp` (1200px) to `../public/media/<id>/`.
 In `../app/data/portfolio.ts`, give the project a `media` entry like the CAMP one: `type: "video"`
 plus `src`, `poster`, `thumb` and `alt`. Videos get the play button on the collapsed card automatically.
 

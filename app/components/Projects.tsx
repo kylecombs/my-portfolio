@@ -270,12 +270,10 @@ function ProjectCard({
                   <MediaCarousel media={p.media} title={p.title} />
                 ) : (
                   <div className="relative overflow-hidden border border-dark-green/20">
-                    <img
+                    <FadeImg
                       src={p.media[0].thumb ?? p.media[0].poster}
                       alt={p.media[0].alt}
-                      loading="lazy"
-                      draggable={false}
-                      className="h-40 w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03] motion-reduce:transition-none sm:h-48"
+                      className="h-40 w-full object-cover transition-[transform,opacity] duration-700 ease-out group-hover:scale-[1.03] motion-reduce:transition-none sm:h-48"
                     />
                     {p.media[0].type === "video" && (
                       <span
@@ -468,12 +466,38 @@ function MediaCarousel({ media, title }: MediaCarouselProps) {
   );
 }
 
+/** Lazy image over a pulsing placeholder (in its own reserved box), faded in once decoded. */
+function FadeImg({ className, ...props }: { src: string; alt: string; className: string }) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <>
+      {!loaded && (
+        <span aria-hidden="true" className="absolute inset-0 bg-dark-green/10 motion-safe:animate-pulse" />
+      )}
+      <img
+        {...props}
+        // Cached images can finish before React attaches onLoad.
+        ref={(el) => { if (el?.complete && el.naturalWidth) setLoaded(true); }}
+        onLoad={() => setLoaded(true)}
+        loading="lazy"
+        decoding="async"
+        draggable={false}
+        className={`relative ${className} ${loaded ? "opacity-100" : "opacity-0"}`}
+      />
+    </>
+  );
+}
+
 function MediaSlide({ media }: { media: Media }) {
   const video = useRef<HTMLVideoElement>(null);
   const reduceMotion = useReducedMotion();
   // Browsers only autoplay muted video, so sound is opt-in.
   const [muted, setMuted] = useState(true);
-  const [phone, setPhone] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  // Read on the first render (slides only mount client-side, on expand) so phones never start the desktop cut.
+  const [phone, setPhone] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(max-width: 639px)").matches
+  );
   useEffect(() => {
     const q = window.matchMedia("(max-width: 639px)"); // below Tailwind's sm
     const on = () => setPhone(q.matches);
@@ -499,35 +523,49 @@ function MediaSlide({ media }: { media: Media }) {
 
   if (media.type !== "video")
     return (
-      <img
-        src={media.src}
-        alt={media.alt}
-        loading="lazy"
-        draggable={false}
-        className="aspect-video w-full object-cover"
-      />
+      <div className="relative">
+        <FadeImg
+          src={media.src}
+          alt={media.alt}
+          className="aspect-video w-full object-cover transition-opacity duration-500"
+        />
+      </div>
     );
 
-  const player = (
-    <video
-      ref={video}
-      src={cut.src}
-      poster={cut.poster}
-      muted={muted}
-      loop
-      playsInline
-      preload="metadata"
-      aria-label={media.alt}
-      className={`${cut === media ? "aspect-video w-full" : "mx-auto block aspect-[9/16]"} object-cover`}
-      // The 9:16 cut fills the width, but no taller than the screen.
-      style={cut === media ? undefined : { width: "min(100%, calc(94svh * 9 / 16))" }}
-    />
-  );
-  if (!media.audio) return player;
-
+  // Reduced motion never plays: the poster is the content, so nothing is loading.
+  const loading = !playing && !reduceMotion;
   return (
-    <div className="relative">
-      {player}
+    <div className="relative" aria-busy={loading}>
+      <video
+        ref={video}
+        src={cut.src}
+        poster={cut.poster}
+        muted={muted}
+        loop
+        playsInline
+        preload="metadata"
+        aria-label={media.alt}
+        onPlaying={() => setPlaying(true)}
+        onWaiting={() => setPlaying(false)}
+        className={`${cut === media ? "aspect-video w-full" : "mx-auto block aspect-[9/16]"} bg-dark-green/10 object-cover`}
+        // The 9:16 cut fills the width, but no taller than the screen.
+        style={cut === media ? undefined : { width: "min(100%, calc(94svh * 9 / 16))" }}
+      />
+      <AnimatePresence>
+        {loading && (
+          <motion.span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            // Delayed so a fast or cached video never flashes a spinner.
+            animate={{ opacity: 1, transition: { delay: 0.4, duration: 0.3 } }}
+            exit={{ opacity: 0, transition: { duration: 0.2 } }}
+          >
+            <span className="h-12 w-12 animate-spin rounded-full border-[3px] border-white/40 border-t-dark-green shadow-lg" />
+          </motion.span>
+        )}
+      </AnimatePresence>
+      {media.audio && (
       <button
         type="button"
         onClick={() => setMuted((m) => !m)}
@@ -552,6 +590,7 @@ function MediaSlide({ media }: { media: Media }) {
           )}
         </svg>
       </button>
+      )}
     </div>
   );
 }

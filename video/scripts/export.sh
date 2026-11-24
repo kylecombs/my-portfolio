@@ -29,9 +29,11 @@ web "$OUT/loop-master.mp4" loop 30 42 ""
 ffmpeg -y -loglevel error -ss "$POSTER_AT" -i "$OUT/master.mp4" -frames:v 1 -vf "scale=-2:1080" -q:v 3 "$OUT/poster.jpg"
 # Collapsed-card thumbnail: the title card once its text has risen in, before it fades.
 ffmpeg -y -loglevel error -ss 1.3 -i "$OUT/master.mp4" -frames:v 1 -vf "scale=-2:1080" -q:v 3 "$OUT/thumb.jpg"
+# The site's copy: the card shows it at most ~560px wide, so 1200px WebP is plenty.
+ffmpeg -y -loglevel error -i "$OUT/thumb.jpg" -vf scale=1200:-2 -c:v libwebp -quality 80 "$OUT/thumb.webp"
 
-cp "$OUT/web-1080.mp4" "$OUT/poster.jpg" "$OUT/thumb.jpg" "$SITE/" # what the site card uses
+cp "$OUT/web-1080.mp4" "$OUT/poster.jpg" "$OUT/thumb.webp" "$SITE/" # what the site card uses
 ls -lh "$OUT" | awk 'NR>1 {print $5, $9}'
-echo "copied web-1080.mp4, poster.jpg and thumb.jpg to $SITE"
+echo "copied web-1080.mp4, poster.jpg and thumb.webp to $SITE"
 
 sh scripts/export-mobile.sh "$APP" "$SITE"
