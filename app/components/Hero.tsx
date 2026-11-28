@@ -13,7 +13,7 @@ interface HeroProps {
 }
 
 const nav = [
-  { label: "Services", href: "#services" },
+  { label: "Skills", href: "#services" },
   { label: "Work", href: "#work" },
   { label: "About", href: "#about" },
 ];
@@ -174,7 +174,7 @@ export function Hero({ className = "" }: HeroProps) {
                 onClick={scrollToSection}
                 className="flex min-h-[3.25rem] items-center justify-center whitespace-nowrap rounded-full bg-dark-green px-6 font-medium text-[#f5f5f5] transition-opacity hover:opacity-90 lg:min-h-12 lg:text-[0.9375rem]"
               >
-                Start a project
+                Get in touch
               </Link>
               <Link
                 to="#work"
@@ -226,7 +226,7 @@ export function Hero({ className = "" }: HeroProps) {
           <Link
             to="#services"
             onClick={scrollToSection}
-            aria-label="Scroll to Services"
+            aria-label="Scroll to Skills"
             className="hidden min-h-11 items-center gap-3 text-[0.6875rem] uppercase tracking-[0.2em] text-[#3d5a4d] transition-colors hover:text-dark-green lg:flex"
           >
             Scroll
