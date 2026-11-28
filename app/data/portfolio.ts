@@ -76,12 +76,12 @@ export const companyLogos: Record<string, string> = {
   Rexby: "/assets/logos/rexby.svg",
 };
 
-export const availability = "Open to full-time roles and contracts";
+export const availability = "Seeking full-time roles · open to contracts";
 
 export const hero = {
   label: "Fullstack & Product Engineer",
   intro:
-    "I’m a fullstack engineer who helps teams ship polished products: React frontends, Node and Rails APIs, Shopify apps, and data pipelines. I bring engineering, design, and product thinking to every project, and I’m open to full-time roles as well as contracts, full- or part-time, from a single project to an ongoing seat on your team.",
+    "I’m a fullstack engineer who helps teams ship polished products: React frontends, Node and Rails APIs, Shopify apps, and data pipelines. I bring engineering, design, and product thinking to the teams I join. I’m looking for my next full-time role, remote, hybrid or in person, and I’m also open to contracts.",
 };
 
 export const services: Service[] = [
@@ -119,14 +119,14 @@ export const services: Service[] = [
 
 export const howIWork: Principle[] = [
   {
-    title: "The support you need.",
+    title: "A real member of the team.",
     description:
-      "Full-time hire, full-time contract, or part-time help on a single project. I join as an embedded member of your team, with the experience to own real work.",
+      "I’m looking for a full-time seat on a team, and I’m open to contracts too. Either way, I take ownership of real work and care about the product long after it ships.",
   },
   {
-    title: "Inside your tools.",
+    title: "Remote, hybrid or in person.",
     description:
-      "I work in your Slack, Linear or Jira, and GitHub, and I join meetings when that helps. Adaptable to fit into your business rhythms.",
+      "I’m comfortable in the office or working remotely, and at home in Slack, Linear or Jira, and GitHub. I adapt to how your team already works.",
   },
   {
     title: "Product-minded.",
@@ -134,22 +134,22 @@ export const howIWork: Principle[] = [
       "If there’s no spec, I’ll write one. If the scope is wrong, I’ll say so early.",
   },
   {
-    title: "Eastern time, async-friendly.",
+    title: "Clear communication.",
     description:
-      "Clear written updates, so you always know where things stand.",
+      "Based in New York on Eastern time. Clear written updates, so everyone knows where things stand.",
   },
 ];
 
 // *text* renders as <em>
 export const about: { paragraphs: string[]; facts: Fact[] } = {
   paragraphs: [
-    "I’m a fullstack engineer leading frontend at *CAMP* and building the analytics pipeline for *ALEX AND ANI*. I’m currently open to full-time roles and new contracts.",
+    "I’m a fullstack engineer leading frontend at *CAMP* and building the analytics pipeline for *ALEX AND ANI*. I’m currently looking for a full-time role and open to contracts.",
     "I came to software from the art world. After receiving my BFA, I spent eight years as a preparator at David Zwirner, installing complex exhibitions and caring for the artworks in them. It taught me to sweat the details people only notice when they’re wrong.",
-    "Since then I’ve shipped React frontends, Node and Rails APIs, AWS media pipelines and dbt/Snowflake warehouses, usually as one of two or three engineers who own the whole product. I’m based in Brooklyn and work remotely.",
+    "Since then I’ve shipped React frontends, Node and Rails APIs, AWS media pipelines and dbt/Snowflake warehouses, usually as one of two or three engineers who own the whole product. I’m based in Brooklyn and open to remote, hybrid or in-person work.",
   ],
   facts: [
-    { label: "Based", value: "Brooklyn · Remote" },
-    { label: "Working", value: "Full-time or contract, remote" },
+    { label: "Based", value: "Brooklyn, NY" },
+    { label: "Seeking", value: "Full-time (open to contract) · remote, hybrid or in person" },
     { label: "Focus", value: "Frontend, Shopify, Node and Rails APIs, data pipelines" },
     { label: "Currently", value: "CAMP · ALEX AND ANI" },
   ],
@@ -163,7 +163,7 @@ export const experienceLinks = {
 
 export const contact = {
   intro:
-    "I’m open to full-time roles and contract work, full- or part-time, starting in 2027. Tell me a little about your team, what you’re building, and where you’re stuck. I’ll reply within one business day.",
+    "I’m looking for a full-time role starting in 2027, remote, hybrid or in person in New York, and I’m open to contracts as well. Tell me a little about your team and what you’re building. I’ll reply within one business day.",
   booking: {
     label: "Book a 15-min intro call",
     // The "30min" slug is Calendly's default; the event itself is 15 minutes.

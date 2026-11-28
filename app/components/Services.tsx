@@ -18,7 +18,7 @@ export function Services() {
     <MotionConfig reducedMotion="user">
       <section id="services" className="relative py-16">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <SectionHeading eyebrow="01" title="What I can help with" />
+          <SectionHeading eyebrow="01" title="What I do" />
 
           <motion.ul
             className="mt-16 grid border-l border-t border-dark-green/20 sm:grid-cols-2 lg:grid-cols-3"

@@ -10,7 +10,7 @@ import { selectedWorkCount } from "~/data/portfolio";
 
 const title = "Kyle Combs — Fullstack & Product Engineer, NYC";
 const description =
-  "Fullstack engineer, open to full-time and contract work: React frontends, Node and Rails APIs, Shopify apps, and dbt/Snowflake data pipelines.";
+  "Fullstack engineer seeking a full-time role (remote, hybrid or in person in NYC), also open to contracts: React frontends, Node and Rails APIs, Shopify apps, and dbt/Snowflake data pipelines.";
 
 export const meta: MetaFunction = () => {
   return [
